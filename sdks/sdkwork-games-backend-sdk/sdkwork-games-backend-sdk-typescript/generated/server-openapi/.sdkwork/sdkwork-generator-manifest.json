@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "generator": "@sdkwork/sdk-generator",
+  "sdk": {
+    "name": "sdkwork-games-backend-sdk",
+    "version": "0.1.0",
+    "language": "typescript",
+    "sdkType": "backend",
+    "protocol": "http",
+    "packageName": "sdkwork-games-backend-sdk-generated-typescript"
+  },
+  "generatedFiles": [
+    {
+      "path": "bin/publish-core.mjs",
+      "sha256": "98ad0918a78bfbe22bf8f12fec709b0bed545b9e01edd40f5e4abf31a23378a5"
+    },
+    {
+      "path": "bin/publish.ps1",
+      "sha256": "78c6419400b988409d9393c2ecd85aa02dd6760f73edb3cc84cb28fefc51b41e"
+    },
+    {
+      "path": "bin/publish.sh",
+      "sha256": "899087c23e670b6951a12a13490fd557f761c96d78fabfb7e58a37e367db889f"
+    },
+    {
+      "path": "bin/sdk-gen.bat",
+      "sha256": "1fa0948b506e5deecf73be9371db39a042e48555d018292334fa0004a897fcbe"
+    },
+    {
+      "path": "bin/sdk-gen.sh",
+      "sha256": "215c7192b3f5891efebd79d6e2938a520ac6c9c6eb6b64979371c1ee7a58fd3d"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "fb941a0806986a54fc192f98a98f6d9c282b8d350b2b19a3e71dda404e92d545"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "7840cc7d2b36ff364ac16c2fc5ec15b861bfe96854eecf81fb59b00edb8b1447"
+    },
+    {
+      "path": "package.json",
+      "sha256": "6963063531748ad6ebd9606e994641b8b21768efe45f5d45bedeafd58aa9945e"
+    },
+    {
+      "path": "README.md",
+      "sha256": "482cb3c2dd97d70a131ecd5aae9f94dbe3eb5d0eb241e5f72f05284a14ea004d"
+    },
+    {
+      "path": "sdkwork-sdk.json",
+      "sha256": "a77f9d59089afcfb0f326c09648b3faad0bb1cf10d50ad4d44a3ceaa1b02dddb"
+    },
+    {
+      "path": "src/api/base.ts",
+      "sha256": "02ad25e6bf331ff241ba387c2947ddf1900dd849038e08c2757416a3aa788a04"
+    },
+    {
+      "path": "src/api/games.ts",
+      "sha256": "9b5d931adc172d16e706fd4643802b6e24f6c8ee9973a59984572d58ae4404b2"
+    },
+    {
+      "path": "src/api/index.ts",
+      "sha256": "13b134a674a5e1564f73a900f3411ff171adb740513defff3da0d9075b1f273d"
+    },
+    {
+      "path": "src/api/paths.ts",
+      "sha256": "fb06a3db13e96bb5b349ddc1831aa6d350c17b09d05ea92a36438131140f666e"
+    },
+    {
+      "path": "src/auth/index.ts",
+      "sha256": "657fc63738bdcd61d83133120732a477dd127448cf2c51229b05d21f5e1f5c04"
+    },
+    {
+      "path": "src/http/client.ts",
+      "sha256": "1d339275acee6ec54660a32eb9effcc718ebf0992c5e9bfdb80a3452e0702137"
+    },
+    {
+      "path": "src/http/index.ts",
+      "sha256": "fc204fbe89750b9d25ecaffe41003e6ac243a1a895b65e65856202ab825d2dbe"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "da79309806cb4f9fdbb238adbdf5c9554611467b53714b35facda9702cab2c9e"
+    },
+    {
+      "path": "src/sdk.ts",
+      "sha256": "49e86b6692ff19f199d0f621ba3a7db7478ac1b72c275b5c2680d31dee12543a"
+    },
+    {
+      "path": "src/types/common.ts",
+      "sha256": "351d721c3c6f48f4453f92276856105120d72eb8d2fa9cd28de8e3854bf10f6c"
+    },
+    {
+      "path": "src/types/game-catalog-item.ts",
+      "sha256": "fb6ac21e1a6679da1b0625f4066d2c14e5d3f83d8354855d0e35774d595682cd"
+    },
+    {
+      "path": "src/types/game-catalog-page.ts",
+      "sha256": "55ae2d7965fbfd3c1a4d01e8d2d6fb0550707661913854175a9770dd09b1fbc4"
+    },
+    {
+      "path": "src/types/games-api-result.ts",
+      "sha256": "92e97d11dd1ccd5638cff48e83503c7703be4a05fc70273d9c539dd7f492c5bb"
+    },
+    {
+      "path": "src/types/games-health-response.ts",
+      "sha256": "28e9912883759a8565e49d24b9684632e10f2f0ad23e16bb4b750472c092b0b3"
+    },
+    {
+      "path": "src/types/index.ts",
+      "sha256": "65a17021cb28f90146e369f266d0ac7020927eaf148ba2c812b2840e6d62d7c5"
+    },
+    {
+      "path": "src/types/problem-detail.ts",
+      "sha256": "46b7995d1fe77bd7511e83e69fef6a0afaf697d0a0b612d651af5591854453cf"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "7c8a6c2b00fb208ec28e1e6045194487d1b3e563d6c44cef4783fd4fe0e8ffad"
+    }
+  ],
+  "scaffoldFiles": [
+    "custom/build-runtime.mjs",
+    "custom/README.md"
+  ],
+  "customRoots": [
+    "custom/"
+  ]
+}

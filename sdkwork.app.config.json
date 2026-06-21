@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.app.config",
+  "app": {
+    "name": "sdkwork-games",
+    "displayName": "SDKWork Games",
+    "version": "0.1.0",
+    "description": "SDKWork games platform for catalog, rooms, and leaderboards",
+    "owner": "sdkwork-games",
+    "domain": "game",
+    "capability": "catalog"
+  },
+  "runtime": {
+    "apiBaseUrl": "http://localhost:8095",
+    "appApiPrefix": "/app/v3/api",
+    "backendApiPrefix": "/backend/v3/api",
+    "supportedDeploymentProfiles": ["standalone", "cloud"],
+    "defaultDeploymentProfile": "standalone"
+  },
+  "sdk": {
+    "appApiAuthority": "sdkwork-games-app-api",
+    "backendApiAuthority": "sdkwork-games-backend-api",
+    "appSdkFamily": "sdkwork-games-app-sdk",
+    "backendSdkFamily": "sdkwork-games-backend-sdk"
+  },
+  "sdkDependencies": [],
+  "dependencyApiExports": [],
+  "dependencyApiSurfaces": [],
+  "features": {
+    "catalog": true,
+    "rooms": true,
+    "leaderboards": true
+  }
+}

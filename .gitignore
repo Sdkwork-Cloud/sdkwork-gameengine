@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+target/
+.turbo/
+.DS_Store
+*.log
+.env.local
+.env.*.local
+.env.postgres
+*.local.toml
+*.zip
+coverage/

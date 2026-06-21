@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-router-catalog-backend-api",
+  "surface": "backend-api",
+  "owner": "sdkwork-games",
+  "domain": "game",
+  "capability": "catalog",
+  "apiAuthority": "sdkwork-games-backend-api",
+  "sdkFamily": "sdkwork-games-backend-sdk",
+  "prefix": "/backend/v3/api",
+  "source": {
+    "crateRoot": "crates/sdkwork-router-catalog-backend-api",
+    "crateImport": "sdkwork_router_catalog_backend_api",
+    "openapiAuthority": "apis/backend-api/game/games-backend-api.openapi.json"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/games",
+      "operationId": "backend.games.catalog.list",
+      "tags": ["games"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "backend_games_catalog_list" },
+      "schemas": { "request": null, "response": "GamesApiResult", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-games-backend-api" },
+      "source": { "file": "apis/backend-api/game/games-backend-api.openapi.json" }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "workspace": "sdkwork-games-app-sdk",
+  "title": "SDKWork Games App API SDK",
+  "apiVersion": "0.1.0",
+  "openapiVersion": "3.1.2",
+  "authoritySpec": "../../apis/app-api/game/games-app-api.openapi.json",
+  "generationInputSpec": "../../apis/app-api/game/games-app-api.openapi.json",
+  "derivedSpecs": {
+    "default": "../../apis/app-api/game/games-app-api.openapi.json"
+  },
+  "apiAuthority": "sdkwork-games-app-api",
+  "discoverySurface": {
+    "sdkTarget": "app",
+    "apiPrefix": "/app/v3/api",
+    "schemaUrl": "/app/v3/openapi.json",
+    "generatedProtocols": ["http-openapi"],
+    "manualTransports": []
+  },
+  "languages": [
+    {
+      "language": "typescript",
+      "workspace": "sdkwork-games-app-sdk-typescript",
+      "generationState": "declared",
+      "releaseState": "not_published",
+      "generatedPath": "sdkwork-games-app-sdk-typescript/generated/server-openapi",
+      "manifestPath": "sdkwork-games-app-sdk-typescript/generated/server-openapi/package.json",
+      "name": "sdkwork-games-app-sdk-generated-typescript",
+      "version": "0.1.0",
+      "description": "Generator-owned TypeScript transport SDK for sdkwork-games app API.",
+      "consumerSurface": {
+        "primaryClient": "SdkworkGamesAppClient",
+        "apiPrefix": "/app/v3/api"
+      }
+    }
+  ],
+  "sdkOwner": "sdkwork-games",
+  "sdkDependencies": [],
+  "dependencyApiExports": [],
+  "dependencyApiSurfaces": []
+}

@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.database.prefix-registry",
+  "prefixes": [{ "prefix": "game_", "owner": "games-platform", "domain": "game" }]
+}

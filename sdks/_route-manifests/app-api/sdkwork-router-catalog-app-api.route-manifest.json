@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-router-catalog-app-api",
+  "surface": "app-api",
+  "owner": "sdkwork-games",
+  "domain": "game",
+  "capability": "catalog",
+  "apiAuthority": "sdkwork-games-app-api",
+  "sdkFamily": "sdkwork-games-app-sdk",
+  "prefix": "/app/v3/api",
+  "source": {
+    "crateRoot": "crates/sdkwork-router-catalog-app-api",
+    "crateImport": "sdkwork_router_catalog_app_api",
+    "openapiAuthority": "apis/app-api/game/games-app-api.openapi.json"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/app/v3/api/games",
+      "operationId": "games.catalog.list",
+      "tags": ["games"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "games_catalog_list" },
+      "schemas": { "request": null, "response": "GamesApiResult", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-games-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/games/{gameId}",
+      "operationId": "games.catalog.retrieve",
+      "tags": ["games"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "games_catalog_retrieve" },
+      "schemas": { "request": null, "response": "GamesApiResult", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-games-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    }
+  ]
+}

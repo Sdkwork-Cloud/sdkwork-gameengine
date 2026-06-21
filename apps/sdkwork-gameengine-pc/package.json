@@ -1,0 +1,58 @@
+{
+  "name": "sdkwork-gameengine-pc",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SDKWork Game Engine PC browser application composition root.",
+  "packageManager": "pnpm@10.33.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "pnpm run typecheck"
+  },
+  "dependencies": {
+    "@sdkwork/appbase-app-sdk": "workspace:*",
+    "@sdkwork/auth-pc-react": "workspace:*",
+    "@sdkwork/auth-runtime-pc-react": "workspace:*",
+    "@sdkwork/iam-contracts": "workspace:*",
+    "@sdkwork/iam-runtime": "workspace:*",
+    "@sdkwork/runtime-bootstrap": "workspace:*",
+    "@sdkwork/sdk-common": "workspace:*",
+    "@tailwindcss/vite": "^4.1.14",
+  "@vitejs/plugin-react": "catalog:",
+    "i18next": "^25.8.17",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "next-themes": "^0.4.6",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-i18next": "catalog:",
+    "react-router": "catalog:",
+    "react-router-dom": "catalog:",
+    "sdkwork-games-app-sdk-generated-typescript": "workspace:*",
+    "sdkwork-gameengine-pc-core": "workspace:*",
+    "sdkwork-gameengine-pc-i18n": "workspace:*",
+    "sdkwork-gameengine-pc-shell": "workspace:*",
+    "tailwind-merge": "^3.5.0",
+    "vite": "catalog:",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-gameengine",
+    "architecture": "pc-react",
+    "domain": "game",
+    "capability": "pc-application",
+    "status": "ready"
+  }
+}

@@ -1,0 +1,19 @@
+schema_version: 1
+kind: sdkwork.database.schema
+module_id: games
+contract_version: 1.0.0
+owner_team: games-platform
+compliance_level: L2
+engines:
+  - postgres
+table_prefix: game_
+tables:
+  - name: game_catalog
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_room
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_leaderboard
+    lifecycle_status: active
+    owner: games-platform

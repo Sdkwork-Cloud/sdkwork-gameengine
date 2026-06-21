@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sdkName": "sdkwork-games-backend-sdk",
+  "sdkOwner": "sdkwork-games",
+  "apiAuthority": "sdkwork-games-backend-api",
+  "sdkFamily": "sdkwork-games-backend-sdk",
+  "sdkType": "backend",
+  "apiPrefix": "/backend/v3/api",
+  "generationInputSpec": "../../apis/backend-api/game/games-backend-api.openapi.json",
+  "generatedPackages": {
+    "typescript": {
+      "language": "typescript",
+      "packageName": "sdkwork-games-backend-sdk-generated-typescript",
+      "generatedOutput": "sdkwork-games-backend-sdk-typescript/generated/server-openapi"
+    }
+  },
+  "sdkDependencies": [],
+  "dependencyApiExports": [],
+  "dependencyApiSurfaces": [],
+  "generatorName": "sdkwork-sdk-generator",
+  "baseUrl": "http://127.0.0.1:8095",
+  "standardProfile": "sdkwork-v3",
+  "fixedSdkVersion": "0.1.0",
+  "ownerOnlyOperationCount": 1,
+  "managedBy": "sdkwork-games-contract-foundation"
+}

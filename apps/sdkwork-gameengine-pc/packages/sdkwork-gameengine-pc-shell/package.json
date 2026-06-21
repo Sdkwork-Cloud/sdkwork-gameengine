@@ -1,0 +1,46 @@
+{
+  "name": "sdkwork-gameengine-pc-shell",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "motion": "^12.23.24",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sdkwork-gameengine-pc-arena": "workspace:*",
+    "sdkwork-gameengine-pc-auth": "workspace:*",
+    "sdkwork-gameengine-pc-claws": "workspace:*",
+    "sdkwork-gameengine-pc-commons": "workspace:*",
+    "sdkwork-gameengine-pc-compute": "workspace:*",
+    "sdkwork-gameengine-pc-dashboard": "workspace:*",
+    "sdkwork-gameengine-pc-mall": "workspace:*",
+    "sdkwork-gameengine-pc-quiz": "workspace:*",
+    "sdkwork-gameengine-pc-ringmatch": "workspace:*",
+    "sdkwork-gameengine-pc-user": "workspace:*",
+    "sdkwork-gameengine-pc-vip": "workspace:*",
+    "sdkwork-gameengine-pc-wallet": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "typescript": "~5.8.2"
+  },
+  "sdkwork": {
+    "architecture": "pc",
+    "role": "shell",
+    "domain": "game",
+    "capability": "catalog"
+  }
+}

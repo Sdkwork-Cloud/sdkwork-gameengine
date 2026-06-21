@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-router-health-app-api",
+  "surface": "app-api",
+  "owner": "sdkwork-games",
+  "domain": "game",
+  "capability": "health",
+  "apiAuthority": "sdkwork-games-app-api",
+  "sdkFamily": "sdkwork-games-app-sdk",
+  "prefix": "/",
+  "source": {
+    "crateRoot": "crates/sdkwork-router-health-app-api",
+    "crateImport": "sdkwork_router_health_app_api",
+    "openapiAuthority": "apis/app-api/game/games-app-api.openapi.json"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/app/v3/api/system/health",
+      "operationId": "games.health.check",
+      "tags": ["health"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "public" },
+      "handler": { "module": "crate", "name": "games_health_check" },
+      "schemas": { "request": null, "response": "GamesHealthResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-games-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/system/ready",
+      "operationId": "games.ready.check",
+      "tags": ["health"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "public" },
+      "handler": { "module": "crate", "name": "games_ready_check" },
+      "schemas": { "request": null, "response": "GamesHealthResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-games-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    }
+  ]
+}
