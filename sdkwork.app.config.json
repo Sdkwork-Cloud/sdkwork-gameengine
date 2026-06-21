@@ -8,13 +8,19 @@
     "description": "SDKWork games platform for catalog, rooms, and leaderboards",
     "owner": "sdkwork-games",
     "domain": "game",
-    "capability": "catalog"
+    "capability": "catalog",
+    "key": "sdkwork-gameengine",
+    "appType": "APP_HTML",
+    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-games"
   },
   "runtime": {
     "apiBaseUrl": "http://localhost:8095",
     "appApiPrefix": "/app/v3/api",
     "backendApiPrefix": "/backend/v3/api",
-    "supportedDeploymentProfiles": ["standalone", "cloud"],
+    "supportedDeploymentProfiles": [
+      "standalone",
+      "cloud"
+    ],
     "defaultDeploymentProfile": "standalone"
   },
   "sdk": {
@@ -30,5 +36,21 @@
     "catalog": true,
     "rooms": true,
     "leaderboards": true
+  },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "accessTokenPermissionScope": [
+      "iam.users.read",
+      "iam.organizations.read",
+      "iam.roles.read",
+      "iam.permissions.read"
+    ]
+  },
+  "environments": {
+    "development": {
+      "accessUrl": "http://localhost:8095",
+      "deployUrl": "http://localhost:8095",
+      "deployEnv": "dev"
+    }
   }
 }
