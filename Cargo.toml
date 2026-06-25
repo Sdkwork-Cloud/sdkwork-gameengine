@@ -25,8 +25,8 @@ sdkwork_router_catalog_backend_api = { package = "sdkwork-router-catalog-backend
 sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }
 sdkwork-web-axum = { path = "../sdkwork-web-framework/crates/sdkwork-web-axum" }
 sdkwork-web-contract = { path = "../sdkwork-web-framework/crates/sdkwork-web-contract" }
-sdkwork-iam-web-adapter = { path = "../sdkwork-appbase/crates/sdkwork-iam-web-adapter" }
-sdkwork_iam_context_service = { package = "sdkwork-iam-context-service", path = "../sdkwork-appbase/crates/sdkwork-iam-context-service" }
+sdkwork-iam-web-adapter = { path = "../sdkwork-iam/crates/sdkwork-iam-web-adapter" }
+sdkwork_iam_context_service = { package = "sdkwork-iam-context-service", path = "../sdkwork-iam/crates/sdkwork-iam-context-service" }
 sdkwork-database-config = { path = "../sdkwork-database/crates/sdkwork-database-config" }
 sdkwork-database-lifecycle = { path = "../sdkwork-database/crates/sdkwork-database-lifecycle" }
 sdkwork-database-spi = { path = "../sdkwork-database/crates/sdkwork-database-spi" }

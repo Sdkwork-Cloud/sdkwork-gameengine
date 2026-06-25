@@ -1,4 +1,4 @@
-import { createClient as createAppbaseAppClient, type SdkworkAppClient } from '@sdkwork/appbase-app-sdk';
+import { createClient as createAppbaseAppClient, type SdkworkAppClient } from '@sdkwork/iam-app-sdk';
 import {
   createSdkworkAppbasePcAuthRuntime,
   type SdkworkAppbasePcAuthRuntimeComposition,
@@ -18,7 +18,7 @@ import {
 import { createSdkworkGameenginePcSessionTokenManager } from './sessionTokenManager';
 import type { SdkworkGameenginePcSdkClientInventory } from './sdkClients';
 
-const APPBASE_APP_SDK_FAMILY_ID = 'sdkwork-appbase-app-sdk';
+const APPBASE_APP_SDK_FAMILY_ID = 'sdkwork-iam-app-sdk';
 const APP_API_PREFIX = '/app/v3/api';
 
 export type SdkworkGameenginePcIamRuntime = IamRuntime & {
@@ -97,7 +97,7 @@ export function createSdkworkGameenginePcSdkClientsWithTokenManager(
       : undefined,
     gamesAppClient,
     sdkFamilies: {
-      app: ['sdkwork-games-app-sdk', 'sdkwork-appbase-app-sdk'],
+      app: ['sdkwork-games-app-sdk', 'sdkwork-iam-app-sdk'],
     },
   };
 }

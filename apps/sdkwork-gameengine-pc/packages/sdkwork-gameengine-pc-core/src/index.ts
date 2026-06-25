@@ -43,11 +43,11 @@ export const SdkworkGameenginePcAppSdkFamilies = [
     tokenManagerScope: 'global-session',
   },
   {
-    authority: 'sdkwork-appbase-app-api',
-    family: 'sdkwork-appbase-app-sdk',
+    authority: 'sdkwork-iam-app-api',
+    family: 'sdkwork-iam-app-sdk',
     generationInputSpec:
-      '../sdkwork-appbase/sdks/sdkwork-appbase-app-sdk/openapi/sdkwork-appbase-app-api.openapi.yaml',
-    generatedPackageName: '@sdkwork/appbase-app-sdk',
+      '../sdkwork-iam/sdks/sdkwork-iam-app-sdk/openapi/sdkwork-iam-app-api.openapi.yaml',
+    generatedPackageName: '@sdkwork/iam-app-sdk',
     surface: 'app',
     tokenManagerScope: 'global-session',
   },

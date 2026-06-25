@@ -9,14 +9,14 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev": "node ../../../sdkwork-iam/scripts/dev/run-pc-renderer-dev-with-bootstrap.mjs -- vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "pnpm run typecheck"
   },
   "dependencies": {
-    "@sdkwork/appbase-app-sdk": "workspace:*",
+    "@sdkwork/iam-app-sdk": "workspace:*",
     "@sdkwork/auth-pc-react": "workspace:*",
     "@sdkwork/auth-runtime-pc-react": "workspace:*",
     "@sdkwork/iam-contracts": "workspace:*",

@@ -1,5 +1,5 @@
 import { getGamesCatalogService } from 'sdkwork-gameengine-pc-core';
-import type { GameCatalogItem } from 'sdkwork-games-app-sdk-generated-typescript';
+import type { GameCatalogItem } from 'sdkwork-gameengine-pc-core/sdk';
 
 import { Game, GetGamesParams, GameListResponse, FeatureBanner, LiveMatch } from '../types/game.types';
 

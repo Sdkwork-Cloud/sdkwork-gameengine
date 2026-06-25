@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.dependency.composition",
+  "applicationCode": "gameengine",
+  "clientArchitecture": "pc",
+  "surfaces": [
+    {
+      "surface": "app",
+      "corePackage": "sdkwork-gameengine-pc-core",
+      "sdkClients": [],
+      "reusableModules": [],
+      "hostAdapters": [],
+      "dependencyApiExports": [],
+      "dependencyApiSurfaces": []
+    }
+  ],
+  "buildToolEntries": {
+    "pnpm": {
+      "workspacePackages": [
+        "sdkwork-gameengine-pc-core",
+        "sdkwork-gameengine-pc-arena",
+        "sdkwork-gameengine-pc-auth",
+        "sdkwork-gameengine-pc-claws",
+        "sdkwork-gameengine-pc-commons",
+        "sdkwork-gameengine-pc-compute",
+        "sdkwork-gameengine-pc-dashboard",
+        "sdkwork-gameengine-pc-i18n",
+        "sdkwork-gameengine-pc-mall",
+        "sdkwork-gameengine-pc-quiz",
+        "sdkwork-gameengine-pc-recharge",
+        "sdkwork-gameengine-pc-ringmatch",
+        "sdkwork-gameengine-pc-shell",
+        "sdkwork-gameengine-pc-user",
+        "sdkwork-gameengine-pc-vip",
+        "sdkwork-gameengine-pc-wallet"
+      ]
+    }
+  }
+}

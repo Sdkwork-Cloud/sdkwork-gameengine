@@ -95,10 +95,10 @@ function parseSdkBaseUrls(sdkBaseUrl?: string): SdkworkGameenginePcSdkBaseUrls |
     appApiBaseUrl: `${normalizedSdkBaseUrl}/app/v3/api`,
     backendApiBaseUrl: `${normalizedSdkBaseUrl}/backend/v3/api`,
     dependencySdkBaseUrls: {
-      'sdkwork-appbase-app-sdk': {
+      'sdkwork-iam-app-sdk': {
         appApiBaseUrl: `${normalizedSdkBaseUrl}/app/v3/api`,
       },
-      'sdkwork-appbase-backend-sdk': {
+      'sdkwork-iam-backend-sdk': {
         backendApiBaseUrl: `${normalizedSdkBaseUrl}/backend/v3/api`,
       },
     },

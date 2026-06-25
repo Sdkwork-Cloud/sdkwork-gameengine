@@ -1,4 +1,4 @@
-import { listSdkworkGameenginePcAppSdkFamilies } from 'sdkwork-gameengine-pc-core';
+import { listSdkworkGameenginePcAppSdkFamilies } from 'sdkwork-gameengine-pc-core/composition';
 import type { SdkworkGamesAppClient } from 'sdkwork-games-app-sdk-generated-typescript';
 
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
