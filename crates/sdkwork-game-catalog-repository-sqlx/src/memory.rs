@@ -75,7 +75,7 @@ mod tests {
         }]);
 
         let page = repo
-            .list_catalog("tenant-1", &GameCatalogQuery::default())
+            .list_catalog("100001", &GameCatalogQuery::default())
             .await
             .expect("page");
 
