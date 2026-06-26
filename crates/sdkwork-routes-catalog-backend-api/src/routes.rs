@@ -3,7 +3,7 @@ use axum::response::Response;
 use axum::routing::get;
 use axum::Router;
 use sdkwork_game_catalog_service::{GameCatalogRepository, GameCatalogService};
-use sdkwork_router_catalog_app_api::GamesListQuery;
+use sdkwork_routes_catalog_app_api::GamesListQuery;
 use sdkwork_web_axum::RequirePrincipal;
 use std::sync::Arc;
 
@@ -26,5 +26,5 @@ async fn list_games<R>(
 where
     R: GameCatalogRepository + Send + Sync,
 {
-    sdkwork_router_catalog_app_api::respond_list(store.as_ref(), principal.tenant_id(), query).await
+    sdkwork_routes_catalog_app_api::respond_list(store.as_ref(), principal.tenant_id(), query).await
 }

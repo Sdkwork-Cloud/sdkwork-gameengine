@@ -1,12 +1,12 @@
 [package]
-name = "sdkwork-router-catalog-app-api"
+name = "sdkwork-routes-catalog-app-api"
 version.workspace = true
 edition.workspace = true
 license = "Apache-2.0"
 description = "SDKWork games catalog app-api router."
 
 [lib]
-name = "sdkwork_router_catalog_app_api"
+name = "sdkwork_routes_catalog_app_api"
 path = "src/lib.rs"
 
 [dependencies]

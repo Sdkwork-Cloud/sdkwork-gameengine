@@ -7,7 +7,7 @@ use sdkwork_game_catalog_service::GameCatalogService;
 use sdkwork_games_api_server::{
     build_catalog_service, build_router, with_games_app_request_context,
 };
-use sdkwork_router_catalog_app_api::build_catalog_app_router;
+use sdkwork_routes_catalog_app_api::build_catalog_app_router;
 use std::sync::Arc;
 use tower::ServiceExt;
 

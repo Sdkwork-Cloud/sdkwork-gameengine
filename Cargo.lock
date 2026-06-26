@@ -1697,9 +1697,9 @@ dependencies = [
  "sdkwork-games-database-host",
  "sdkwork-iam-context-service",
  "sdkwork-iam-web-adapter",
- "sdkwork-router-catalog-app-api",
- "sdkwork-router-catalog-backend-api",
- "sdkwork-router-health-app-api",
+ "sdkwork-routes-catalog-app-api",
+ "sdkwork-routes-catalog-backend-api",
+ "sdkwork-routes-health-app-api",
  "sdkwork-web-axum",
  "sdkwork-web-contract",
  "sdkwork-web-core",
@@ -1757,7 +1757,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-router-catalog-app-api"
+name = "sdkwork-routes-catalog-app-api"
 version = "0.1.0"
 dependencies = [
  "axum",
@@ -1768,19 +1768,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-router-catalog-backend-api"
+name = "sdkwork-routes-catalog-backend-api"
 version = "0.1.0"
 dependencies = [
  "axum",
  "sdkwork-game-catalog-service",
- "sdkwork-router-catalog-app-api",
+ "sdkwork-routes-catalog-app-api",
  "sdkwork-web-axum",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "sdkwork-router-health-app-api"
+name = "sdkwork-routes-health-app-api"
 version = "0.1.0"
 dependencies = [
  "axum",

@@ -1,12 +1,12 @@
 [package]
-name = "sdkwork-router-health-app-api"
+name = "sdkwork-routes-health-app-api"
 version.workspace = true
 edition.workspace = true
 license = "Apache-2.0"
 description = "SDKWork games health app-api router."
 
 [lib]
-name = "sdkwork_router_health_app_api"
+name = "sdkwork_routes_health_app_api"
 path = "src/lib.rs"
 
 [dependencies]

@@ -1,12 +1,12 @@
 [package]
-name = "sdkwork-router-catalog-backend-api"
+name = "sdkwork-routes-catalog-backend-api"
 version.workspace = true
 edition.workspace = true
 license = "Apache-2.0"
 description = "SDKWork games catalog backend-api router."
 
 [lib]
-name = "sdkwork_router_catalog_backend_api"
+name = "sdkwork_routes_catalog_backend_api"
 path = "src/lib.rs"
 
 [dependencies]
@@ -15,4 +15,4 @@ serde.workspace = true
 serde_json.workspace = true
 sdkwork_game_catalog_service.workspace = true
 sdkwork-web-axum.workspace = true
-sdkwork_router_catalog_app_api.workspace = true
+sdkwork_routes_catalog_app_api.workspace = true

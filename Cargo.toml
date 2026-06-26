@@ -5,9 +5,9 @@ members = [
     "crates/sdkwork-games-database-host",
     "crates/sdkwork-game-catalog-service",
     "crates/sdkwork-game-catalog-repository-sqlx",
-    "crates/sdkwork-router-health-app-api",
-    "crates/sdkwork-router-catalog-app-api",
-    "crates/sdkwork-router-catalog-backend-api",
+    "crates/sdkwork-routes-health-app-api",
+    "crates/sdkwork-routes-catalog-app-api",
+    "crates/sdkwork-routes-catalog-backend-api",
 ]
 
 [workspace.package]
@@ -19,9 +19,9 @@ sdkwork_games_api_server = { package = "sdkwork-games-api-server", path = "crate
 sdkwork_games_database_host = { package = "sdkwork-games-database-host", path = "crates/sdkwork-games-database-host" }
 sdkwork_game_catalog_service = { package = "sdkwork-game-catalog-service", path = "crates/sdkwork-game-catalog-service" }
 sdkwork_game_catalog_repository_sqlx = { package = "sdkwork-game-catalog-repository-sqlx", path = "crates/sdkwork-game-catalog-repository-sqlx" }
-sdkwork_router_health_app_api = { package = "sdkwork-router-health-app-api", path = "crates/sdkwork-router-health-app-api" }
-sdkwork_router_catalog_app_api = { package = "sdkwork-router-catalog-app-api", path = "crates/sdkwork-router-catalog-app-api" }
-sdkwork_router_catalog_backend_api = { package = "sdkwork-router-catalog-backend-api", path = "crates/sdkwork-router-catalog-backend-api" }
+sdkwork_routes_health_app_api = { package = "sdkwork-routes-health-app-api", path = "crates/sdkwork-routes-health-app-api" }
+sdkwork_routes_catalog_app_api = { package = "sdkwork-routes-catalog-app-api", path = "crates/sdkwork-routes-catalog-app-api" }
+sdkwork_routes_catalog_backend_api = { package = "sdkwork-routes-catalog-backend-api", path = "crates/sdkwork-routes-catalog-backend-api" }
 sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }
 sdkwork-web-axum = { path = "../sdkwork-web-framework/crates/sdkwork-web-axum" }
 sdkwork-web-contract = { path = "../sdkwork-web-framework/crates/sdkwork-web-contract" }

@@ -1,5 +1,5 @@
 use axum::Router;
-use sdkwork_iam_web_adapter::{build_web_framework_layer, IamDatabaseWebRequestContextResolver};
+use sdkwork_iam_web_adapter::{build_web_framework_layer, IamWebRequestContextResolver};
 use sdkwork_web_axum::with_web_request_context;
 use sdkwork_web_core::HttpRouteManifest;
 
@@ -12,8 +12,8 @@ pub fn games_public_path_prefixes() -> Vec<String> {
     ]
 }
 
-fn default_resolver() -> IamDatabaseWebRequestContextResolver {
-    IamDatabaseWebRequestContextResolver::new(None)
+fn default_resolver() -> IamWebRequestContextResolver {
+    IamWebRequestContextResolver::new(None)
 }
 
 fn wrap_router_with_manifest(router: Router, route_manifest: HttpRouteManifest) -> Router {

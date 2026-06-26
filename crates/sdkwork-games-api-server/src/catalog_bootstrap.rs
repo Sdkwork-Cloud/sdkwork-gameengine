@@ -3,8 +3,8 @@ use std::sync::Arc;
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_game_catalog_repository_sqlx::GameCatalogRepositoryAdapter;
 use sdkwork_game_catalog_service::GameCatalogService;
-use sdkwork_router_catalog_app_api::CatalogAppState;
-use sdkwork_router_catalog_backend_api::CatalogBackendState;
+use sdkwork_routes_catalog_app_api::CatalogAppState;
+use sdkwork_routes_catalog_backend_api::CatalogBackendState;
 
 pub fn default_catalog_app_state() -> CatalogAppState {
     Arc::new(GameCatalogService::new(GameCatalogRepositoryAdapter::in_memory()))

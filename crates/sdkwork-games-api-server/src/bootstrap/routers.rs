@@ -3,9 +3,9 @@ use tower_http::cors::CorsLayer;
 
 use crate::bootstrap::catalog::SharedCatalogService;
 use crate::web_bootstrap::{with_games_app_request_context, with_games_backend_request_context};
-use sdkwork_router_catalog_app_api::build_catalog_app_router;
-use sdkwork_router_catalog_backend_api::build_catalog_backend_router;
-use sdkwork_router_health_app_api::build_health_router;
+use sdkwork_routes_catalog_app_api::build_catalog_app_router;
+use sdkwork_routes_catalog_backend_api::build_catalog_backend_router;
+use sdkwork_routes_health_app_api::build_health_router;
 
 pub async fn build_router(catalog_service: SharedCatalogService) -> Router {
     let app_routes = Router::new()

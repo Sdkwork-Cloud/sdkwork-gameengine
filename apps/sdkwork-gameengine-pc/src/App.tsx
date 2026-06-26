@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { SdkworkSessionAuthBrowserRoot } from '@sdkwork/auth-pc-react';
 
 import { AppRoutes } from './AppRoutes';
 import { AuthGate } from './AuthGate';
@@ -9,6 +10,7 @@ const runtime = createSdkworkGameenginePcRuntime();
 export function App() {
   return (
     <BrowserRouter>
+      <SdkworkSessionAuthBrowserRoot>
       <Routes>
         <Route
           element={
@@ -19,6 +21,7 @@ export function App() {
           path="/*"
         />
       </Routes>
+          </SdkworkSessionAuthBrowserRoot>
     </BrowserRouter>
   );
 }

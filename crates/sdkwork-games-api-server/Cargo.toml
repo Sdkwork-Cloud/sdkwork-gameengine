@@ -24,9 +24,9 @@ serde_json.workspace = true
 sdkwork_game_catalog_repository_sqlx.workspace = true
 sdkwork_game_catalog_service.workspace = true
 sdkwork_games_database_host.workspace = true
-sdkwork_router_catalog_app_api.workspace = true
-sdkwork_router_catalog_backend_api.workspace = true
-sdkwork_router_health_app_api.workspace = true
+sdkwork_routes_catalog_app_api.workspace = true
+sdkwork_routes_catalog_backend_api.workspace = true
+sdkwork_routes_health_app_api.workspace = true
 sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-web-contract.workspace = true
@@ -42,3 +42,7 @@ http-body-util = "0.1"
 sdkwork_game_catalog_repository_sqlx.workspace = true
 tokio.workspace = true
 tower = { version = "0.5", features = ["util"] }
+
+[[bin]]
+name = "sdkwork-gameengine-standalone-gateway"
+path = "src/main.rs"
