@@ -11,3 +11,7 @@ target/
 *.local.toml
 *.zip
 coverage/
+
+# SDKWork local runtime state
+.runtime/
+**/.runtime/

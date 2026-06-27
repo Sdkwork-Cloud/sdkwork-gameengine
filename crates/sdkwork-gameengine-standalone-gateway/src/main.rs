@@ -1,4 +1,4 @@
-use sdkwork_games_api_server::{build_catalog_service, build_router};
+use sdkwork_gameengine_standalone_gateway::{build_catalog_service, build_router};
 
 #[tokio::main]
 async fn main() {
@@ -19,9 +19,9 @@ async fn main() {
     let app = build_router(catalog_service).await;
     let listener = tokio::net::TcpListener::bind(&bind_address)
         .await
-        .expect("bind games api-server listener failed");
-    tracing::info!("sdkwork-games-api-server listening on {bind_address}");
+        .expect("bind games standalone-gateway listener failed");
+    tracing::info!("sdkwork-gameengine-standalone-gateway listening on {bind_address}");
     axum::serve(listener, app)
         .await
-        .expect("serve games api-server failed");
+        .expect("serve games standalone-gateway failed");
 }

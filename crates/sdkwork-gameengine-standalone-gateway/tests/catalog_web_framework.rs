@@ -4,7 +4,7 @@ use sdkwork_game_catalog_repository_sqlx::{
     GameCatalogRepositoryKind, InMemoryGameCatalogRepository,
 };
 use sdkwork_game_catalog_service::GameCatalogService;
-use sdkwork_games_api_server::{
+use sdkwork_gameengine_standalone_gateway::{
     build_catalog_service, build_router, with_games_app_request_context,
 };
 use sdkwork_routes_catalog_app_api::build_catalog_app_router;
