@@ -1135,7 +1135,7 @@ importers:
         specifier: ^6.2.0
         version: 6.4.3(@types/node@25.9.4)(jiti@2.7.0)(lightningcss@1.32.0)
 
-  packages/common/games/sdkwork-games-contracts:
+  apps/sdkwork-gameengine-common/packages/sdkwork-games-contracts:
     dependencies:
       '@sdkwork/utils':
         specifier: workspace:*

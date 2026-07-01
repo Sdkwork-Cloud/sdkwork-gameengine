@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-gameengine-pc-core",
+    "type": "typescript-package",
+    "root": "apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-core",
+    "domain": "gameengine",
+    "capability": "core",
+    "surface": "app",
+    "languages": [
+      "typescript"
+    ],
+    "generated": false
+  },
+  "contracts": {
+    "sdkDependencies": [
+      {
+        "workspace": "sdkwork-catalog-app-sdk",
+        "surface": "app-api",
+        "credentialMode": "authenticated-app-api"
+      },
+      {
+        "workspace": "sdkwork-games-app-sdk",
+        "surface": "app-api",
+        "credentialMode": "authenticated-app-api"
+      },
+      {
+        "workspace": "sdkwork-iam-app-sdk",
+        "surface": "app-api",
+        "credentialMode": "authenticated-app-api"
+      }
+    ],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": []
+  }
+}

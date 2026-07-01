@@ -1,4 +1,5 @@
 # SDKWork Games
+repository-kind: application
 
 SDKWork games platform application root. Provides game catalog, rooms, and leaderboard capabilities aligned with `../sdkwork-specs`.
 
