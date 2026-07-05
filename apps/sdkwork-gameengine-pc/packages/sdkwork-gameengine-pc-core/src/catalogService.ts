@@ -1,5 +1,5 @@
-import type { GameCatalogItem, GameCatalogPage } from 'sdkwork-games-app-sdk-generated-typescript';
-import type { SdkworkGamesAppClient } from 'sdkwork-games-app-sdk-generated-typescript';
+import type { GameCatalogItem, GameCatalogPage } from '@sdkwork/games-app-sdk';
+import type { SdkworkGamesAppClient } from '@sdkwork/games-app-sdk';
 
 export type { GameCatalogItem, GameCatalogPage };
 

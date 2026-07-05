@@ -7,7 +7,7 @@ import {
 import type { IamAppContext, IamDeploymentMode, IamEnvironment } from '@sdkwork/iam-contracts';
 import type { IamRuntime } from '@sdkwork/iam-runtime';
 import { normalizeSdkworkApiBaseUrl } from '@sdkwork/runtime-bootstrap';
-import { createClient as createGamesAppClient } from 'sdkwork-games-app-sdk-generated-typescript';
+import { createClient as createGamesAppClient } from '@sdkwork/games-app-sdk';
 
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
 import {

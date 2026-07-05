@@ -24,7 +24,7 @@
     "@sdkwork/runtime-bootstrap": "workspace:*",
     "@sdkwork/sdk-common": "workspace:*",
     "@tailwindcss/vite": "^4.1.14",
-  "@vitejs/plugin-react": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
     "tailwindcss": "^4.1.14",
     "i18next": "^25.8.17",
     "lucide-react": "^0.546.0",
@@ -35,7 +35,7 @@
     "react-i18next": "catalog:",
     "react-router": "catalog:",
     "react-router-dom": "catalog:",
-    "sdkwork-games-app-sdk-generated-typescript": "workspace:*",
+    "@sdkwork/games-app-sdk": "workspace:*",
     "sdkwork-gameengine-pc-core": "workspace:*",
     "sdkwork-gameengine-pc-i18n": "workspace:*",
     "sdkwork-gameengine-pc-shell": "workspace:*",
@@ -55,5 +55,12 @@
     "domain": "game",
     "capability": "pc-application",
     "status": "ready"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
   }
 }

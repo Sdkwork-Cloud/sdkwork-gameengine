@@ -38,7 +38,7 @@ export const SdkworkGameenginePcAppSdkFamilies = [
     authority: 'sdkwork-games-app-api',
     family: 'sdkwork-games-app-sdk',
     generationInputSpec: 'apis/app-api/game/games-app-api.openapi.json',
-    generatedPackageName: 'sdkwork-games-app-sdk-generated-typescript',
+    generatedPackageName: '@sdkwork/games-app-sdk',
     surface: 'app',
     tokenManagerScope: 'global-session',
   },
