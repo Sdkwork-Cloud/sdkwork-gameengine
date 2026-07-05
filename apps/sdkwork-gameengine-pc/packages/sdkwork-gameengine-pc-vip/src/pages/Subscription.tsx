@@ -24,7 +24,7 @@ export default function Subscription({ setCurrentView }: SubscriptionProps) {
       const days = billingCycle === 'monthly' ? 30 : 365;
       setVipLevel(level, days);
       setIsProcessing(null);
-      showToast(t('subscription_success', '订阅成功�?), 'success');
+      showToast(t('subscription_success', 'Subscription successful!'), 'success');
     }, 1500);
   };
 

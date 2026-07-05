@@ -101,11 +101,11 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-black tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-            <span className="text-4xl">??</span>
+            <span className="text-4xl">🦞</span>
             {t('my_claws', '????')}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-lg">
-            {t('claws_desc', '????????????????????)}
+            {t('claws_desc', 'Manage and train your AI combat agents.')}
           </p>
         </div>
         <button
@@ -113,7 +113,7 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
           className="flex items-center gap-2 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-rose-500/20 hover:scale-105 active:scale-95"
         >
           <Plus size={20} />
-          {t('create_claw', '??????)}
+          {t('create_claw', 'Create Agent')}
         </button>
       </div>
 
@@ -143,9 +143,9 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
                       lobster.status === 'defending' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                       'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                     }`}>
-                      {lobster.status === 'idle' ? t('status_idle', '????) : 
-                       lobster.status === 'defending' ? t('status_defending', '????) : 
-                       t('status_training', '????)}
+                      {lobster.status === 'idle' ? t('status_idle', 'Idle') : 
+                       lobster.status === 'defending' ? t('status_defending', 'Defending') : 
+                       t('status_training', 'Training')}
                     </span>
                   </div>
                 </div>
@@ -190,7 +190,7 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
                 ) : (
                   <>
                     <Cpu size={18} />
-                    {t('train_claw', '?? (500 Tokens)')}
+                    {t('train_claw', 'Train (500 Tokens)')}
                   </>
                 )}
               </button>
@@ -199,7 +199,7 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
                 className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-rose-500/20"
               >
                 <ShieldAlert size={18} />
-                {t('go_defend', '????)}
+                {t('go_defend', 'Go Defend')}
               </button>
             </div>
           </motion.div>
@@ -215,7 +215,7 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-black text-white flex items-center gap-2">
-                <span>??</span> {t('create_claw', '??????)}
+                <span>🦞</span> {t('create_claw', 'Create Agent')}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-zinc-500 hover:text-white">
                 <Plus className="rotate-45" size={24} />
@@ -230,7 +230,7 @@ export default function ClawsManager({ setCurrentView }: ClawsManagerProps) {
                   value={newLobsterName}
                   onChange={(e) => setNewLobsterName(e.target.value)}
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-all"
-                  placeholder={t('claw_name_placeholder', '????????)}
+                  placeholder={t('claw_name_placeholder', 'Enter agent name...')}
                 />
               </div>
             </div>
