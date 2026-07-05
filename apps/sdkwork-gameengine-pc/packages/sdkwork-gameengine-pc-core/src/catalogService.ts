@@ -27,15 +27,24 @@ export function getGamesCatalogService(): GamesCatalogService {
   return configuredCatalogService;
 }
 
+function mapPageData(page: import('@sdkwork/games-app-sdk').SdkWorkPageData): GameCatalogPage {
+  return {
+    items: page.items as unknown as GameCatalogItem[],
+    total: Number(page.pageInfo.totalItems ?? page.items.length),
+    page: page.pageInfo.page ?? 1,
+    pageSize: page.pageInfo.pageSize ?? 20,
+  };
+}
+
 export function createGamesCatalogService(client: SdkworkGamesAppClient): GamesCatalogService {
   return {
     async listCatalog(params) {
-      const result = await client.games.catalog.list(params);
-      return result.data as GameCatalogPage;
+      const page = await client.games.catalog.list(params);
+      return mapPageData(page);
     },
     async retrieveCatalogItem(gameId) {
-      const result = await client.games.catalog.retrieve(gameId);
-      return result.data as GameCatalogItem;
+      const item = await client.games.catalog.retrieve(gameId);
+      return item as unknown as GameCatalogItem;
     },
   };
 }
