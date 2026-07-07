@@ -377,4 +377,28 @@ mod tests {
         assert!(result.is_err());
         assert_eq!(result.unwrap_err().code(), "invalid");
     }
+
+    #[tokio::test]
+    async fn create_room_rejects_excessive_max_players_before_repository_access() {
+        let service = GameRoomService::new(EmptyRepo);
+        let result = service
+            .create_room(
+                "100001",
+                CreateGameRoomCommand {
+                    game_id: "game-xiangqi".into(),
+                    mode_id: None,
+                    ruleset_id: None,
+                    room_code: "ROOM-TOO-LARGE".into(),
+                    host_user_id: "user-host".into(),
+                    visibility: "public".into(),
+                    join_policy: "open".into(),
+                    max_players: 65,
+                },
+            )
+            .await;
+
+        let error = result.unwrap_err();
+        assert_eq!("invalid", error.code());
+        assert_eq!("max_players must be between 1 and 64", error.message());
+    }
 }

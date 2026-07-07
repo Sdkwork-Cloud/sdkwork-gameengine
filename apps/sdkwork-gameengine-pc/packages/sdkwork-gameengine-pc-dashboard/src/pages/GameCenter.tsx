@@ -30,9 +30,7 @@ export default function GameCenter() {
   const [liveMatches, setLiveMatches] = useState<any[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'recommended' | 'popular' | 'newest' | 'rating'>(
-    'recommended',
-  );
+  const [sortBy, setSortBy] = useState<'recommended' | 'title' | 'newest'>('recommended');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -163,9 +161,8 @@ export default function GameCenter() {
                   <div className="flex flex-col gap-1">
                     {[
                       { id: 'recommended', label: t('recommended_sort', 'Recommended') },
-                      { id: 'popular', label: t('most_popular', 'Most Popular') },
+                      { id: 'title', label: t('title_sort', 'Title') },
                       { id: 'newest', label: t('newest_release', 'Newest') },
-                      { id: 'rating', label: t('highest_rating', 'Highest Rating') },
                     ].map((sortOpt) => (
                       <button
                         key={sortOpt.id}

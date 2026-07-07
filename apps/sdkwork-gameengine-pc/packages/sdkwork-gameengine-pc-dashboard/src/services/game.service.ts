@@ -25,7 +25,10 @@ function mapSortBy(sortBy?: GetGamesParams['sortBy']): 'recommended' | 'title' |
   if (sortBy === 'newest') {
     return 'newest';
   }
-  if (sortBy === 'recommended' || sortBy === 'popular' || sortBy === 'rating') {
+  if (sortBy === 'title') {
+    return 'title';
+  }
+  if (sortBy === 'recommended') {
     return 'recommended';
   }
   return undefined;
@@ -63,13 +66,8 @@ export class GameService {
       sort: mapSortBy(params.sortBy),
     });
 
-    let games = page.items.map(mapCatalogItemToGame);
-    if (params.category === 'featured') {
-      games = games.filter((game) => game.isHot || game.rating >= 4.5);
-    }
-
     return {
-      games,
+      games: page.items.map(mapCatalogItemToGame),
       total: page.total,
     };
   }

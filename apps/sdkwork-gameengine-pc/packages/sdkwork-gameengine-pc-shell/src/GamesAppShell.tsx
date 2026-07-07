@@ -15,9 +15,9 @@ export default function GamesAppShell({ onLogout }: GamesAppShellProps) {
       case "leaderboard":
         return <Leaderboard />;
       case "games":
-        return <GameCenter setCurrentView={setCurrentView} />;
+        return <GameCenter />;
       default:
-        return <GameCenter setCurrentView={setCurrentView} />;
+        return <GameCenter />;
     }
   };
 
