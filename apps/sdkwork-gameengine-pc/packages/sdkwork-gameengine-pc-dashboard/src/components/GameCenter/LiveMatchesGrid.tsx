@@ -1,15 +1,14 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Activity, ChevronRight, Users, Gamepad2, Play } from "lucide-react";
+import { Activity, Users, Gamepad2 } from "lucide-react";
 import { motion } from "motion/react";
 import { LiveMatch } from "../../types/game.types";
 
 interface LiveMatchesGridProps {
   liveMatches: LiveMatch[];
-  onSpectate?: (match: LiveMatch) => void;
 }
 
-export default function LiveMatchesGrid({ liveMatches, onSpectate }: LiveMatchesGridProps) {
+export default function LiveMatchesGrid({ liveMatches }: LiveMatchesGridProps) {
   const { t } = useTranslation();
 
   return (
@@ -19,9 +18,6 @@ export default function LiveMatchesGrid({ liveMatches, onSpectate }: LiveMatches
           <Activity className="text-emerald-500" />
           {t('live_matches', 'Live Matches')}
         </h2>
-        <button className="text-sm font-bold text-zinc-500 hover:text-emerald-500 transition-colors flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-          {t('view_all', 'View All')} <ChevronRight size={14} />
-        </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {liveMatches.map((match) => (
@@ -88,12 +84,9 @@ export default function LiveMatchesGrid({ liveMatches, onSpectate }: LiveMatches
                 </div>
                 <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400">{t(match.gameNameKey)} • {t('ranked_match', 'Ranked')}</span>
               </div>
-              <button 
-                onClick={(e) => { e.stopPropagation(); onSpectate?.(match); }}
-                className="text-xs font-black text-white bg-zinc-900 dark:bg-white dark:text-zinc-900 px-5 py-2.5 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] flex items-center gap-1.5 active:scale-95 hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:text-white dark:hover:text-white"
-              >
-                <Play size={12} fill="currentColor" /> {t('spectate', 'Spectate')}
-              </button>
+              <span className="text-xs font-black text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/70 px-4 py-2 rounded-xl">
+                {match.status}
+              </span>
             </div>
           </motion.div>
         ))}

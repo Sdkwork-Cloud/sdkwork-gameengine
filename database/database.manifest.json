@@ -5,7 +5,7 @@
   "serviceCode": "GAMES",
   "displayName": "GAMES Database",
   "owner": "games-platform",
-  "engines": ["postgres"],
+  "engines": ["postgres", "sqlite"],
   "defaultEngine": "postgres",
   "tablePrefix": "game_",
   "contractVersion": "1.0.0",

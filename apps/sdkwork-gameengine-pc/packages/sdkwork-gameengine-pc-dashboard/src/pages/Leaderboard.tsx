@@ -7,46 +7,31 @@ import {
   User,
   Cpu,
   Users,
-  Flame,
   TrendingUp,
   Timer,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Swords,
   Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useToast } from "sdkwork-gameengine-pc-commons";
-import { useUserStore } from "sdkwork-gameengine-pc-core";
 
 import { LeaderboardService, type LeaderboardRow } from "../services/leaderboard.service";
 
 // Sub-components
 import LeaderboardHeader from "../components/Leaderboard/LeaderboardHeader";
-import ChallengeModal from "../components/Leaderboard/ChallengeModal";
-import ArenaModal from "../components/Leaderboard/ArenaModal";
 
-interface LeaderboardProps {
-  onViewPlayer?: (player: any) => void;
-}
-
-export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
+export default function Leaderboard() {
   const { t } = useTranslation();
-  const { showToast, ToastComponent } = useToast();
   const [activeTab, setActiveTab] = useState("global");
   const [timeRange, setTimeRange] = useState("daily");
   const [currentPage, setCurrentPage] = useState(1);
-  const [showChallengeModal, setShowChallengeModal] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
-  const [showArenaModal, setShowArenaModal] = useState(false);
-  const [wagerAmount, setWagerAmount] = useState(100);
   const itemsPerPage = 20;
-  const profile = useUserStore((state) => state.profile);
   const [rankings, setRankings] = useState<LeaderboardRow[]>([]);
   const [totalRankings, setTotalRankings] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [myRanking, setMyRanking] = useState<LeaderboardRow | null>(null);
 
   const tabs = [
@@ -80,6 +65,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
     }
 
     setLoading(true);
+    setLoadError(null);
     try {
       const page = await LeaderboardService.listRankings({
         page: currentPage,
@@ -88,13 +74,13 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
       setRankings(page.items);
       setTotalRankings(page.total);
     } catch {
-      showToast(t('leaderboard_load_failed', 'Failed to load leaderboard.'), 'error');
+      setLoadError(t('leaderboard_load_failed', 'Failed to load leaderboard.'));
       setRankings([]);
       setTotalRankings(0);
     } finally {
       setLoading(false);
     }
-  }, [activeTab, currentPage, itemsPerPage, showToast, t]);
+  }, [activeTab, currentPage, itemsPerPage, t]);
 
   useEffect(() => {
     void loadRankings();
@@ -127,22 +113,10 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
     }
   };
 
-  const handleChallengeConfirm = (amount: number) => {
-    showToast(t('challenged_alert', { name: selectedPlayer?.name, points: amount }), 'success');
-    setShowChallengeModal(false);
-  };
-
-  const handleArenaPublishConfirm = (amount: number) => {
-    showToast(t('arena_success_alert', { points: amount }), 'success');
-    setShowArenaModal(false);
-  };
-
   return (
     <div className="space-y-6 pb-12 h-full flex flex-col">
-      <ToastComponent />
-      
       {/* Header */}
-      <LeaderboardHeader onSetupArena={() => setShowArenaModal(true)} />
+      <LeaderboardHeader />
 
       {/* Controls Area */}
       <div className="flex flex-col gap-4 shrink-0">
@@ -202,8 +176,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
           <div className="col-span-3">{t('player_ai')}</div>
           <div className="col-span-2 text-center">{activeTab === "ai" ? t('provider') : t('title')}</div>
           <div className="col-span-2 text-center">{t('win_rate')}</div>
-          <div className="col-span-2 text-right">{activeTab === "ai" ? t('compute_power') : t('points')}</div>
-          <div className="col-span-2 text-center">{t('action')}</div>
+          <div className="col-span-4 text-right">{activeTab === "ai" ? t('compute_power') : t('points')}</div>
         </div>
 
         {/* List Content */}
@@ -213,6 +186,10 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
               <div className="flex h-48 items-center justify-center text-zinc-500">
                 <Loader2 className="mr-2 animate-spin" size={20} />
                 <span>{t('loading', 'Loading...')}</span>
+              </div>
+            ) : loadError ? (
+              <div className="flex h-48 items-center justify-center px-6 text-center text-sm font-medium text-rose-500">
+                {loadError}
               </div>
             ) : activeTab !== "global" ? (
               <div className="flex h-48 items-center justify-center px-6 text-center text-sm font-medium text-zinc-500">
@@ -246,7 +223,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                             : "bg-zinc-50/50 dark:bg-zinc-950/50 border-zinc-100/50 dark:border-zinc-800/50 hover:bg-zinc-100"
                   }`}
                 >
-                  <div className="col-span-1 flex justify-center cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
+                  <div className="col-span-1 flex justify-center">
                     {user.rank === 1 ? (
                       <Crown className="text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" size={24} />
                     ) : user.rank === 2 ? (
@@ -258,7 +235,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                     )}
                   </div>
 
-                  <div className="col-span-3 flex items-center space-x-3 cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
+                  <div className="col-span-3 flex items-center space-x-3">
                     <div className="relative">
                       <img
                         src={user.avatar}
@@ -286,7 +263,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                     </div>
                   </div>
 
-                  <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
+                  <div className="col-span-2 flex justify-center">
                     {user.type === "AI" && user.provider ? (
                       <span className="px-2.5 py-1 text-[10px] font-black tracking-wider rounded-md border bg-zinc-150 dark:bg-zinc-850 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700">
                         {user.provider}
@@ -302,32 +279,18 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                     )}
                   </div>
 
-                  <div className="col-span-2 text-center cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
+                  <div className="col-span-2 text-center">
                     <div className="inline-flex items-center space-x-1 bg-zinc-50 dark:bg-zinc-950 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800">
                       <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold text-xs">{user.winRate}</span>
                     </div>
                   </div>
 
-                  <div className="col-span-2 flex items-center justify-end cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
+                  <div className="col-span-4 flex items-center justify-end">
                     <div className={`font-mono font-black text-xl ${
                       user.rank <= 3 ? "text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400" : "text-zinc-700 dark:text-zinc-300"
                     }`}>
                       {user.score.toLocaleString()}
                     </div>
-                  </div>
-                  
-                  <div className="col-span-2 flex items-center justify-center">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPlayer(user);
-                        setShowChallengeModal(true);
-                      }}
-                      className="flex items-center space-x-1 px-3 py-1.5 bg-white dark:bg-zinc-800 hover:bg-rose-600 dark:hover:bg-rose-600 text-zinc-600 dark:text-zinc-300 hover:text-white rounded-lg text-xs font-bold transition-all border border-zinc-200 dark:border-zinc-700 hover:border-transparent active:scale-95 shadow-sm"
-                    >
-                      <Swords size={14} />
-                      <span>{t('challenge')}</span>
-                    </button>
                   </div>
                 </div>
               ))}
@@ -411,9 +374,8 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
               <div className="relative">
                 <img
                   src={
-                    profile?.avatar
-                    ?? myRanking?.avatar
-                    ?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile?.id ?? 'guest')}`
+                    myRanking?.avatar
+                    ?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(myRanking?.name ?? 'guest')}`
                   }
                   alt={t('me')}
                   className="w-12 h-12 rounded-xl object-cover border-2 border-rose-500/50"
@@ -424,7 +386,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
               </div>
               <div>
                 <span className="font-black text-lg text-zinc-900 dark:text-white block">
-                  {t('me')} ({profile?.username ?? myRanking?.name ?? t('guest', 'Guest')})
+                  {t('me')} ({myRanking?.name ?? t('guest', 'Guest')})
                 </span>
                 <span className="text-xs text-rose-500 dark:text-rose-400 font-medium">
                   {myRanking
@@ -458,23 +420,6 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
         </div>
       </div>
 
-      {/* MoDals */}
-      <ChallengeModal 
-        isOpen={showChallengeModal} 
-        onClose={() => setShowChallengeModal(false)} 
-        player={selectedPlayer}
-        wagerAmount={wagerAmount}
-        setWagerAmount={setWagerAmount}
-        onConfirm={handleChallengeConfirm}
-      />
-
-      <ArenaModal 
-        isOpen={showArenaModal} 
-        onClose={() => setShowArenaModal(false)} 
-        wagerAmount={wagerAmount}
-        setWagerAmount={setWagerAmount}
-        onConfirm={handleArenaPublishConfirm}
-      />
     </div>
   );
 }

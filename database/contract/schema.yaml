@@ -6,6 +6,7 @@ owner_team: games-platform
 compliance_level: L2
 engines:
   - postgres
+  - sqlite
 table_prefix: game_
 tables:
   - name: game_catalog

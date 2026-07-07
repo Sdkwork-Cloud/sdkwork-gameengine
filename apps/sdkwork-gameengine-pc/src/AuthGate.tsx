@@ -1,6 +1,7 @@
 import { lazy, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SdkworkIamAuthRoutes } from '@sdkwork/auth-pc-react';
+import { useUserStore } from 'sdkwork-gameengine-pc-core';
 
 import {
   resolveSdkworkGameenginePcAuthAppearance,
@@ -22,8 +23,22 @@ export function AuthGate({ children, runtime }: AuthGateProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [snapshot, setSnapshot] = useState(() => runtime.session.getSnapshot());
+  const syncFromIamSession = useUserStore((state) => state.syncFromIamSession);
 
   useEffect(() => runtime.session.subscribe(setSnapshot), [runtime.session]);
+
+  useEffect(() => {
+    syncFromIamSession(
+      snapshot.context?.userId
+        ? {
+            userId: snapshot.context.userId,
+            tenantId: snapshot.context.tenantId,
+            organizationId: snapshot.context.organizationId,
+            sessionId: snapshot.sessionId ?? snapshot.context.sessionId,
+          }
+        : null,
+    );
+  }, [snapshot, syncFromIamSession]);
 
   const decision = useMemo(
     () =>

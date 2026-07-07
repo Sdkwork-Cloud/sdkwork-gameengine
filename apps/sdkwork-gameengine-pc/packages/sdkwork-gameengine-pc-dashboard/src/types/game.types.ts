@@ -3,15 +3,12 @@ export type Tag = string;
 export interface Game {
   id: string | number;
   name: string;
+  title: string;
   category: string;
   desc: string;
-  img: string;
-  isHot: boolean;
-  playersOnline: string | number;
-  rating: number;
-  aiDifficulty?: string;
+  img?: string;
+  status: string;
   tags: Tag[];
-  actionId?: string; // used to trigger specific UI actions.
 }
 
 export interface GameCategory {
@@ -50,7 +47,7 @@ export interface GameListResponse {
   total: number;
 }
 
-export type SortOption = 'recommended' | 'popular' | 'newest' | 'rating';
+export type SortOption = 'recommended' | 'title' | 'newest';
 
 export interface GetGamesParams {
   category?: string;

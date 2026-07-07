@@ -13,7 +13,11 @@ export function AppRoutes({ runtime }: { runtime: SdkworkGameenginePcRuntime }) 
       <Route
         element={
           <ProtectedRoute runtime={runtime}>
-            <GamesAppShell />
+            <GamesAppShell
+              onLogout={async () => {
+                await runtime.iamRuntime.service.auth.sessions.current.delete();
+              }}
+            />
           </ProtectedRoute>
         }
         path="/app/games/*"

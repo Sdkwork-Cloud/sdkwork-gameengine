@@ -2,23 +2,21 @@ import { isBlank } from '@sdkwork/utils';
 import {
   getGamesCatalogService,
   getGamesRoomService,
+  type CreateRoomRequest,
   type GameCatalogItem,
   type GameRoomItem,
 } from 'sdkwork-gameengine-pc-core';
 
-import type { FeatureBanner, Game, GetGamesParams, GameListResponse, LiveMatch } from '../types/game.types';
+import type { Game, GetGamesParams, GameListResponse, LiveMatch } from '../types/game.types';
 
 function mapCatalogItemToGame(item: GameCatalogItem): Game {
   return {
     id: item.id,
     name: item.gameCode,
+    title: item.title,
     category: item.genre ?? 'action',
     desc: item.summary ?? item.title,
-    img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&q=80',
-    isHot: item.status === 'active',
-    playersOnline: '0',
-    rating: 4.5,
-    aiDifficulty: 'A',
+    status: item.status,
     tags: [item.genre ?? 'game', item.status],
   };
 }
@@ -52,17 +50,6 @@ function mapRoomToLiveMatch(room: GameRoomItem): LiveMatch {
   };
 }
 
-function mapCatalogToBanner(item: GameCatalogItem, index: number): FeatureBanner {
-  return {
-    id: item.id,
-    titleKey: item.title,
-    subtitleKey: item.summary ?? item.gameCode,
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&q=80',
-    tagKey: index === 0 ? 'featured' : item.genre ?? 'game',
-    color: 'from-rose-600 to-orange-600',
-  };
-}
-
 export class GameService {
   static async getGames(params: GetGamesParams = {}): Promise<GameListResponse> {
     const page = await getGamesCatalogService().listCatalog({
@@ -87,18 +74,14 @@ export class GameService {
     };
   }
 
-  static async getFeaturedBanners(): Promise<FeatureBanner[]> {
-    const page = await getGamesCatalogService().listCatalog({
-      page: 1,
-      pageSize: 3,
-      status: 'active',
-      sort: 'recommended',
+  static async createRoom(input: CreateRoomRequest): Promise<GameRoomItem> {
+    if (isBlank(input.roomCode)) {
+      throw new Error('Room name is required.');
+    }
+    return getGamesRoomService().createRoom({
+      ...input,
+      roomCode: input.roomCode.trim(),
     });
-    return page.items.map(mapCatalogToBanner);
-  }
-
-  static async getRecentlyPlayed(): Promise<Game[]> {
-    return [];
   }
 
   static async getLiveMatches(): Promise<LiveMatch[]> {

@@ -1,12 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Flame, Zap, ShieldAlert } from "lucide-react";
+import { Flame } from "lucide-react";
 
-interface LeaderboardHeaderProps {
-  onSetupArena: () => void;
-}
-
-export default function LeaderboardHeader({ onSetupArena }: LeaderboardHeaderProps) {
+export default function LeaderboardHeader() {
   const { t } = useTranslation();
 
   return (
@@ -22,20 +18,6 @@ export default function LeaderboardHeader({ onSetupArena }: LeaderboardHeaderPro
         <p className="text-zinc-600 dark:text-zinc-400 font-medium font-sans">
           {t('leaderboard_desc')}
         </p>
-      </div>
-      <div className="relative z-10 flex flex-col items-end gap-3">
-        <div className="flex items-center space-x-2 bg-zinc-100/80 dark:bg-zinc-950/80 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-inner">
-          <Zap size={16} className="text-orange-500" />
-          <span className="text-sm font-bold text-zinc-900 dark:text-zinc-300">{t('s3_in_progress')}</span>
-          <span className="text-xs text-zinc-500 ml-2">{t('days_left')}</span>
-        </div>
-        <button 
-          onClick={onSetupArena}
-          className="flex items-center space-x-2 bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white px-5 py-2.5 rounded-xl font-black text-sm transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] border border-orange-400/50"
-        >
-          <ShieldAlert size={16} />
-          <span>{t('set_up_arena')}</span>
-        </button>
       </div>
     </div>
   );
