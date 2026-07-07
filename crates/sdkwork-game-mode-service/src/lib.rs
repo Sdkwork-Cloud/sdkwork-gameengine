@@ -121,6 +121,54 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn create_mode_rejects_excessive_max_players_before_repository_access() {
+        let service = GameModeService::new(EmptyRepo);
+
+        let result = service
+            .create_mode(
+                "100001",
+                CreateGameModeCommand {
+                    game_id: "game-1".into(),
+                    mode_code: "oversized".into(),
+                    title: "Oversized".into(),
+                    status: "active".into(),
+                    min_players: 2,
+                    max_players: 65,
+                    team_size: None,
+                    ruleset_id: None,
+                    matchmaking_enabled: true,
+                    room_enabled: true,
+                    leaderboard_enabled: true,
+                },
+            )
+            .await;
+
+        let error = result.unwrap_err();
+        assert_eq!("invalid", error.code());
+        assert_eq!("max_players must be between 1 and 64", error.message());
+    }
+
+    #[tokio::test]
+    async fn update_mode_rejects_excessive_max_players_before_repository_access() {
+        let service = GameModeService::new(EmptyRepo);
+
+        let result = service
+            .update_mode(
+                "100001",
+                "mode-1",
+                UpdateGameModeCommand {
+                    max_players: Some(65),
+                    ..Default::default()
+                },
+            )
+            .await;
+
+        let error = result.unwrap_err();
+        assert_eq!("invalid", error.code());
+        assert_eq!("max_players must be between 1 and 64", error.message());
+    }
+
+    #[tokio::test]
     async fn create_mode_accepts_active_mode() {
         let service = GameModeService::new(EmptyRepo);
 

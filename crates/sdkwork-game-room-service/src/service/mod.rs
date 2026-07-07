@@ -7,6 +7,8 @@ use crate::domain::models::{
 };
 use crate::ports::repository::GameRoomRepository;
 
+pub const MAX_ROOM_PLAYERS: i32 = 64;
+
 pub struct GameRoomService<R> {
     repository: R,
 }
@@ -237,8 +239,10 @@ fn validate_join_policy(value: &str) -> GameRoomResult<()> {
 }
 
 fn validate_max_players(value: i32) -> GameRoomResult<()> {
-    if value < 1 {
-        return Err(GameRoomError::invalid("max_players must be positive"));
+    if !(1..=MAX_ROOM_PLAYERS).contains(&value) {
+        return Err(GameRoomError::invalid(format!(
+            "max_players must be between 1 and {MAX_ROOM_PLAYERS}"
+        )));
     }
     Ok(())
 }

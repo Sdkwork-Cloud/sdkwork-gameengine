@@ -6,6 +6,8 @@ use crate::domain::models::{
 };
 use crate::ports::repository::GameModeRepository;
 
+pub const MAX_MODE_PLAYERS: i32 = 64;
+
 pub struct GameModeService<R> {
     repository: R,
 }
@@ -68,7 +70,7 @@ where
             validate_min_players(min_players)?;
         }
         if let Some(max_players) = command.max_players {
-            validate_min_players(max_players)?;
+            validate_max_players(max_players)?;
         }
         if let (Some(min_players), Some(max_players)) = (command.min_players, command.max_players) {
             validate_player_range(min_players, max_players)?;
@@ -97,15 +99,26 @@ fn validate_mode_status(status: &str) -> GameModeResult<()> {
 }
 
 fn validate_min_players(value: i32) -> GameModeResult<()> {
-    if value < 1 {
-        return Err(GameModeError::invalid("player count must be positive"));
+    if !(1..=MAX_MODE_PLAYERS).contains(&value) {
+        return Err(GameModeError::invalid(format!(
+            "min_players must be between 1 and {MAX_MODE_PLAYERS}"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_max_players(value: i32) -> GameModeResult<()> {
+    if !(1..=MAX_MODE_PLAYERS).contains(&value) {
+        return Err(GameModeError::invalid(format!(
+            "max_players must be between 1 and {MAX_MODE_PLAYERS}"
+        )));
     }
     Ok(())
 }
 
 fn validate_player_range(min_players: i32, max_players: i32) -> GameModeResult<()> {
     validate_min_players(min_players)?;
-    validate_min_players(max_players)?;
+    validate_max_players(max_players)?;
     if max_players < min_players {
         return Err(GameModeError::invalid(
             "max_players must be greater than or equal to min_players",
@@ -118,7 +131,11 @@ fn validate_team_size(team_size: Option<i32>, max_players: Option<i32>) -> GameM
     let Some(team_size) = team_size else {
         return Ok(());
     };
-    validate_min_players(team_size)?;
+    if !(1..=MAX_MODE_PLAYERS).contains(&team_size) {
+        return Err(GameModeError::invalid(format!(
+            "team_size must be between 1 and {MAX_MODE_PLAYERS}"
+        )));
+    }
     if let Some(max_players) = max_players {
         if team_size > max_players {
             return Err(GameModeError::invalid(
