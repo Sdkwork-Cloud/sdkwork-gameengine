@@ -118,7 +118,7 @@
             "crate": "sdkwork-api-cloud-gateway",
             "binary": "sdkwork-api-cloud-gateway",
             "repository": "sdkwork-api-cloud-gateway",
-            "required": false
+            "required": true
           },
           {
             "id": "application.public-ingress",
@@ -139,7 +139,7 @@
             "crate": "sdkwork-api-cloud-gateway",
             "binary": "sdkwork-api-cloud-gateway",
             "repository": "sdkwork-api-cloud-gateway",
-            "required": false
+            "required": true
           },
           {
             "id": "application.public-ingress",

@@ -90,16 +90,16 @@
     ],
     "sign": [
       {
-        "name": "Sign artifacts placeholder",
+        "name": "Create checksums and sign release artifacts",
         "shell": "pwsh",
-        "run": "Write-Host \"Signing policy is configured by release environment for $env:SDKWORK_PACKAGE_ID\""
+        "run": "node scripts/release-supply-chain.mjs sign"
       }
     ],
     "sbom": [
       {
-        "name": "SBOM placeholder",
+        "name": "Generate and verify release SBOM",
         "shell": "pwsh",
-        "run": "Write-Host \"SBOM generation deferred until release gate enables supply-chain evidence\""
+        "run": "node scripts/release-supply-chain.mjs sbom"
       }
     ]
   },
@@ -111,15 +111,15 @@
       "architecture": "x64",
       "formats": ["tar.gz"],
       "runner": "ubuntu-24.04",
-      "outputGlobs": ["target/release/sdkwork-gameengine-standalone-gateway*"],
+      "outputGlobs": ["target/release/sdkwork-gameengine-standalone-gateway"],
       "deploymentProfile": "cloud",
       "runtimeTarget": "container"
     }
   ],
   "security": {
-    "artifactAttestations": false,
-    "sbomRequired": false,
-    "signingRequired": false
+    "artifactAttestations": true,
+    "sbomRequired": true,
+    "signingRequired": true
   },
   "publish": {
     "workflowArtifact": true,
