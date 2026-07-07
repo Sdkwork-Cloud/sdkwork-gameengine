@@ -5,7 +5,10 @@
   "serviceCode": "GAMES",
   "displayName": "GAMES Database",
   "owner": "games-platform",
-  "engines": ["postgres", "sqlite"],
+  "engines": [
+    "postgres",
+    "sqlite"
+  ],
   "defaultEngine": "postgres",
   "tablePrefix": "game_",
   "contractVersion": "1.0.0",
@@ -16,8 +19,18 @@
     "seedOnBoot": false,
     "defaultSeedLocale": "zh-CN",
     "defaultSeedProfile": "standard",
-    "supportedSeedLocales": ["zh-CN", "en-US", "ja-JP", "de-DE", "fr-FR", "ru-RU", "ko-KR"],
-    "activeSeedLocales": ["zh-CN"],
+    "supportedSeedLocales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "de-DE",
+      "fr-FR",
+      "ru-RU",
+      "ko-KR"
+    ],
+    "activeSeedLocales": [
+      "zh-CN"
+    ],
     "driftCheckIntervalSec": 60
   },
   "paths": {

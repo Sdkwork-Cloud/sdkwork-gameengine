@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS game_mode (
   deleted_by TEXT,
   UNIQUE (tenant_id, game_id, mode_code),
   CHECK (min_players >= 1),
-  CHECK (max_players >= min_players)
+  CHECK (max_players BETWEEN min_players AND 64),
+  CHECK (team_size IS NULL OR (team_size >= 1 AND team_size <= max_players))
 );
 
 CREATE TABLE IF NOT EXISTS game_ruleset (
@@ -112,7 +113,7 @@ CREATE TABLE IF NOT EXISTS game_room (
   deleted_at TEXT,
   deleted_by TEXT,
   UNIQUE (tenant_id, room_code),
-  CHECK (max_players >= 1),
+  CHECK (max_players BETWEEN 1 AND 64),
   CHECK (current_players >= 0),
   CHECK (current_players <= max_players)
 );

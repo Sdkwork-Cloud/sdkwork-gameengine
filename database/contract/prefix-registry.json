@@ -5,7 +5,7 @@
     {
       "prefix": "game_",
       "owner": "games-platform",
-      "domain": "game"
+      "domain": "games"
     }
   ]
 }

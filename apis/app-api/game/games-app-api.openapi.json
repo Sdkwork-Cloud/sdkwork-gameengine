@@ -998,7 +998,8 @@
           },
           "maxPlayers": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "maximum": 64
           },
           "currentPlayers": {
             "type": "integer",
@@ -1109,7 +1110,7 @@
           "maxPlayers": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 200
+            "maximum": 64
           }
         }
       },
