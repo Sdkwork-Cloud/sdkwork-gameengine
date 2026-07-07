@@ -416,7 +416,7 @@ Initial engineering requirement records should be created when implementation st
 ## 15. Resolved Decisions
 
 1. Game-server integration is internal-api first through `sdkwork-gameengine-internal-api`.
-   Public third-party open-api is deferred until an explicit product/security approval exists.
+   Public third-party open-api is not in scope until an explicit product/security approval exists.
 2. Points mean game and competitive points only. Wallet/cash-equivalent balances remain external
    to commerce or wallet domains.
 3. Realtime frame sync and authoritative gameplay state remain outside P0/P1 foundation and belong

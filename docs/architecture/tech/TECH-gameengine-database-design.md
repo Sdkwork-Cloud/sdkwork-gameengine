@@ -2,7 +2,7 @@
 
 Status: draft
 Owner: SDKWork maintainers
-Updated: 2026-07-07
+Updated: 2026-07-08
 Specs: DATABASE_SPEC.md, DATABASE_FRAMEWORK_SPEC.md, API_SPEC.md, PAGINATION_SPEC.md, SECURITY_SPEC.md
 
 ## 1. Purpose
@@ -15,7 +15,9 @@ Executable database assets remain under `database/`:
 - `database/database.manifest.json`
 - `database/contract/schema.yaml`
 - `database/ddl/baseline/postgres/0001_games_baseline.sql`
+- `database/ddl/baseline/sqlite/0001_games_baseline.sql`
 - `database/migrations/postgres/`
+- `database/migrations/sqlite/`
 - `database/drift/policy.yaml`
 
 ## 2. Current Baseline
@@ -58,6 +60,8 @@ Current contract version: `1.0.0`.
 8. Store-level pagination must be supported by indexes.
 9. Do not store Drive/provider raw file fields; store Drive/media references as JSON or stable ids.
 10. Do not store wallet/payment balance facts in game tables.
+11. Keep PostgreSQL and SQLite baseline DDL and materialized contract engines aligned.
+12. Bound room/mode player capacity to 1..64 at service, API schema, and database constraint layers.
 
 ## 4. Target Table Catalog
 
@@ -154,9 +158,9 @@ Key columns:
 | `mode_code` | text | Unique under game. |
 | `title` | text | Display title. |
 | `status` | text | `draft`, `active`, `disabled`, `archived`. |
-| `min_players` | integer | Required. |
-| `max_players` | integer | Required. |
-| `team_size` | integer nullable | Team-based mode support. |
+| `min_players` | integer | Required; database and service enforce `>= 1`. |
+| `max_players` | integer | Required; database and service enforce `min_players..64`. |
+| `team_size` | integer nullable | Team-based mode support; when present, database and service enforce `1..max_players`. |
 | `ruleset_id` | text nullable | Active rule set. |
 | `matchmaking_enabled` | boolean | Whether ticket matching is allowed. |
 | `room_enabled` | boolean | Whether manual rooms are allowed. |
@@ -207,7 +211,7 @@ Current baseline columns and implemented service semantics:
 | `visibility` | text | Current service values: `public`, `private`. |
 | `join_policy` | text | Current service values: `open`, `invite`, `password`. |
 | `room_password_hash` | text nullable | Reserved for password policy; never plaintext. |
-| `max_players`, `current_players` | integer | Occupancy projection; checked by service and database constraints. |
+| `max_players`, `current_players` | integer | Occupancy projection; service, OpenAPI, PostgreSQL, and SQLite enforce `max_players` in `1..64` and `current_players <= max_players`. |
 | `status` | text | Current service values: `open`, `in_progress`, `closed`. |
 | `opened_at`, `started_at`, `completed_at`, `closed_at`, `expires_at` | text nullable | State timestamps. |
 | `metadata` | json nullable | Non-critical display/runtime metadata. |
@@ -722,8 +726,9 @@ expand/backfill/verify/shrink migrations instead of rewriting the baseline.
 
 Implementation sequence:
 
-1. Keep database contract and table registry generated from the PostgreSQL baseline.
-2. Keep PostgreSQL and SQLite baselines aligned for standalone development parity.
+1. Keep database contract and table registry generated from the PostgreSQL baseline with declared
+   PostgreSQL and SQLite engines.
+2. Keep PostgreSQL and SQLite baselines aligned for cloud, standalone, and local packaging parity.
 3. Add repository tests around list pagination, unique constraints, and idempotency.
 4. Add Rust repository/service modules in bounded increments.
 5. Add route manifests and OpenAPI operations.
@@ -743,8 +748,10 @@ Implementation verification after schema/API changes:
 
 ```bash
 pnpm run db:validate
+pnpm run db:materialize:contract
 pnpm run api:check
 pnpm run sdk:check
+node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
 pnpm run verify
 cargo test --workspace
 ```
