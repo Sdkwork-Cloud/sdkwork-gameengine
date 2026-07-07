@@ -1,4 +1,6 @@
-use sdkwork_gameengine_standalone_gateway::{build_catalog_service, build_router};
+use sdkwork_gameengine_standalone_gateway::{
+    build_catalog_service, build_leaderboard_service, build_room_service, build_router,
+};
 
 #[tokio::main]
 async fn main() {
@@ -15,13 +17,19 @@ async fn main() {
 
     let catalog_service = build_catalog_service()
         .await
-        .expect("games catalog service bootstrap failed");
-    let app = build_router(catalog_service).await;
+        .expect("gameengine catalog service bootstrap failed");
+    let leaderboard_service = build_leaderboard_service()
+        .await
+        .expect("gameengine leaderboard service bootstrap failed");
+    let room_service = build_room_service()
+        .await
+        .expect("gameengine room service bootstrap failed");
+    let app = build_router(catalog_service, leaderboard_service, room_service).await;
     let listener = tokio::net::TcpListener::bind(&bind_address)
         .await
-        .expect("bind games standalone-gateway listener failed");
+        .expect("bind gameengine standalone-gateway listener failed");
     tracing::info!("sdkwork-gameengine-standalone-gateway listening on {bind_address}");
     axum::serve(listener, app)
         .await
-        .expect("serve games standalone-gateway failed");
+        .expect("serve gameengine standalone-gateway failed");
 }

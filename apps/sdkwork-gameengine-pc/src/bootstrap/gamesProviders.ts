@@ -1,4 +1,11 @@
-import { configureGamesCatalogService, createGamesCatalogService } from 'sdkwork-gameengine-pc-core';
+import {
+  configureGamesCatalogService,
+  configureGamesLeaderboardService,
+  configureGamesRoomService,
+  createGamesCatalogService,
+  createGamesLeaderboardService,
+  createGamesRoomService,
+} from 'sdkwork-gameengine-pc-core';
 
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
 import type { SdkworkGameenginePcIamRuntime } from './iamRuntime';
@@ -6,6 +13,8 @@ import type { SdkworkGameenginePcSdkClientInventory } from './sdkClients';
 
 export interface SdkworkGameenginePcProviders {
   catalogService: ReturnType<typeof createGamesCatalogService>;
+  leaderboardService: ReturnType<typeof createGamesLeaderboardService>;
+  roomService: ReturnType<typeof createGamesRoomService>;
 }
 
 export function configureSdkworkGameenginePcProviders(input: {
@@ -17,5 +26,9 @@ export function configureSdkworkGameenginePcProviders(input: {
   void input.iamRuntime;
   const catalogService = createGamesCatalogService(input.sdkClients.gamesAppClient);
   configureGamesCatalogService(catalogService);
-  return { catalogService };
+  const leaderboardService = createGamesLeaderboardService(input.sdkClients.gamesAppClient);
+  configureGamesLeaderboardService(leaderboardService);
+  const roomService = createGamesRoomService(input.sdkClients.gamesAppClient);
+  configureGamesRoomService(roomService);
+  return { catalogService, leaderboardService, roomService };
 }

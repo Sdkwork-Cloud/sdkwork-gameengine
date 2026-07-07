@@ -11,9 +11,57 @@ tables:
   - name: game_catalog
     lifecycle_status: active
     owner: games-platform
+  - name: game_mode
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_ruleset
+    lifecycle_status: active
+    owner: games-platform
   - name: game_room
     lifecycle_status: active
     owner: games-platform
-  - name: game_leaderboard
+  - name: game_room_seat
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_match_ticket
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_match_result
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_session
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_session_participant
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_session_result
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_score_event
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_point_ledger
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_point_balance
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_leaderboard_config
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_leaderboard_entry
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_settlement_job
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_reward_intent
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_engine_event
+    lifecycle_status: active
+    owner: games-platform
+  - name: game_audit_record
     lifecycle_status: active
     owner: games-platform

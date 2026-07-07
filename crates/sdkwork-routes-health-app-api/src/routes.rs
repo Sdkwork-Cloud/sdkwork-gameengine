@@ -7,8 +7,8 @@ use serde_json::json;
 
 pub fn build_health_router() -> Router {
     Router::new()
-        .route("/app/v3/api/system/health", get(health_check))
-        .route("/app/v3/api/system/ready", get(ready_check))
+        .route("/app/v3/api/games/health", get(health_check))
+        .route("/app/v3/api/games/ready", get(ready_check))
 }
 
 async fn health_check(_ctx: WebRequestContext) -> Response {

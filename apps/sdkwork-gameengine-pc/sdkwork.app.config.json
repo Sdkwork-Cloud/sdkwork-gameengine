@@ -142,10 +142,10 @@
     "sourceRoot": "."
   },
   "sdk": {
-    "appApiAuthority": "sdkwork-games-app-api",
-    "backendApiAuthority": "sdkwork-games-backend-api",
-    "appSdkFamily": "sdkwork-games-app-sdk",
-    "backendSdkFamily": "sdkwork-games-backend-sdk"
+    "appApiAuthority": "sdkwork-gameengine-app-api",
+    "backendApiAuthority": "sdkwork-gameengine-backend-api",
+    "appSdkFamily": "sdkwork-gameengine-app-sdk",
+    "backendSdkFamily": "sdkwork-gameengine-backend-sdk"
   },
   "specs": {
     "root": "../../../sdkwork-specs",

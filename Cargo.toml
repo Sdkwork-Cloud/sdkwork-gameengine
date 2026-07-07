@@ -5,9 +5,31 @@ members = [
     "crates/sdkwork-games-database-host",
     "crates/sdkwork-game-catalog-service",
     "crates/sdkwork-game-catalog-repository-sqlx",
+    "crates/sdkwork-routes-games-support",
     "crates/sdkwork-routes-health-app-api",
     "crates/sdkwork-routes-catalog-app-api",
     "crates/sdkwork-routes-catalog-backend-api",
+    "crates/sdkwork-game-leaderboard-service",
+    "crates/sdkwork-game-leaderboard-repository-sqlx",
+    "crates/sdkwork-routes-leaderboard-app-api",
+    "crates/sdkwork-game-room-service",
+    "crates/sdkwork-game-room-repository-sqlx",
+    "crates/sdkwork-routes-room-app-api",
+    "crates/sdkwork-routes-room-backend-api",
+    "crates/sdkwork-game-mode-service",
+    "crates/sdkwork-game-rules-service",
+    "crates/sdkwork-game-mode-repository-sqlx",
+    "crates/sdkwork-game-rules-repository-sqlx",
+    "crates/sdkwork-game-points-service",
+    "crates/sdkwork-game-points-repository-sqlx",
+    "crates/sdkwork-game-matchmaking-service",
+    "crates/sdkwork-game-session-service",
+    "crates/sdkwork-game-matchmaking-repository-sqlx",
+    "crates/sdkwork-game-session-repository-sqlx",
+    "crates/sdkwork-game-settlement-service",
+    "crates/sdkwork-game-settlement-repository-sqlx",
+    "crates/sdkwork-game-events-service",
+    "crates/sdkwork-game-events-repository-sqlx",
 ]
 
 [workspace.package]
@@ -19,9 +41,31 @@ sdkwork_gameengine_standalone_gateway = { package = "sdkwork-gameengine-standalo
 sdkwork_games_database_host = { package = "sdkwork-games-database-host", path = "crates/sdkwork-games-database-host" }
 sdkwork_game_catalog_service = { package = "sdkwork-game-catalog-service", path = "crates/sdkwork-game-catalog-service" }
 sdkwork_game_catalog_repository_sqlx = { package = "sdkwork-game-catalog-repository-sqlx", path = "crates/sdkwork-game-catalog-repository-sqlx" }
+sdkwork_routes_games_support = { package = "sdkwork-routes-games-support", path = "crates/sdkwork-routes-games-support" }
 sdkwork_routes_health_app_api = { package = "sdkwork-routes-health-app-api", path = "crates/sdkwork-routes-health-app-api" }
 sdkwork_routes_catalog_app_api = { package = "sdkwork-routes-catalog-app-api", path = "crates/sdkwork-routes-catalog-app-api" }
 sdkwork_routes_catalog_backend_api = { package = "sdkwork-routes-catalog-backend-api", path = "crates/sdkwork-routes-catalog-backend-api" }
+sdkwork_game_leaderboard_service = { package = "sdkwork-game-leaderboard-service", path = "crates/sdkwork-game-leaderboard-service" }
+sdkwork_game_leaderboard_repository_sqlx = { package = "sdkwork-game-leaderboard-repository-sqlx", path = "crates/sdkwork-game-leaderboard-repository-sqlx" }
+sdkwork_routes_leaderboard_app_api = { package = "sdkwork-routes-leaderboard-app-api", path = "crates/sdkwork-routes-leaderboard-app-api" }
+sdkwork_game_room_service = { package = "sdkwork-game-room-service", path = "crates/sdkwork-game-room-service" }
+sdkwork_game_room_repository_sqlx = { package = "sdkwork-game-room-repository-sqlx", path = "crates/sdkwork-game-room-repository-sqlx" }
+sdkwork_routes_room_app_api = { package = "sdkwork-routes-room-app-api", path = "crates/sdkwork-routes-room-app-api" }
+sdkwork_routes_room_backend_api = { package = "sdkwork-routes-room-backend-api", path = "crates/sdkwork-routes-room-backend-api" }
+sdkwork_game_mode_service = { package = "sdkwork-game-mode-service", path = "crates/sdkwork-game-mode-service" }
+sdkwork_game_rules_service = { package = "sdkwork-game-rules-service", path = "crates/sdkwork-game-rules-service" }
+sdkwork_game_mode_repository_sqlx = { package = "sdkwork-game-mode-repository-sqlx", path = "crates/sdkwork-game-mode-repository-sqlx" }
+sdkwork_game_rules_repository_sqlx = { package = "sdkwork-game-rules-repository-sqlx", path = "crates/sdkwork-game-rules-repository-sqlx" }
+sdkwork_game_points_service = { package = "sdkwork-game-points-service", path = "crates/sdkwork-game-points-service" }
+sdkwork_game_points_repository_sqlx = { package = "sdkwork-game-points-repository-sqlx", path = "crates/sdkwork-game-points-repository-sqlx" }
+sdkwork_game_matchmaking_service = { package = "sdkwork-game-matchmaking-service", path = "crates/sdkwork-game-matchmaking-service" }
+sdkwork_game_session_service = { package = "sdkwork-game-session-service", path = "crates/sdkwork-game-session-service" }
+sdkwork_game_matchmaking_repository_sqlx = { package = "sdkwork-game-matchmaking-repository-sqlx", path = "crates/sdkwork-game-matchmaking-repository-sqlx" }
+sdkwork_game_session_repository_sqlx = { package = "sdkwork-game-session-repository-sqlx", path = "crates/sdkwork-game-session-repository-sqlx" }
+sdkwork_game_settlement_service = { package = "sdkwork-game-settlement-service", path = "crates/sdkwork-game-settlement-service" }
+sdkwork_game_settlement_repository_sqlx = { package = "sdkwork-game-settlement-repository-sqlx", path = "crates/sdkwork-game-settlement-repository-sqlx" }
+sdkwork_game_events_service = { package = "sdkwork-game-events-service", path = "crates/sdkwork-game-events-service" }
+sdkwork_game_events_repository_sqlx = { package = "sdkwork-game-events-repository-sqlx", path = "crates/sdkwork-game-events-repository-sqlx" }
 sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }
 sdkwork-web-axum = { path = "../sdkwork-web-framework/crates/sdkwork-web-axum" }
 sdkwork-web-contract = { path = "../sdkwork-web-framework/crates/sdkwork-web-contract" }

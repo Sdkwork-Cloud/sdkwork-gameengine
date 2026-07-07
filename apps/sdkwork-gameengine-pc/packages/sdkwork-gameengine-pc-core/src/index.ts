@@ -35,10 +35,10 @@ export const SdkworkGameenginePcRuntimeIdentity = {
 
 export const SdkworkGameenginePcAppSdkFamilies = [
   {
-    authority: 'sdkwork-games-app-api',
-    family: 'sdkwork-games-app-sdk',
+    authority: 'sdkwork-gameengine-app-api',
+    family: 'sdkwork-gameengine-app-sdk',
     generationInputSpec: 'apis/app-api/game/games-app-api.openapi.json',
-    generatedPackageName: '@sdkwork/games-app-sdk',
+    generatedPackageName: '@sdkwork/gameengine-app-sdk',
     surface: 'app',
     tokenManagerScope: 'global-session',
   },
@@ -66,3 +66,5 @@ export function createSdkworkGameenginePcRouteRegistry(
 export * from './store/configStore';
 export * from './store/useUserStore';
 export * from './catalogService';
+export * from './leaderboardService';
+export * from './roomService';

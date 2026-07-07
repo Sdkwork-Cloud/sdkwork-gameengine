@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Trophy,
@@ -14,10 +14,14 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Swords
+  Swords,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useToast } from "sdkwork-gameengine-pc-commons";
+import { useUserStore } from "sdkwork-gameengine-pc-core";
+
+import { LeaderboardService, type LeaderboardRow } from "../services/leaderboard.service";
 
 // Sub-components
 import LeaderboardHeader from "../components/Leaderboard/LeaderboardHeader";
@@ -38,7 +42,12 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null);
   const [showArenaModal, setShowArenaModal] = useState(false);
   const [wagerAmount, setWagerAmount] = useState(100);
-  const itemsPerPage = 100;
+  const itemsPerPage = 20;
+  const profile = useUserStore((state) => state.profile);
+  const [rankings, setRankings] = useState<LeaderboardRow[]>([]);
+  const [totalRankings, setTotalRankings] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [myRanking, setMyRanking] = useState<LeaderboardRow | null>(null);
 
   const tabs = [
     { id: "global", name: t('global_leaderboard'), icon: <Trophy size={16} /> },
@@ -62,68 +71,55 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
     setCurrentPage(1);
   }, [timeRange, activeTab]);
 
-  // Generate 500 mock users
-  const rankings = useMemo(() => {
-    const multiplier = timeRange === "hourly" ? 0.1 : timeRange === "daily" ? 0.5 : timeRange === "weekly" ? 1 : timeRange === "monthly" ? 2 : timeRange === "season" ? 5 : timeRange === "yearly" ? 12 : 25;
-    
-    let baseUsers: { name: string, type: string, baseScore: number, title: string, avatar: string, provider?: string, sponsorPrice?: string }[] = [];
-
-    if (activeTab === "ai") {
-      baseUsers = [
-        { name: "Gemini 3.1 Pro", type: "AI", baseScore: 15500, title: t('omniscient', '全知�?), avatar: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=100&q=80", provider: "Google", sponsorPrice: "¥999/�? },
-        { name: "GPT-4o", type: "AI", baseScore: 15200, title: t('god_of_compute', '算力之神'), avatar: "https://images.unsplash.com/photo-1614729939124-032f0b56c9ce?w=100&q=80", provider: "OpenAI", sponsorPrice: "¥899/�? },
-        { name: "Claude 3.5 Sonnet", type: "AI", baseScore: 14800, title: t('logic_master', '逻辑大师'), avatar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&q=80", provider: "Anthropic", sponsorPrice: "¥799/�? },
-        { name: "AlphaGo Zero", type: "AI", baseScore: 14500, title: t('peak_of_go', '围棋巅峰'), avatar: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&q=80", provider: "DeepMind", sponsorPrice: "¥1299/�? },
-        { name: "DeepSeek-V3", type: "AI", baseScore: 14200, title: t('deep_exploration', '深度探索'), avatar: "https://images.unsplash.com/photo-1633412802994-5c058f151b66?w=100&q=80", provider: "DeepSeek", sponsorPrice: "¥599/�? },
-      ];
-    } else {
-      baseUsers = [
-        { name: "AlphaGo_V4", type: "AI", baseScore: 12500, title: t('god_of_compute', '算力之神'), avatar: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=100&q=80" },
-        { name: "人类_柯洁", type: "Human", baseScore: 11820, title: t('light_of_humanity', '人类之光'), avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80" },
-        { name: "Libratus", type: "AI", baseScore: 11500, title: t('game_master', '博弈之皇'), avatar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=100&q=80" },
-        { name: "赌神高进", type: "Human", baseScore: 10600, title: t('king_of_cards', '卡牌之王'), avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&q=80" },
-        { name: "DeepAgent", type: "AI", baseScore: 10250, title: t('strategy_core', '策略核心'), avatar: "https://images.unsplash.com/photo-1614729939124-032f0b56c9ce?w=100&q=80" },
-        { name: "AI猎手_007", type: "Human", baseScore: 9750, title: t('ai_hunter', 'AI猎手'), avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=100&q=80" },
-        { name: "四川麻将�?, type: "Human", baseScore: 9600, title: t('mahjong_saint', '麻坛宗师'), avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80" },
-      ];
+  const loadRankings = useCallback(async () => {
+    if (activeTab !== "global") {
+      setRankings([]);
+      setTotalRankings(0);
+      setLoading(false);
+      return;
     }
 
-    const generated = [...baseUsers];
-    
-    // Generate the rest up to 500
-    for (let i = baseUsers.length; i < 500; i++) {
-      const isAI = activeTab === "ai" ? true : activeTab === "human" ? false : i % 3 === 0;
-      generated.push({
-        name: isAI ? `Model_Node_${i}` : `Player_${Math.floor(Math.random() * 9000) + 1000}`,
-        type: isAI ? "AI" : "Human",
-        baseScore: (activeTab === "ai" ? 14000 : 9500) - (i * 15) - Math.floor(Math.random() * 100),
-        title: isAI ? t('compute_node', '算力节点') : t('high_tier_player', '高阶玩家'),
-        avatar: isAI 
-          ? `https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&q=80&seed=${i}`
-          : `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80&seed=${i}`,
-        provider: isAI ? ["Google", "OpenAI", "Anthropic", "Meta", "Local"][Math.floor(Math.random() * 5)] : undefined,
-        sponsorPrice: isAI ? `¥${Math.floor(Math.random() * 500 + 99)}/月` : undefined
+    setLoading(true);
+    try {
+      const page = await LeaderboardService.listRankings({
+        page: currentPage,
+        pageSize: itemsPerPage,
       });
+      setRankings(page.items);
+      setTotalRankings(page.total);
+    } catch {
+      showToast(t('leaderboard_load_failed', 'Failed to load leaderboard.'), 'error');
+      setRankings([]);
+      setTotalRankings(0);
+    } finally {
+      setLoading(false);
     }
+  }, [activeTab, currentPage, itemsPerPage, showToast, t]);
 
-    return generated.map((item, index) => {
-      const winRateNum = Math.max(45, 99.8 - (index * 0.1) + (Math.random() * 5 - 2.5));
-      const trendVal = Math.floor(Math.random() * 100) - 30;
-      
-      return {
-        ...item,
-        rank: index + 1,
-        score: Math.floor(item.baseScore * multiplier),
-        winRate: `${winRateNum.toFixed(1)}%`,
-        trend: trendVal > 0 ? `+${trendVal}` : trendVal === 0 ? "0" : `${trendVal}`
-      };
-    });
-  }, [timeRange, activeTab, t]);
+  useEffect(() => {
+    void loadRankings();
+  }, [loadRankings]);
 
-  const totalPages = Math.ceil(rankings.length / itemsPerPage);
-  const currentRankings = rankings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  
-  const myScoreMultiplier = timeRange === "hourly" ? 0.1 : timeRange === "daily" ? 0.5 : timeRange === "weekly" ? 1 : timeRange === "monthly" ? 2 : timeRange === "season" ? 5 : timeRange === "yearly" ? 12 : 25;
+  useEffect(() => {
+    let isMounted = true;
+    void LeaderboardService.retrieveMyRanking()
+      .then((item) => {
+        if (isMounted) {
+          setMyRanking(item);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setMyRanking(null);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(totalRankings / itemsPerPage));
+  const currentRankings = rankings;
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -213,6 +209,20 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
         {/* List Content */}
         <div className="flex-1 overflow-y-auto p-2 space-y-2 pb-36 scrollbar-hide">
           <AnimatePresence mode="wait">
+            {loading ? (
+              <div className="flex h-48 items-center justify-center text-zinc-500">
+                <Loader2 className="mr-2 animate-spin" size={20} />
+                <span>{t('loading', 'Loading...')}</span>
+              </div>
+            ) : activeTab !== "global" ? (
+              <div className="flex h-48 items-center justify-center px-6 text-center text-sm font-medium text-zinc-500">
+                {t('leaderboard_tab_coming_soon', 'This leaderboard view will be available when the platform API adds segment filters.')}
+              </div>
+            ) : currentRankings.length === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm font-medium text-zinc-500">
+                {t('leaderboard_empty', 'No rankings yet.')}
+              </div>
+            ) : (
             <motion.div 
               key={currentPage + timeRange + activeTab}
               initial={{ opacity: 0, y: 10 }}
@@ -277,7 +287,7 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                   </div>
 
                   <div className="col-span-2 flex justify-center cursor-pointer" onClick={() => onViewPlayer && onViewPlayer(user)}>
-                    {activeTab === "ai" && user.provider ? (
+                    {user.type === "AI" && user.provider ? (
                       <span className="px-2.5 py-1 text-[10px] font-black tracking-wider rounded-md border bg-zinc-150 dark:bg-zinc-850 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700">
                         {user.provider}
                       </span>
@@ -322,13 +332,14 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
                 </div>
               ))}
             </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
         {/* Pagination Controls */}
         <div className="absolute bottom-[88px] left-0 right-0 p-3 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center justify-between z-20 gap-2 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] dark:shadow-none">
           <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium px-4">
-            {t('showing_pagination', { start: (currentPage - 1) * itemsPerPage + 1, end: Math.min(currentPage * itemsPerPage, rankings.length), total: rankings.length })}
+            {t('showing_pagination', { start: totalRankings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1, end: Math.min(currentPage * itemsPerPage, totalRankings), total: totalRankings })}
           </div>
           <div className="flex items-center space-x-2 px-4">
             <button 
@@ -392,18 +403,34 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-rose-500/30 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] dark:shadow-[0_-20px_40px_rgba(0,0,0,0.5)] z-30">
           <div className="grid grid-cols-12 gap-4 items-center max-w-full">
             <div className="col-span-1 flex justify-center">
-              <span className="text-xl font-black text-zinc-400 dark:text-zinc-500">842</span>
+              <span className="text-xl font-black text-zinc-400 dark:text-zinc-500">
+                {myRanking?.rank ?? "?"}
+              </span>
             </div>
             <div className="col-span-4 flex items-center space-x-4">
               <div className="relative">
-                <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&q=80" alt="Me" className="w-12 h-12 rounded-xl object-cover border-2 border-rose-500/50" />
+                <img
+                  src={
+                    profile?.avatar
+                    ?? myRanking?.avatar
+                    ?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile?.id ?? 'guest')}`
+                  }
+                  alt={t('me')}
+                  className="w-12 h-12 rounded-xl object-cover border-2 border-rose-500/50"
+                />
                 <div className="absolute -bottom-2 -right-2 w-6 h-6 rounded-lg flex items-center justify-center border-2 border-white dark:border-zinc-900 bg-orange-600">
                   <User size={12} className="text-white" />
                 </div>
               </div>
               <div>
-                <span className="font-black text-lg text-zinc-900 dark:text-white block">{t('me')} (Player_1)</span>
-                <span className="text-xs text-rose-500 dark:text-rose-400 font-medium">{t('points_to_next_rank', { points: Math.floor(150 * myScoreMultiplier) })}</span>
+                <span className="font-black text-lg text-zinc-900 dark:text-white block">
+                  {t('me')} ({profile?.username ?? myRanking?.name ?? t('guest', 'Guest')})
+                </span>
+                <span className="text-xs text-rose-500 dark:text-rose-400 font-medium">
+                  {myRanking
+                    ? t('points_to_next_rank', { points: Math.max(0, (myRanking.score ?? 0) - (currentRankings[0]?.score ?? 0)) })
+                    : t('not_ranked_yet', 'Not ranked yet')}
+                </span>
               </div>
             </div>
             <div className="col-span-2 flex justify-center">
@@ -413,16 +440,18 @@ export default function Leaderboard({ onViewPlayer }: LeaderboardProps) {
             </div>
             <div className="col-span-2 text-center">
               <div className="inline-flex items-center space-x-1 bg-zinc-50 dark:bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">54.2%</span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                  {myRanking?.winRate ?? "?"}
+                </span>
               </div>
             </div>
             <div className="col-span-3 flex items-center justify-end space-x-4 pr-4">
               <div className="flex items-center space-x-1 text-xs font-bold text-emerald-600 dark:text-emerald-500">
                 <TrendingUp size={14} />
-                <span>+{Math.floor(24 * myScoreMultiplier)}</span>
+                <span>{myRanking?.trend ?? "0"}</span>
               </div>
               <div className="font-mono font-black text-2xl text-transparent bg-clip-text bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-400">
-                {Math.floor(4250 * myScoreMultiplier).toLocaleString()}
+                {(myRanking?.score ?? 0).toLocaleString()}
               </div>
             </div>
           </div>

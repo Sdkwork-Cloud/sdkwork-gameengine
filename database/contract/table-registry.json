@@ -2,8 +2,119 @@
   "schemaVersion": 1,
   "kind": "sdkwork.database.table-registry",
   "tables": [
-    { "table_name": "game_catalog", "owner": "games-platform", "compliance_level": "L2", "lifecycle_status": "active" },
-    { "table_name": "game_room", "owner": "games-platform", "compliance_level": "L2", "lifecycle_status": "active" },
-    { "table_name": "game_leaderboard", "owner": "games-platform", "compliance_level": "L2", "lifecycle_status": "active" }
+    {
+      "table_name": "game_catalog",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_mode",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_ruleset",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_room",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_room_seat",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_match_ticket",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_match_result",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_session",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_session_participant",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_session_result",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_score_event",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_point_ledger",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_point_balance",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_leaderboard_config",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_leaderboard_entry",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_settlement_job",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_reward_intent",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_engine_event",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    },
+    {
+      "table_name": "game_audit_record",
+      "owner": "games-platform",
+      "compliance_level": "L2",
+      "lifecycle_status": "active"
+    }
   ]
 }

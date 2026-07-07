@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct GameCatalogItem {
     pub id: String,
     pub game_code: String,
@@ -25,6 +26,9 @@ pub struct GameCatalogQuery {
     pub page: Option<u32>,
     pub page_size: Option<u32>,
     pub status: Option<String>,
+    pub genre: Option<String>,
+    pub q: Option<String>,
+    pub sort: Option<String>,
 }
 
 impl GameCatalogQuery {

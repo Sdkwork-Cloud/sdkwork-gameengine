@@ -193,7 +193,7 @@ export default function Subscription({ setCurrentView }: SubscriptionProps) {
               className={`w-full py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all mb-8 ${plan.buttonStyle}`}
             >
               {isProcessing === plan.id ? (
-                <span className="animate-pulse">{t('processing', '处理�?..')}</span>
+                <span className="animate-pulse">{t('processing', '处理�?..')}</span>
               ) : (
                 <>
                   <span>{plan.buttonText}</span>

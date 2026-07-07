@@ -7,7 +7,7 @@ import {
 import type { IamAppContext, IamDeploymentMode, IamEnvironment } from '@sdkwork/iam-contracts';
 import type { IamRuntime } from '@sdkwork/iam-runtime';
 import { normalizeSdkworkApiBaseUrl } from '@sdkwork/runtime-bootstrap';
-import { createClient as createGamesAppClient } from '@sdkwork/games-app-sdk';
+import { createClient as createGameengineAppClient } from '@sdkwork/gameengine-app-sdk';
 
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
 import {
@@ -81,7 +81,7 @@ export function createSdkworkGameenginePcSdkClientsWithTokenManager(
   config: SdkworkGameenginePcRuntimeConfig,
   tokenManager: ReturnType<typeof createSdkworkGameenginePcSessionTokenManager>,
 ): SdkworkGameenginePcSdkClientInventory {
-  const gamesAppClient = createGamesAppClient({
+  const gamesAppClient = createGameengineAppClient({
     authMode: 'dual-token',
     baseUrl: normalizeGeneratedSdkBaseUrl(config.appApiBaseUrl, APP_API_PREFIX),
     platform: 'pc',
@@ -97,7 +97,7 @@ export function createSdkworkGameenginePcSdkClientsWithTokenManager(
       : undefined,
     gamesAppClient,
     sdkFamilies: {
-      app: ['sdkwork-games-app-sdk', 'sdkwork-iam-app-sdk'],
+      app: ['sdkwork-gameengine-app-sdk', 'sdkwork-iam-app-sdk'],
     },
   };
 }

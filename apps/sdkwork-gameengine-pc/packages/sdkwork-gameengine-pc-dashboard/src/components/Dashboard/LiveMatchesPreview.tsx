@@ -4,7 +4,7 @@ import { Eye, Cpu, User } from "lucide-react";
 import { motion } from "motion/react";
 
 interface LiveMatch {
-  id: number;
+  id: string | number;
   game: string;
   player1: string;
   player2: string;

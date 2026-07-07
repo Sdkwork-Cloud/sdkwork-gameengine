@@ -17,20 +17,61 @@
     "sdkDependencies": [
       {
         "workspace": "sdkwork-catalog-app-sdk",
+        "moduleId": "catalog",
         "surface": "app-api",
         "credentialMode": "authenticated-app-api"
       },
       {
-        "workspace": "sdkwork-games-app-sdk",
+        "workspace": "sdkwork-gameengine-app-sdk",
+        "moduleId": "gameengine",
         "surface": "app-api",
         "credentialMode": "authenticated-app-api"
       },
       {
         "workspace": "sdkwork-iam-app-sdk",
+        "moduleId": "iam",
         "surface": "app-api",
         "credentialMode": "authenticated-app-api"
       }
     ],
+    "permissionComposition": {
+      "inheritanceMode": "module-catalog-with-overrides",
+      "moduleCatalogRefs": [
+        {
+          "moduleId": "catalog",
+          "manifestRef": "../sdkwork-catalog/database/database.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": false
+        },
+        {
+          "moduleId": "gameengine",
+          "manifestRef": "database/database.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": false
+        },
+        {
+          "moduleId": "iam",
+          "manifestRef": "../sdkwork-iam/iam/modules/iam-kernel/iam.module.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": false
+        }
+      ],
+      "bootstrapAccessTokenScope": {
+        "inheritFrom": "sdkwork.app.config.json#backend.accessTokenPermissionScope",
+        "supplement": [],
+        "overrideReplace": false
+      },
+      "routePermissionHints": {
+        "inheritFromOpenApi": true,
+        "inheritFromModuleManifests": true,
+        "overrides": []
+      },
+      "consumerPolicy": {
+        "forbidLocalPermissionCatalogForDependencyDomains": true,
+        "allowExplicitOverridesOnly": true,
+        "allowFrontendHintsWithoutServerDuplication": true
+      }
+    },
     "dependencyApiExports": [],
     "dependencyApiSurfaces": []
   }

@@ -8,6 +8,9 @@ description = "SQLx repository for SDKWork game catalog."
 [lib]
 path = "src/lib.rs"
 
+[features]
+test-support = []
+
 [dependencies]
 async-trait.workspace = true
 sdkwork_game_catalog_service.workspace = true

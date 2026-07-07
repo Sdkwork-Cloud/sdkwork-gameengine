@@ -1531,6 +1531,7 @@ dependencies = [
  "pkcs1",
  "pkcs8",
  "rand_core 0.6.4",
+ "sha2",
  "signature",
  "spki",
  "subtle",
@@ -1620,6 +1621,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sdkwork-database-id"
+version = "0.1.0"
+dependencies = [
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-id-core",
+ "sqlx",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "sdkwork-database-lifecycle"
 version = "0.1.0"
 dependencies = [
@@ -1630,6 +1643,7 @@ dependencies = [
  "sdkwork-database-sqlx",
  "serde",
  "serde_json",
+ "sqlx",
  "thiserror",
  "tokio",
  "tracing",
@@ -1687,19 +1701,251 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-games-api-server"
+name = "sdkwork-game-events-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-events-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-events-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-leaderboard-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-leaderboard-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-matchmaking-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-matchmaking-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-matchmaking-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-mode-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-mode-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-mode-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-points-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-points-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-points-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-room-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-room-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-room-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-rules-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-rules-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-rules-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-session-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-session-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-session-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-settlement-repository-sqlx"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-database-config",
+ "sdkwork-database-sqlx",
+ "sdkwork-game-settlement-service",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-game-settlement-service"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "sdkwork-utils-rust",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-gameengine-standalone-gateway"
 version = "0.1.0"
 dependencies = [
  "axum",
  "http-body-util",
  "sdkwork-game-catalog-repository-sqlx",
  "sdkwork-game-catalog-service",
+ "sdkwork-game-leaderboard-repository-sqlx",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-game-room-repository-sqlx",
+ "sdkwork-game-room-service",
  "sdkwork-games-database-host",
  "sdkwork-iam-context-service",
  "sdkwork-iam-web-adapter",
  "sdkwork-routes-catalog-app-api",
  "sdkwork-routes-catalog-backend-api",
+ "sdkwork-routes-games-support",
  "sdkwork-routes-health-app-api",
+ "sdkwork-routes-leaderboard-app-api",
+ "sdkwork-routes-room-app-api",
+ "sdkwork-routes-room-backend-api",
  "sdkwork-web-axum",
  "sdkwork-web-contract",
  "sdkwork-web-core",
@@ -1724,10 +1970,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "sdkwork-iam-bootstrap"
+version = "0.1.0"
+dependencies = [
+ "aes-gcm",
+ "argon2",
+ "base64",
+ "chrono",
+ "rand_core 0.6.4",
+ "rsa",
+ "sdkwork-database-id",
+ "sdkwork-iam-context-service",
+ "sdkwork-iam-module-registry",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "uuid",
+]
+
+[[package]]
 name = "sdkwork-iam-context-service"
 version = "0.1.0"
 dependencies = [
  "sdkwork-utils-rust",
+]
+
+[[package]]
+name = "sdkwork-iam-module-registry"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "sdkwork-iam-context-service",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
 ]
 
 [[package]]
@@ -1744,15 +2021,26 @@ dependencies = [
  "password-hash",
  "rand_core 0.6.4",
  "reqwest",
+ "sdkwork-database-config",
  "sdkwork-database-sqlx",
+ "sdkwork-iam-bootstrap",
  "sdkwork-iam-context-service",
  "sdkwork-utils-rust",
  "sdkwork-web-axum",
  "sdkwork-web-core",
  "serde",
  "serde_json",
+ "sha1",
  "sha2",
  "sqlx",
+ "urlencoding",
+ "uuid",
+]
+
+[[package]]
+name = "sdkwork-id-core"
+version = "0.1.0"
+dependencies = [
  "uuid",
 ]
 
@@ -1762,6 +2050,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "sdkwork-game-catalog-service",
+ "sdkwork-routes-games-support",
  "sdkwork-web-axum",
  "serde",
  "serde_json",
@@ -1780,6 +2069,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "sdkwork-routes-games-support"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-game-catalog-service",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-game-room-service",
+ "sdkwork-utils-rust",
+ "sdkwork-web-core",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower",
+ "tracing",
+]
+
+[[package]]
 name = "sdkwork-routes-health-app-api"
 version = "0.1.0"
 dependencies = [
@@ -1789,14 +2095,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "sdkwork-routes-leaderboard-app-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-routes-games-support",
+ "sdkwork-web-axum",
+ "serde",
+]
+
+[[package]]
+name = "sdkwork-routes-room-app-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-game-room-service",
+ "sdkwork-routes-games-support",
+ "sdkwork-utils-rust",
+ "sdkwork-web-axum",
+ "serde",
+]
+
+[[package]]
+name = "sdkwork-routes-room-backend-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-game-room-service",
+ "sdkwork-routes-games-support",
+ "sdkwork-utils-rust",
+ "sdkwork-web-axum",
+ "serde",
+]
+
+[[package]]
 name = "sdkwork-utils-rust"
 version = "0.10.0"
 dependencies = [
+ "aes-gcm",
  "base64",
  "chrono",
+ "hkdf",
  "hmac",
  "rand 0.8.6",
  "regex",
+ "serde",
  "serde_json",
  "sha2",
  "urlencoding",
@@ -1833,10 +2177,16 @@ dependencies = [
  "async-trait",
  "axum",
  "getrandom 0.2.17",
+ "hmac",
  "http",
+ "percent-encoding",
+ "rsa",
+ "sdkwork-utils-rust",
  "sdkwork-web-contract",
  "serde",
  "serde_json",
+ "sha2",
+ "tokio",
  "tracing",
 ]
 
@@ -1938,6 +2288,12 @@ dependencies = [
  "cpufeatures",
  "digest",
 ]
+
+[[package]]
+name = "sha1_smol"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbfa15b3dddfee50a0fff136974b3e1bde555604ba463834a7eb7deb6417705d"
 
 [[package]]
 name = "sha2"
@@ -2650,6 +3006,7 @@ checksum = "144d6b123cef80b301b8f72a9e2ca4370ddec21950d0a103dd22c437006d2db7"
 dependencies = [
  "getrandom 0.4.3",
  "js-sys",
+ "sha1_smol",
  "wasm-bindgen",
 ]
 

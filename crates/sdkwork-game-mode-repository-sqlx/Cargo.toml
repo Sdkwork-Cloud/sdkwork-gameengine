@@ -1,0 +1,25 @@
+[package]
+name = "sdkwork-game-mode-repository-sqlx"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SQLx-backed SDKWork game mode repository."
+
+[lib]
+name = "sdkwork_game_mode_repository_sqlx"
+path = "src/lib.rs"
+
+[features]
+test-support = []
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork-utils-rust.workspace = true
+sdkwork_game_mode_service.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

@@ -1,0 +1,13 @@
+mod manifest;
+mod paths;
+mod routes;
+
+pub use manifest::{
+    API_AUTHORITY, OWNER, PACKAGE_NAME, PREFIX, ROUTE_MANIFEST_PATH, SDK_FAMILY, SURFACE,
+};
+pub use paths::{
+    GAMES_ROOMS_LIST_PATH, GAMES_ROOM_CLOSE_PATH, GAMES_ROOM_DETAIL_PATH, GAMES_ROOM_JOIN_PATH,
+    GAMES_ROOM_LEAVE_PATH, GAMES_ROOM_READY_PATH, GAMES_ROOM_SEATS_LIST_PATH,
+    GAMES_ROOM_START_PATH,
+};
+pub use routes::{build_room_app_router, GamesRoomsListQuery};

@@ -10,18 +10,21 @@ const repoRoot = resolve(__dirname, '..');
 const API_INPUTS = {
   'app-api': {
     path: 'apis/app-api/game/games-app-api.openapi.json',
-    sdkFamily: 'sdkwork-games-app-sdk',
+    sdkFamily: 'sdkwork-gameengine-app-sdk',
   },
   'backend-api': {
     path: 'apis/backend-api/game/games-backend-api.openapi.json',
-    sdkFamily: 'sdkwork-games-backend-sdk',
+    sdkFamily: 'sdkwork-gameengine-backend-sdk',
   },
 };
 
 const ROUTE_MANIFESTS = [
   'sdks/_route-manifests/app-api/sdkwork-routes-health-app-api.route-manifest.json',
   'sdks/_route-manifests/app-api/sdkwork-routes-catalog-app-api.route-manifest.json',
+  'sdks/_route-manifests/app-api/sdkwork-routes-leaderboard-app-api.route-manifest.json',
+  'sdks/_route-manifests/app-api/sdkwork-routes-room-app-api.route-manifest.json',
   'sdks/_route-manifests/backend-api/sdkwork-routes-catalog-backend-api.route-manifest.json',
+  'sdks/_route-manifests/backend-api/sdkwork-routes-room-backend-api.route-manifest.json',
 ];
 
 function parseArgs(argv) {

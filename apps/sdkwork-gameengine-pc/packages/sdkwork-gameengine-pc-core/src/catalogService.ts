@@ -1,12 +1,22 @@
-import type { GameCatalogItem, GameCatalogPage } from '@sdkwork/games-app-sdk';
-import type { SdkworkGamesAppClient } from '@sdkwork/games-app-sdk';
+import type { GameCatalogItem, SdkWorkPageData } from '@sdkwork/gameengine-app-sdk';
+import type { SdkworkGameengineAppClient } from '@sdkwork/gameengine-app-sdk';
 
-export type { GameCatalogItem, GameCatalogPage };
+export type { GameCatalogItem };
+
+export interface GameCatalogPage {
+  items: GameCatalogItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
 
 export interface GamesCatalogListParams {
   page?: number;
   pageSize?: number;
   status?: string;
+  genre?: string;
+  q?: string;
+  sort?: 'recommended' | 'title' | 'newest';
 }
 
 export interface GamesCatalogService {
@@ -22,12 +32,14 @@ export function configureGamesCatalogService(service: GamesCatalogService): void
 
 export function getGamesCatalogService(): GamesCatalogService {
   if (!configuredCatalogService) {
-    throw new Error('Games catalog service is not configured. Bootstrap sdkwork-gameengine-pc runtime first.');
+    throw new Error(
+      'Games catalog service is not configured. Bootstrap sdkwork-gameengine-pc runtime first.',
+    );
   }
   return configuredCatalogService;
 }
 
-function mapPageData(page: import('@sdkwork/games-app-sdk').SdkWorkPageData): GameCatalogPage {
+function mapPageData(page: SdkWorkPageData): GameCatalogPage {
   return {
     items: page.items as unknown as GameCatalogItem[],
     total: Number(page.pageInfo.totalItems ?? page.items.length),
@@ -36,7 +48,7 @@ function mapPageData(page: import('@sdkwork/games-app-sdk').SdkWorkPageData): Ga
   };
 }
 
-export function createGamesCatalogService(client: SdkworkGamesAppClient): GamesCatalogService {
+export function createGamesCatalogService(client: SdkworkGameengineAppClient): GamesCatalogService {
   return {
     async listCatalog(params) {
       const page = await client.games.catalog.list(params);

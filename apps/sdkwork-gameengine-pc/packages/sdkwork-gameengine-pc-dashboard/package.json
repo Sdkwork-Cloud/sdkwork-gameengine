@@ -23,7 +23,8 @@
     "sdkwork-gameengine-pc-commons": "workspace:*",
     "sdkwork-gameengine-pc-core": "workspace:*",
     "sdkwork-gameengine-pc-i18n": "workspace:*",
-    "@sdkwork/games-app-sdk": "workspace:*"
+    "@sdkwork/gameengine-app-sdk": "workspace:*",
+    "@sdkwork/utils": "workspace:*"
   },
   "devDependencies": {
     "react": "^19.0.0",

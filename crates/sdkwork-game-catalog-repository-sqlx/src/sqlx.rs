@@ -6,6 +6,8 @@ use sdkwork_game_catalog_service::{
 };
 use sdkwork_utils_rust::string::is_blank;
 
+use crate::catalog_list_query::{build_catalog_list_sql, SqlDialect};
+
 #[derive(Clone)]
 pub struct SqlxGameCatalogRepository {
     pool: DatabasePool,
@@ -30,14 +32,13 @@ impl GameCatalogRepository for SqlxGameCatalogRepository {
 
         let limit = query.limit() as i64;
         let offset = query.offset() as i64;
-        let status = query.status.as_deref();
 
         match &self.pool {
             DatabasePool::Postgres(pool, _) => {
-                list_postgres(pool, tenant_id, status, limit, offset).await
+                list_postgres(pool, tenant_id, query, limit, offset).await
             }
             DatabasePool::Sqlite(pool, _) => {
-                list_sqlite(pool, tenant_id, status, limit, offset).await
+                list_sqlite(pool, tenant_id, query, limit, offset).await
             }
         }
     }
@@ -64,60 +65,68 @@ impl GameCatalogRepository for SqlxGameCatalogRepository {
 async fn list_postgres(
     pool: &sqlx::PgPool,
     tenant_id: &str,
-    status: Option<&str>,
+    query: &GameCatalogQuery,
     limit: i64,
     offset: i64,
 ) -> GameResult<GameCatalogPage> {
-    let rows = if let Some(status) = status {
-        sqlx::query_as::<_, CatalogRow>(
-            "SELECT id, game_code, title, summary, genre, status FROM game_catalog \
-             WHERE tenant_id = $1 AND deleted_at IS NULL AND status = $2 \
-             ORDER BY sort_order ASC, title ASC LIMIT $3 OFFSET $4",
-        )
-        .bind(tenant_id)
-        .bind(status)
+    let list_sql = build_catalog_list_sql(query, SqlDialect::Postgres);
+
+    let mut select = sqlx::query_as::<_, CatalogRow>(&list_sql.select_sql).bind(tenant_id);
+    for value in &list_sql.bind_values {
+        select = select.bind(value);
+    }
+    let rows = select
         .bind(limit)
         .bind(offset)
         .fetch_all(pool)
         .await
-    } else {
-        sqlx::query_as::<_, CatalogRow>(
-            "SELECT id, game_code, title, summary, genre, status FROM game_catalog \
-             WHERE tenant_id = $1 AND deleted_at IS NULL \
-             ORDER BY sort_order ASC, title ASC LIMIT $2 OFFSET $3",
-        )
-        .bind(tenant_id)
+        .map_err(map_sqlx_error)?;
+
+    let mut count = sqlx::query_scalar::<_, i64>(&list_sql.count_sql).bind(tenant_id);
+    for value in &list_sql.bind_values {
+        count = count.bind(value);
+    }
+    let total = count.fetch_one(pool).await.map_err(map_sqlx_error)?;
+
+    Ok(page_from_rows(rows, total, limit, offset))
+}
+
+async fn list_sqlite(
+    pool: &sqlx::SqlitePool,
+    tenant_id: &str,
+    query: &GameCatalogQuery,
+    limit: i64,
+    offset: i64,
+) -> GameResult<GameCatalogPage> {
+    let list_sql = build_catalog_list_sql(query, SqlDialect::Sqlite);
+
+    let mut select = sqlx::query_as::<_, CatalogRow>(&list_sql.select_sql).bind(tenant_id);
+    for value in &list_sql.bind_values {
+        select = select.bind(value);
+    }
+    let rows = select
         .bind(limit)
         .bind(offset)
         .fetch_all(pool)
         .await
-    }
-    .map_err(map_sqlx_error)?;
+        .map_err(map_sqlx_error)?;
 
-    let total: i64 = if let Some(status) = status {
-        sqlx::query_scalar(
-            "SELECT COUNT(*) FROM game_catalog WHERE tenant_id = $1 AND deleted_at IS NULL AND status = $2",
-        )
-        .bind(tenant_id)
-        .bind(status)
-        .fetch_one(pool)
-        .await
-    } else {
-        sqlx::query_scalar(
-            "SELECT COUNT(*) FROM game_catalog WHERE tenant_id = $1 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .fetch_one(pool)
-        .await
+    let mut count = sqlx::query_scalar::<_, i64>(&list_sql.count_sql).bind(tenant_id);
+    for value in &list_sql.bind_values {
+        count = count.bind(value);
     }
-    .map_err(map_sqlx_error)?;
+    let total = count.fetch_one(pool).await.map_err(map_sqlx_error)?;
 
-    Ok(GameCatalogPage {
+    Ok(page_from_rows(rows, total, limit, offset))
+}
+
+fn page_from_rows(rows: Vec<CatalogRow>, total: i64, limit: i64, offset: i64) -> GameCatalogPage {
+    GameCatalogPage {
         items: rows.into_iter().map(CatalogRow::into_item).collect(),
         total: total as u64,
         page: ((offset / limit) + 1) as u32,
         page_size: limit as u32,
-    })
+    }
 }
 
 async fn get_postgres(
@@ -137,65 +146,6 @@ async fn get_postgres(
     .ok_or_else(|| GameError::not_found(format!("game {game_id} not found")))?;
 
     Ok(row.into_item())
-}
-
-async fn list_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    status: Option<&str>,
-    limit: i64,
-    offset: i64,
-) -> GameResult<GameCatalogPage> {
-    let rows = if let Some(status) = status {
-        sqlx::query_as::<_, CatalogRow>(
-            "SELECT id, game_code, title, summary, genre, status FROM game_catalog \
-             WHERE tenant_id = ? AND deleted_at IS NULL AND status = ? \
-             ORDER BY sort_order ASC, title ASC LIMIT ? OFFSET ?",
-        )
-        .bind(tenant_id)
-        .bind(status)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
-    } else {
-        sqlx::query_as::<_, CatalogRow>(
-            "SELECT id, game_code, title, summary, genre, status FROM game_catalog \
-             WHERE tenant_id = ? AND deleted_at IS NULL \
-             ORDER BY sort_order ASC, title ASC LIMIT ? OFFSET ?",
-        )
-        .bind(tenant_id)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-
-    let total: i64 = if let Some(status) = status {
-        sqlx::query_scalar(
-            "SELECT COUNT(*) FROM game_catalog WHERE tenant_id = ? AND deleted_at IS NULL AND status = ?",
-        )
-        .bind(tenant_id)
-        .bind(status)
-        .fetch_one(pool)
-        .await
-    } else {
-        sqlx::query_scalar(
-            "SELECT COUNT(*) FROM game_catalog WHERE tenant_id = ? AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .fetch_one(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-
-    Ok(GameCatalogPage {
-        items: rows.into_iter().map(CatalogRow::into_item).collect(),
-        total: total as u64,
-        page: ((offset / limit) + 1) as u32,
-        page_size: limit as u32,
-    })
 }
 
 async fn get_sqlite(

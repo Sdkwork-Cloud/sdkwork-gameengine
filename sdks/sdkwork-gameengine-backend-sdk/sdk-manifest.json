@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "sdkName": "sdkwork-gameengine-backend-sdk",
+  "sdkOwner": "sdkwork-gameengine",
+  "apiAuthority": "sdkwork-gameengine-backend-api",
+  "sdkFamily": "sdkwork-gameengine-backend-sdk",
+  "sdkType": "backend",
+  "apiPrefix": "/backend/v3/api",
+  "generationInputSpec": "../../apis/backend-api/game/games-backend-api.openapi.json",
+  "generatedPackages": {
+    "typescript": {
+      "language": "typescript",
+      "packageName": "sdkwork-gameengine-backend-sdk-generated-typescript",
+      "generatedOutput": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi"
+    }
+  },
+  "sdkDependencies": [],
+  "dependencyApiExports": [],
+  "dependencyApiSurfaces": [],
+  "generatorName": "sdkwork-sdk-generator",
+  "baseUrl": "http://127.0.0.1:8095",
+  "standardProfile": "sdkwork-v3",
+  "fixedSdkVersion": "0.1.0",
+  "ownerOnlyOperationCount": 1,
+  "managedBy": "sdkwork-games-contract-foundation",
+  "packageName": "@sdkwork/gameengine-backend-sdk",
+  "transportPackageName": "sdkwork-gameengine-backend-sdk-generated-typescript",
+  "typescript": {
+    "composedRoot": "sdkwork-gameengine-backend-sdk-typescript",
+    "composedEntry": "sdkwork-gameengine-backend-sdk-typescript/src/index.ts",
+    "transportRoot": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi",
+    "transportEntry": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi/src/index.ts"
+  },
+  "workspace": "sdkwork-gameengine-backend-sdk",
+  "title": "SDKWork Game Engine Backend API SDK",
+  "apiVersion": "0.1.0",
+  "openapiVersion": "3.1.2",
+  "authoritySpec": "../../apis/backend-api/game/games-backend-api.openapi.json",
+  "derivedSpecs": {
+    "default": "../../apis/backend-api/game/games-backend-api.openapi.json"
+  },
+  "discoverySurface": {
+    "sdkTarget": "backend",
+    "apiPrefix": "/backend/v3/api",
+    "schemaUrl": "/backend/v3/openapi.json",
+    "generatedProtocols": [
+      "http-openapi"
+    ],
+    "manualTransports": []
+  },
+  "languages": [
+    {
+      "language": "typescript",
+      "workspace": "sdkwork-gameengine-backend-sdk-typescript",
+      "generationState": "declared",
+      "releaseState": "not_published",
+      "generatedPath": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi",
+      "manifestPath": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi/package.json",
+      "name": "sdkwork-gameengine-backend-sdk-generated-typescript",
+      "version": "0.1.0",
+      "description": "Generator-owned TypeScript transport SDK for sdkwork-gameengine backend API.",
+      "consumerSurface": {
+        "primaryClient": "SdkworkGameengineBackendClient",
+        "apiPrefix": "/backend/v3/api"
+      },
+      "consumerPackageName": "@sdkwork/gameengine-backend-sdk",
+      "transportPackageName": "sdkwork-gameengine-backend-sdk-generated-typescript"
+    }
+  ]
+}

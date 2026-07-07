@@ -6,28 +6,32 @@ import path from 'node:path';
 import process from 'node:process';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { isBlank } from '@sdkwork/utils';
 
 const GENERATOR_PACKAGE_NAME = '@sdkwork/sdk-generator';
 const GENERATOR_CLI_NAME = 'sdkgen';
 const STANDARD_PROFILE = 'sdkwork-v3';
 const DEFAULT_WORKSPACE_GENERATOR_ENTRYPOINT = '../sdkwork-sdk-generator/bin/sdkgen.js';
 const SUPPORTED_LANGUAGES = new Set(['typescript']);
+const EXPECTED_SDK_OWNER = 'sdkwork-gameengine';
 
 const FAMILY_DEFAULTS = {
-  'sdkwork-games-app-sdk': { surface: 'app', clientName: 'SdkworkGamesAppClient' },
-  'sdkwork-games-backend-sdk': { surface: 'backend', clientName: 'SdkworkGamesBackendClient' },
+  'sdkwork-gameengine-app-sdk': { surface: 'app', clientName: 'SdkworkGameengineAppClient' },
+  'sdkwork-gameengine-backend-sdk': { surface: 'backend', clientName: 'SdkworkGameengineBackendClient' },
 };
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+function isBlank(value) {
+  return String(value ?? '').trim().length === 0;
+}
+
 function parseArgs(argv) {
   const options = {
     dryRun: false,
     languages: [],
-    sdkFamily: 'sdkwork-games-app-sdk',
+    sdkFamily: 'sdkwork-gameengine-app-sdk',
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -80,7 +84,7 @@ function createGenerationPlans(rootDir, options) {
   const familyRoot = path.join(rootDir, 'sdks', options.sdkFamily);
   const assemblyPath = path.join(familyRoot, '.sdkwork-assembly.json');
   const assembly = readJson(assemblyPath);
-  assert.equal(assembly.sdkOwner, 'sdkwork-games');
+  assert.equal(assembly.sdkOwner, EXPECTED_SDK_OWNER);
 
   const requestedLanguages = new Set(
     options.languages.length > 0 ? options.languages : SUPPORTED_LANGUAGES,
@@ -93,7 +97,7 @@ function createGenerationPlans(rootDir, options) {
 
   const input = path.resolve(familyRoot, assembly.generationInputSpec);
   const apiPrefix = assembly.discoverySurface?.apiPrefix ?? '/app/v3/api';
-  const defaults = FAMILY_DEFAULTS[options.sdkFamily] ?? FAMILY_DEFAULTS['sdkwork-games-app-sdk'];
+  const defaults = FAMILY_DEFAULTS[options.sdkFamily] ?? FAMILY_DEFAULTS['sdkwork-gameengine-app-sdk'];
   const languages = new Map((assembly.languages ?? []).map((entry) => [entry.language, entry]));
 
   return [...requestedLanguages].map((language) => {

@@ -1,7 +1,8 @@
 # SDKWork Games
 repository-kind: application
 
-SDKWork games platform application root. Provides game catalog, rooms, and leaderboard capabilities aligned with `../sdkwork-specs`.
+SDKWork Game Engine application root. Provides reusable game catalog, modes, rules, rooms, points,
+leaderboard, audit, and operations foundations aligned with `../sdkwork-specs`.
 
 ## Active layout
 
@@ -18,10 +19,16 @@ SDKWork games platform application root. Provides game catalog, rooms, and leade
 
 ## Framework integration
 
-- **HTTP**: `sdkwork-web-framework` via `crates/sdkwork-gameengine-standalone-gateway`
+- **HTTP**: `sdkwork-web-framework` via `crates/sdkwork-gameengine-standalone-gateway` (catalog, room, leaderboard)
 - **Database**: `sdkwork-database` via `crates/sdkwork-games-database-host` and `database/`
+  (`game_catalog`, `game_mode`, `game_ruleset`, `game_room`, `game_room_seat`,
+  `game_score_event`, `game_point_ledger`, `game_point_balance`,
+  `game_leaderboard_config`, `game_leaderboard_entry`, `game_audit_record`)
 - **Utils**: `@sdkwork/utils` (TypeScript), `sdkwork-utils-rust` (Rust)
+- **PC services**: `sdkwork-gameengine-pc-core` exposes `catalogService`, `roomService`, `leaderboardService` for consumer apps
 - **Discovery**: not integrated (no RPC services yet; add when split-service RPC is required)
+
+Consumer applications (for example `sdkwork-games`) depend on this repository for platform APIs and re-export PC services from `sdkwork-gameengine-pc-core`.
 
 ## Commands
 

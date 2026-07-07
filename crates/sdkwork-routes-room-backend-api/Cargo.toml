@@ -1,0 +1,18 @@
+[package]
+name = "sdkwork-routes-room-backend-api"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SDKWork games room backend-api router."
+
+[lib]
+name = "sdkwork_routes_room_backend_api"
+path = "src/lib.rs"
+
+[dependencies]
+axum.workspace = true
+serde.workspace = true
+sdkwork_game_room_service.workspace = true
+sdkwork_routes_games_support.workspace = true
+sdkwork-utils-rust.workspace = true
+sdkwork-web-axum.workspace = true

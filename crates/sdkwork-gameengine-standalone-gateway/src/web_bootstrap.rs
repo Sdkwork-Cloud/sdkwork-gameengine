@@ -7,8 +7,8 @@ include!(concat!(env!("OUT_DIR"), "/games_http_routes.rs"));
 
 pub fn games_public_path_prefixes() -> Vec<String> {
     vec![
-        "/app/v3/api/system/health".to_owned(),
-        "/app/v3/api/system/ready".to_owned(),
+        "/app/v3/api/games/health".to_owned(),
+        "/app/v3/api/games/ready".to_owned(),
     ]
 }
 

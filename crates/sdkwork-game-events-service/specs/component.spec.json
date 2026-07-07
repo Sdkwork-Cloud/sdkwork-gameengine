@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-game-events-service",
+    "displayName": "SDKWork Game Events Service",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "crates/sdkwork-game-events-service",
+    "domain": "game",
+    "capability": "events",
+    "languages": ["rust"],
+    "generated": false,
+    "manifests": ["Cargo.toml"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component-local contract and discovery rules."
+    },
+    {
+      "file": "EVENT_SPEC.md",
+      "path": "../../../sdkwork-specs/EVENT_SPEC.md",
+      "purpose": "Event outbox and audit contract rules."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust service crate boundaries."
+    }
+  ],
+  "contracts": {
+    "layerRole": "backend-service",
+    "publicExports": ["."],
+    "runtimeEntrypoints": [],
+    "routeManifest": null,
+    "sdkClients": [],
+    "events": ["game.*"],
+    "configKeys": []
+  },
+  "verification": {
+    "commands": [
+      "cargo test -p sdkwork-game-events-service"
+    ]
+  },
+  "exceptions": []
+}

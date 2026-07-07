@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-routes-room-backend-api",
+  "surface": "backend-api",
+  "owner": "sdkwork-games",
+  "domain": "game",
+  "capability": "rooms",
+  "apiAuthority": "sdkwork-gameengine-backend-api",
+  "sdkFamily": "sdkwork-gameengine-backend-sdk",
+  "prefix": "/backend/v3/api",
+  "source": {
+    "crateRoot": "crates/sdkwork-routes-room-backend-api",
+    "crateImport": "sdkwork_routes_room_backend_api",
+    "openapiAuthority": "apis/backend-api/game/games-backend-api.openapi.json"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/games/rooms",
+      "operationId": "backend.games.rooms.list",
+      "tags": ["rooms"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "backend_games_rooms_list" },
+      "schemas": { "request": null, "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-backend-api" },
+      "source": { "file": "apis/backend-api/game/games-backend-api.openapi.json" }
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/games/rooms/{roomId}",
+      "operationId": "backend.games.rooms.retrieve",
+      "tags": ["rooms"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "backend_games_room_retrieve" },
+      "schemas": { "request": null, "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-backend-api" },
+      "source": { "file": "apis/backend-api/game/games-backend-api.openapi.json" }
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/games/rooms/{roomId}/seats",
+      "operationId": "backend.games.rooms.seats.list",
+      "tags": ["rooms"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "backend_games_room_seats_list" },
+      "schemas": { "request": null, "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-backend-api" },
+      "source": { "file": "apis/backend-api/game/games-backend-api.openapi.json" }
+    },
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/games/rooms/{roomId}/force_close",
+      "operationId": "backend.games.rooms.forceClose",
+      "tags": ["rooms"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "backend_games_room_force_close" },
+      "schemas": { "request": "ForceCloseRoomRequest", "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-backend-api" },
+      "source": { "file": "apis/backend-api/game/games-backend-api.openapi.json" }
+    }
+  ]
+}

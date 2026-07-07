@@ -3,11 +3,13 @@ use sdkwork_game_catalog_service::{
     GameCatalogItem, GameCatalogPage, GameCatalogQuery, GameCatalogRepository, GameResult,
 };
 
+#[cfg(any(test, feature = "test-support"))]
 use crate::memory::InMemoryGameCatalogRepository;
 use crate::sqlx::SqlxGameCatalogRepository;
 
 #[derive(Clone)]
 pub enum GameCatalogRepositoryKind {
+    #[cfg(any(test, feature = "test-support"))]
     Memory(InMemoryGameCatalogRepository),
     Sqlx(Box<SqlxGameCatalogRepository>),
 }
@@ -20,6 +22,7 @@ impl GameCatalogRepository for GameCatalogRepositoryKind {
         query: &GameCatalogQuery,
     ) -> GameResult<GameCatalogPage> {
         match self {
+            #[cfg(any(test, feature = "test-support"))]
             Self::Memory(repo) => repo.list_catalog(tenant_id, query).await,
             Self::Sqlx(repo) => repo.list_catalog(tenant_id, query).await,
         }
@@ -31,6 +34,7 @@ impl GameCatalogRepository for GameCatalogRepositoryKind {
         game_id: &str,
     ) -> GameResult<GameCatalogItem> {
         match self {
+            #[cfg(any(test, feature = "test-support"))]
             Self::Memory(repo) => repo.get_catalog_item(tenant_id, game_id).await,
             Self::Sqlx(repo) => repo.get_catalog_item(tenant_id, game_id).await,
         }

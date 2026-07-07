@@ -1,0 +1,19 @@
+[package]
+name = "sdkwork-game-matchmaking-service"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SDKWork games matchmaking domain service."
+
+[lib]
+name = "sdkwork_game_matchmaking_service"
+path = "src/lib.rs"
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sdkwork-utils-rust.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

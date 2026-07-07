@@ -1,0 +1,24 @@
+[package]
+name = "sdkwork-game-leaderboard-repository-sqlx"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SQLx-backed games leaderboard repository."
+
+[lib]
+name = "sdkwork_game_leaderboard_repository_sqlx"
+path = "src/lib.rs"
+
+[features]
+test-support = []
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+sqlx.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork_game_leaderboard_service.workspace = true
+sdkwork-utils-rust.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

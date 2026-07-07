@@ -11,7 +11,8 @@ import {
   Flame,
   ChevronRight,
   Gamepad2,
-  Cpu
+  Cpu,
+  Play
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MatchmakingModal, CreateRoomModal } from "sdkwork-gameengine-pc-commons";
@@ -182,9 +183,9 @@ export default function GameCenter({
                   <div className="flex flex-col gap-1">
                     {[
                       { id: 'recommended', label: t('recommended_sort', '推荐排序') },
-                      { id: 'popular', label: t('most_popular', '最受欢�?) },
-                      { id: 'newest', label: t('newest_release', '最新上�?) },
-                      { id: 'rating', label: t('highest_rating', '评分最�?) }
+                      { id: 'popular', label: t('most_popular', 'most_popular') },
+                      { id: 'newest', label: t('newest_release', 'newest_release') },
+                      { id: 'rating', label: t('highest_rating', 'highest_rating') }
                     ].map(sortOpt => (
                       <button
                         key={sortOpt.id}

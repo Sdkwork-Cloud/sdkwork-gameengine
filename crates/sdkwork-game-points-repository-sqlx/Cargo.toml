@@ -1,0 +1,25 @@
+[package]
+name = "sdkwork-game-points-repository-sqlx"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SQLx-backed games point ledger repository."
+
+[lib]
+name = "sdkwork_game_points_repository_sqlx"
+path = "src/lib.rs"
+
+[features]
+test-support = []
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+sqlx.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork_game_points_service.workspace = true
+sdkwork-utils-rust.workspace = true
+
+[dev-dependencies]
+sdkwork-database-config.workspace = true
+tokio.workspace = true

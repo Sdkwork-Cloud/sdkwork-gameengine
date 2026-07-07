@@ -16,7 +16,7 @@
     "format:rust": "cargo fmt",
     "format:rust:check": "cargo fmt -- --check",
     "api:materialize": "node tools/games_openapi_export.mjs",
-    "api:check": "node tools/games_route_manifest_check.mjs && node tools/games_sdk_generate.mjs --check",
+    "api:check": "node tools/games_openapi_export.mjs --check && node tools/games_route_manifest_check.mjs && node tools/games_sdk_generate.mjs --check",
     "sdk:check": "node tools/games_sdk_generate.mjs --check",
     "sdk:generate": "node tools/games_sdk_generate.mjs",
     "db:materialize:contract": "node ../sdkwork-specs/tools/materialize-database-contract-from-baseline.mjs --root . --baseline database/ddl/baseline/postgres/0001_games_baseline.sql --module-id games --owner games-platform --prefixes game_ --engines postgres",

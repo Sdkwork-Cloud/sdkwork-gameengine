@@ -4,5 +4,18 @@ repository: sdkwork-gameengine
 canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
-entries: []
-domains: []
+entries:
+  - id: ADR-20260707-gameengine-modular-foundation
+    path: docs/architecture/decisions/ADR-20260707-gameengine-modular-foundation.md
+    layer: work
+    audience: [architecture, engineering, product]
+    status: accepted
+  - id: PLAN-2026-07-07-gameengine-foundation
+    path: docs/engineering/plans/PLAN-2026-07-07-gameengine-foundation.md
+    layer: work
+    audience: [engineering]
+    status: draft
+domains:
+  - name: game
+    path: docs/architecture/tech/TECH_ARCHITECTURE.md
+    owner: games-platform

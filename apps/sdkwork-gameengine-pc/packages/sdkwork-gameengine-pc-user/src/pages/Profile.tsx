@@ -19,9 +19,10 @@ interface ProfileProps {
   isPublic?: boolean;
   playerData?: any;
   onBack?: () => void;
+  onEditProfile?: () => void;
 }
 
-export default function Profile({ isPublic = false, playerData, onBack }: ProfileProps) {
+export default function Profile({ isPublic = false, playerData, onBack, onEditProfile }: ProfileProps) {
   const { t } = useTranslation();
 
   const stats = [
@@ -179,7 +180,11 @@ export default function Profile({ isPublic = false, playerData, onBack }: Profil
                     </button>
                   </>
                 ) : (
-                  <button className="px-6 py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white rounded-xl font-bold transition-colors border border-zinc-200 dark:border-zinc-700">
+                  <button
+                    type="button"
+                    onClick={() => onEditProfile?.()}
+                    className="px-6 py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white rounded-xl font-bold transition-colors border border-zinc-200 dark:border-zinc-700"
+                  >
                     {t('edit_profile')}
                   </button>
                 )}

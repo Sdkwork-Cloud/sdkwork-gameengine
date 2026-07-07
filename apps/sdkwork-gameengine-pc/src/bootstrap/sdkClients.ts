@@ -1,12 +1,12 @@
 import { listSdkworkGameenginePcAppSdkFamilies } from 'sdkwork-gameengine-pc-core/composition';
-import type { SdkworkGamesAppClient } from '@sdkwork/games-app-sdk';
+import type { SdkworkGameengineAppClient } from '@sdkwork/gameengine-app-sdk';
 
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
 
 export interface SdkworkGameenginePcSdkClientInventory {
   appApiBaseUrl: string;
   backendApiBaseUrl?: string;
-  gamesAppClient: SdkworkGamesAppClient & { setTokenManager(manager: unknown): unknown };
+  gamesAppClient: SdkworkGameengineAppClient & { setTokenManager(manager: unknown): unknown };
   sdkFamilies: {
     app: string[];
   };

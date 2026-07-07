@@ -16,7 +16,7 @@
       "source": "apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-core/specs/component.spec.json"
     },
     {
-      "workspace": "sdkwork-games-app-sdk",
+      "workspace": "sdkwork-gameengine-app-sdk",
       "surface": "app-api",
       "apiPrefix": "/app/v3/api",
       "connectivityPlane": "application",
@@ -57,7 +57,7 @@
     "resolver": "sdkwork-specs/tools/lib/composition-resolver.mjs",
     "credentialModes": {
       "sdkwork-catalog-app-sdk": "authenticated-app-api",
-      "sdkwork-games-app-sdk": "authenticated-app-api",
+      "sdkwork-gameengine-app-sdk": "authenticated-app-api",
       "sdkwork-iam-app-sdk": "authenticated-app-api"
     }
   }

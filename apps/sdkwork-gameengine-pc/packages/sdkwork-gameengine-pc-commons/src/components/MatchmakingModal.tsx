@@ -16,7 +16,7 @@ export default function MatchmakingModal({ isOpen, onClose, gameName }: Matchmak
   const [timeElapsed, setTimeElapsed] = useState(0);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setInterval> | undefined;
     if (isOpen) {
       setTimeElapsed(0);
       setStatus(t('searching_opponent'));

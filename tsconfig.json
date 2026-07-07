@@ -11,6 +11,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "allowJs": true,
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
@@ -25,7 +26,6 @@
   "include": [
     "scripts/**/*.mjs",
     "tools/**/*.mjs",
-    "packages/**/*.ts",
-    "sdks/test/**/*.mjs"
+    "tests/**/*.mjs"
   ]
 }

@@ -1,0 +1,18 @@
+[package]
+name = "sdkwork-game-room-service"
+version.workspace = true
+edition.workspace = true
+license = "Apache-2.0"
+description = "SDKWork games room domain service."
+
+[lib]
+name = "sdkwork_game_room_service"
+path = "src/lib.rs"
+
+[dependencies]
+async-trait.workspace = true
+serde.workspace = true
+sdkwork-utils-rust.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

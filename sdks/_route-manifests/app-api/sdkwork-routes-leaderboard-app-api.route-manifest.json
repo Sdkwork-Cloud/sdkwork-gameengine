@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-routes-leaderboard-app-api",
+  "surface": "app-api",
+  "owner": "sdkwork-games",
+  "domain": "game",
+  "capability": "leaderboard",
+  "apiAuthority": "sdkwork-gameengine-app-api",
+  "sdkFamily": "sdkwork-gameengine-app-sdk",
+  "prefix": "/app/v3/api",
+  "source": {
+    "crateRoot": "crates/sdkwork-routes-leaderboard-app-api",
+    "crateImport": "sdkwork_routes_leaderboard_app_api",
+    "openapiAuthority": "apis/app-api/game/games-app-api.openapi.json"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/app/v3/api/games/leaderboard",
+      "operationId": "games.leaderboard.list",
+      "tags": ["leaderboard"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "games_leaderboard_list" },
+      "schemas": { "request": null, "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    },
+    {
+      "method": "GET",
+      "path": "/app/v3/api/games/leaderboard/me",
+      "operationId": "games.leaderboard.me.retrieve",
+      "tags": ["leaderboard"],
+      "requestContext": "WebRequestContext",
+      "apiSurface": "app-api",
+      "auth": { "mode": "dual-token", "required": true, "tenantScope": "tenant", "dataScope": "organization" },
+      "handler": { "module": "crate", "name": "games_leaderboard_retrieve_me" },
+      "schemas": { "request": null, "response": "SdkWorkApiResponse", "problem": "ProblemDetail" },
+      "ownership": { "owner": "sdkwork-games", "apiAuthority": "sdkwork-gameengine-app-api" },
+      "source": { "file": "apis/app-api/game/games-app-api.openapi.json" }
+    }
+  ]
+}
