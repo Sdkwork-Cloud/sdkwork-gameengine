@@ -2,7 +2,7 @@
 
 Status: draft
 Owner: SDKWork maintainers
-Updated: 2026-07-07
+Updated: 2026-07-08
 Specs: ARCHITECTURE_DECISION_SPEC.md, DOCUMENTATION_SPEC.md, API_SPEC.md, SDK_SPEC.md, WEB_FRAMEWORK_SPEC.md, WEB_BACKEND_SPEC.md, DATABASE_SPEC.md, DATABASE_FRAMEWORK_SPEC.md, DEPLOYMENT_SPEC.md, APP_SDK_INTEGRATION_SPEC.md
 
 ## Document Map
@@ -21,9 +21,11 @@ Specs: ARCHITECTURE_DECISION_SPEC.md, DOCUMENTATION_SPEC.md, API_SPEC.md, SDK_SP
 ## 1. Architecture Overview
 
 `sdkwork-gameengine` is the SDKWork game foundation engine. It is an application root with Rust
-backend services, Rust route crates, PostgreSQL database assets, generated TypeScript SDK facades,
-and a PC browser surface. The engine provides reusable game capabilities for catalog, modes, rooms,
-matchmaking, sessions, points, leaderboards, settlement, events, and operations.
+backend services, Rust route crates, PostgreSQL and SQLite database assets, generated TypeScript SDK
+facades, and a PC browser surface. The current production API/UI baseline exposes catalog, rooms,
+and read-only leaderboards. Mode, rules, matchmaking, sessions, points, settlement, events, and
+audit crates/tables exist as pre-GA foundations and must not be treated as production surfaces until
+their route, OpenAPI, SDK, worker, authorization, and UI contracts are complete.
 
 The architecture is module-first:
 
@@ -46,7 +48,7 @@ do not call private repositories, generated internals, or route implementation f
 | Layer | Choice | Reason |
 | --- | --- | --- |
 | Backend runtime | Rust + Axum via `sdkwork-web-framework` | Aligns current route crate and gateway implementation. |
-| Database | PostgreSQL primary, SQLite parity candidate | Current lifecycle assets are PostgreSQL-first; SQLite can support local standalone later. |
+| Database | PostgreSQL and SQLite | Current lifecycle assets, DDL, materialized contract, and validation declare both engines. |
 | Database lifecycle | `sdkwork-database` assets under `database/` | Required SDKWork lifecycle, drift, seed, and contract model. |
 | API contracts | OpenAPI/route manifests | Source for SDK generation and route verification. |
 | SDKs | Generated app/backend TypeScript SDKs with composed facade exports | Keeps consumers away from raw HTTP and generator transport names. |
@@ -79,33 +81,27 @@ do not call private repositories, generated internals, or route implementation f
 | Module | Rust service crate target | Repository target | Route/API surface |
 | --- | --- | --- | --- |
 | `catalog` | `sdkwork-game-catalog-service` | `sdkwork-game-catalog-repository-sqlx` | app-api and backend-api |
-| `mode` | `sdkwork-game-mode-service` | `sdkwork-game-mode-repository-sqlx` | app-api and backend-api |
-| `rules` | `sdkwork-game-rules-service` | `sdkwork-game-rules-repository-sqlx` | backend-api; app read projection where needed |
+| `mode` | `sdkwork-game-mode-service` | `sdkwork-game-mode-repository-sqlx` | planned app/backend API expansion |
+| `rules` | `sdkwork-game-rules-service` | `sdkwork-game-rules-repository-sqlx` | planned backend API expansion; app read projection where needed |
 | `room` | `sdkwork-game-room-service` | `sdkwork-game-room-repository-sqlx` | app-api and backend-api |
-| `matchmaking` | `sdkwork-game-matchmaking-service` | `sdkwork-game-matchmaking-repository-sqlx` | app-api and backend-api |
-| `session` | `sdkwork-game-session-service` | `sdkwork-game-session-repository-sqlx` | app-api, backend-api, open/internal server API |
-| `points` | `sdkwork-game-points-service` | `sdkwork-game-points-repository-sqlx` | app-api and backend-api |
-| `leaderboard` | `sdkwork-game-leaderboard-service` | `sdkwork-game-leaderboard-repository-sqlx` | app-api and backend-api |
-| `settlement` | `sdkwork-game-settlement-service` | `sdkwork-game-settlement-repository-sqlx` | backend-api and async workers |
-| `events` | `sdkwork-game-events-service` | `sdkwork-game-events-repository-sqlx` | backend-api and webhook worker |
+| `matchmaking` | `sdkwork-game-matchmaking-service` | `sdkwork-game-matchmaking-repository-sqlx` | planned app/backend API expansion |
+| `session` | `sdkwork-game-session-service` | `sdkwork-game-session-repository-sqlx` | planned app/backend/internal API expansion |
+| `points` | `sdkwork-game-points-service` | `sdkwork-game-points-repository-sqlx` | planned app/backend API expansion |
+| `leaderboard` | `sdkwork-game-leaderboard-service` | `sdkwork-game-leaderboard-repository-sqlx` | app-api currently; backend operations planned |
+| `settlement` | `sdkwork-game-settlement-service` | `sdkwork-game-settlement-repository-sqlx` | planned backend API and async workers |
+| `events` | `sdkwork-game-events-service` | `sdkwork-game-events-repository-sqlx` | planned backend API and webhook worker |
 
 Current implementation contains `catalog`, `mode`, `rules`, `room`, `matchmaking`, `session`,
 `points`, `leaderboard`, `settlement`, and `events` service/repository crates, plus route support,
-database host, and standalone gateway crates. The
-`room` module has app-api routes for player room lifecycle and backend-api routes for operator
-monitoring and forced close; both are mounted in the standalone gateway. The `points` module owns
-append-only ledger writes, idempotent replay/conflict detection, and point balance projection. The
-`leaderboard` module owns config query contracts and entry upsert/rebuild projections. The
-`matchmaking` module owns ticket create/cancel/retrieve/list, exact idempotent replay, conflicting
-payload rejection, and priority queue pagination. The `session` module owns session create/start,
-participant snapshots, idempotent result submission, and result-version projection updates. The
-`settlement` module owns settlement job idempotency, running/retrying/succeeded/failed transitions,
-due-job pagination, and reward-intent records that do not directly write wallet, commerce,
-inventory, or entitlement tables. The `events` module owns event outbox append/publish/failure
-state and append-only audit search. HTTP route surfaces for `mode`, `rules`, `matchmaking`,
-`session`, `points`, `settlement`, `events`, and backend leaderboard operations are still owned by
-the API expansion task and should follow the same service/repository/route pattern instead of broad
-catch-all crates.
+database host, and standalone gateway crates. Production-mounted routes are limited to health/ready,
+catalog, rooms, app leaderboard reads, backend catalog list, and backend room monitoring/forced
+close. The `room` module has app-api routes for player room lifecycle and backend-api routes for
+operator monitoring and forced close; both are mounted in the standalone gateway.
+
+The `points`, `matchmaking`, `session`, `settlement`, and `events` modules have service/repository
+foundations for idempotency, store-level pagination, and projection behavior, but their public route
+surfaces, generated SDK methods, workers, and UI facades remain planned. They must not be exposed
+through production UI shims or raw HTTP clients.
 
 ## 5. Dependency Direction
 
@@ -145,7 +141,34 @@ Rules:
 
 All SDKWork-owned success responses use the SDKWork v3 envelope. Errors use
 `application/problem+json` with numeric codes and trace ids. List/search operations use standard
-pagination and store-level filtering.
+pagination and store-level filtering. Room and mode player counts are capped at 64 across service
+validation, OpenAPI schemas, PostgreSQL DDL, and SQLite DDL so room-seat reads remain bounded.
+
+Currently published app operations:
+
+- `games.health.retrieve`
+- `games.ready.retrieve`
+- `games.catalog.list`
+- `games.catalog.retrieve`
+- `games.rooms.list`
+- `games.rooms.create`
+- `games.rooms.retrieve`
+- `games.rooms.seats.list`
+- `games.rooms.join`
+- `games.rooms.leave`
+- `games.rooms.ready`
+- `games.rooms.start`
+- `games.rooms.close`
+- `games.leaderboard.list`
+- `games.leaderboard.me.retrieve`
+
+Currently published backend operations:
+
+- `backend.games.catalog.list`
+- `backend.games.rooms.list`
+- `backend.games.rooms.retrieve`
+- `backend.games.rooms.seats.list`
+- `backend.games.rooms.forceClose`
 
 ### SDK Ownership
 
@@ -156,6 +179,18 @@ pagination and store-level filtering.
 | future open SDK | Requires explicit approval | Third-party game integration only after product/security review. |
 
 Generated SDK output remains generator-owned. Frontend services consume composed facade exports only.
+
+### PC Production Surface
+
+The PC app mounts only SDK-backed catalog, room creation/lifecycle, and read-only leaderboard
+surfaces. IAM runtime owns session state and logout; the local user store is only an IAM session
+mirror.
+
+The following surfaces are not part of production until matching API/SDK/service/storage contracts
+exist: local auth, local wallet/recharge, VIP/subscription, compute tokens, mall/store, quiz,
+claws, ringmatch, arena, tournaments, AI challenge, simulated matchmaking, local recent games,
+fake featured banners, local economy ledgers, and client-side pagination over full catalog
+downloads.
 
 ### Data Ownership
 
@@ -250,8 +285,17 @@ The root topology supports:
 - `cloud.split-services.production`
 
 The application public ingress is currently `sdkwork-gameengine-standalone-gateway`. Cloud profiles
-also account for `sdkwork-api-cloud-gateway` as the platform connectivity plane. Standalone and cloud
-must preserve the same API contracts, SDK method shapes, database semantics, and security behavior.
+also account for `sdkwork-api-cloud-gateway` as the platform connectivity plane. The cloud
+production profile requires the platform API gateway process, and the gameengine cloud gateway
+dependency surface uses `apiPrefix = "/app/v3/api"` to match OpenAPI and SDK manifests. Standalone
+and cloud must preserve the same API contracts, SDK method shapes, database semantics, and security
+behavior.
+
+Release safety is enforced by `sdkwork.workflow.json` and the PC app manifest: checksums,
+signatures, SBOMs, and artifact attestations are required. The release lifecycle uses
+`scripts/release-supply-chain.mjs` to create checksum/signature evidence and CycloneDX SBOMs; if
+the protected signing key is not supplied by CI, the release fails instead of publishing unsigned
+artifacts.
 
 ## 10. Database Architecture
 
@@ -260,7 +304,9 @@ The database is contract-first:
 ```text
 database/contract/schema.yaml
   -> database/ddl/baseline/postgres/0001_games_baseline.sql
+  -> database/ddl/baseline/sqlite/0001_games_baseline.sql
   -> database/migrations/postgres/*
+  -> database/migrations/sqlite/*
   -> repositories
   -> API/SDK DTOs
 ```
@@ -315,7 +361,7 @@ is retained in the pre-GA baseline.
 | `crates/sdkwork-routes-*-app-api` | App API route/path crates. |
 | `crates/sdkwork-routes-*-backend-api` | Backend API route/path crates. |
 | `crates/sdkwork-game-*-service` | Domain services and ports. |
-| `crates/sdkwork-game-*-repository-sqlx` | PostgreSQL/sqlx repositories and feature-gated memory test stores. |
+| `crates/sdkwork-game-*-repository-sqlx` | SQLx repositories for PostgreSQL/SQLite plus feature-gated memory test stores. |
 | `crates/sdkwork-gameengine-standalone-gateway` | Runtime gateway and route composition. |
 | `database/` | Database contract, baseline, migrations, seeds, drift policy. |
 | `sdks/` | SDK families, route manifests, generated output, composed facades. |
@@ -347,12 +393,20 @@ Design verification:
 Implementation verification targets:
 
 ```bash
+node ../sdkwork-specs/tools/check-api-operation-patterns.mjs --workspace .
+node ../sdkwork-specs/tools/check-api-response-envelope.mjs --workspace .
+node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
+node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .
 pnpm run db:validate
 pnpm run api:check
 pnpm run sdk:check
+pnpm run topology:validate
+node --test tests/contract/gameengine-production-readiness.contract.test.mjs
+node --test scripts/release-supply-chain.test.mjs
 pnpm run check
-pnpm run verify
+cargo fmt --all --check
 cargo test --workspace
+pnpm run verify
 ```
 
 Database/API/SDK work must additionally run the SDKWork standard validators referenced in

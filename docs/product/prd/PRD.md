@@ -3,15 +3,18 @@
 Status: draft
 Owner: SDKWork maintainers
 Application: sdkwork-gameengine
-Updated: 2026-07-07
+Updated: 2026-07-08
 Specs: REQUIREMENTS_SPEC.md, DOCUMENTATION_SPEC.md, DOMAIN_SPEC.md, API_SPEC.md, SDK_SPEC.md
 
 ## Document Map
 
 - Technical architecture: [../../architecture/tech/TECH_ARCHITECTURE.md](../../architecture/tech/TECH_ARCHITECTURE.md)
 - Database design: [../../architecture/tech/TECH-gameengine-database-design.md](../../architecture/tech/TECH-gameengine-database-design.md)
-- Current foundation baseline: `catalog`, `modes`, `rules`, `rooms`, `matchmaking`,
-  `sessions`, `points`, `leaderboards`, `settlement`, `events`, and `audit`
+- Current production API/UI baseline: catalog, rooms, read-only leaderboards, IAM-backed session
+  identity, PostgreSQL/SQLite database lifecycle, and signed/SBOM-gated release packaging.
+- Foundation service baseline: mode, rules, matchmaking, sessions, points, settlement, events, and
+  audit crates/tables exist as pre-GA foundations but are not production app UI/API surfaces until
+  their OpenAPI, generated SDK, route, worker, and frontend contracts are published.
 
 ## 1. Background And Problem
 
@@ -25,26 +28,24 @@ platform integration.
 capabilities and exposes them through SDKWork app/backend SDKs. Specific games still own their
 gameplay logic; the engine owns the reusable platform capabilities around that gameplay.
 
-Current repository evidence shows the pre-GA foundation baseline already exists around game
-catalog, modes, rules, rooms, matchmaking, sessions, points, leaderboards, settlement jobs,
-reward intents, events, and audit storage:
+Current repository evidence shows a pre-launch production baseline around game catalog, rooms,
+read-only leaderboards, IAM session mirroring, bounded room capacity, SQLite/PostgreSQL lifecycle
+parity, and release safety:
 
 - Root manifest: `sdkwork.app.config.json` with domain `game` and generated SDK authorities for
   `sdkwork-gameengine-app-api` and `sdkwork-gameengine-backend-api`.
-- App API: game list/detail, room list/create/retrieve/seats/join/leave/ready/start/close,
-  leaderboard list, and my leaderboard entry.
+- App API: health/ready, game list/detail, room list/create/retrieve/seats/join/leave/ready/start/
+  close, leaderboard list, and my leaderboard entry.
 - Backend API: game catalog list plus room list/retrieve/seats/force-close operations for
   operator monitoring and recovery.
-- Rust services/repositories: points support append-only ledger writes, idempotent replay with
-  conflicting-payload rejection, tenant-isolated point balance projection, and SQLx/SQLite parity
-  tests. Leaderboards support config query contracts plus entry upsert/rebuild projection behavior.
-  Matchmaking supports ticket create/cancel/retrieve/list, exact idempotent replay, conflicting
-  payload rejection, and priority queue pagination. Sessions support create/start/result-submit,
-  participant snapshots, result idempotency, and SQLite parity tests. Settlement supports
-  idempotent job creation, start/failure/retry/completion transitions, due-job pagination, and
-  reward-intent creation without direct wallet/commerce/inventory/entitlement table writes. Events
-  support idempotent outbox append, publish/fail/dead-letter transitions, and append-only audit
-  search.
+- PC production UI: only catalog/room creation and read-only leaderboard surfaces are mounted.
+  Retired local-ledger, wallet/recharge, VIP/subscription, compute, mall, quiz, claws, arena,
+  ringmatch, tournament, AI challenge, and simulated matchmaking packages are not production
+  surfaces.
+- Rust service/repository foundations: mode/rules, points, matchmaking, sessions, settlement,
+  events, and audit exist for pre-GA expansion. They must not be exposed as product capabilities
+  until matching route crates, OpenAPI operations, generated SDK methods, workers, authorization
+  policy, and frontend/service facades are complete.
 - Database: `game_catalog`, `game_mode`, `game_ruleset`, `game_room`,
   `game_room_seat`, `game_match_ticket`, `game_match_result`, `game_session`,
   `game_session_participant`, `game_session_result`, `game_score_event`,
@@ -52,7 +53,7 @@ reward intents, events, and audit storage:
   `game_leaderboard_entry`, `game_settlement_job`, `game_reward_intent`,
   `game_engine_event`, and `game_audit_record`.
 
-This PRD expands that baseline into a complete foundation engine design.
+This PRD keeps the production baseline strict while defining the target foundation roadmap.
 
 ## 2. Target Users
 
@@ -113,21 +114,27 @@ It does not own:
 
 ## 5. Scope
 
-### P0 Foundation Scope
+### P0 Production Baseline Scope
 
 | Capability | Product Requirement |
 | --- | --- |
-| Catalog | Games can be registered, listed, retrieved, enabled, disabled, sorted, and filtered by status, genre, and keyword. |
+| Catalog | Players can list and retrieve published game catalog rows through the app SDK. Operators can list catalog rows through the backend SDK. |
+| Rooms | Players can list, create, retrieve, inspect seats, join, leave, ready, start, and close rooms through the app SDK. Backend operators can list/retrieve room state, inspect seats, and force close rooms. |
+| Capacity | Room and mode player counts are bounded to 1..64 in service validation, OpenAPI schemas, and PostgreSQL/SQLite baseline constraints. |
+| Leaderboards | Players can read leaderboard lists and "my rank" through the app SDK. Production UI is read-only until challenge/arena/write APIs exist. |
+| Identity | PC UI mirrors IAM session identity and delegates logout to IAM runtime; it does not own local auth, VIP, wallet, or compute balances. |
+| Release safety | PC/release metadata requires checksums, signatures, SBOM, and artifact attestations. Missing evidence fails release packaging. |
+
+### P0/P1 Foundation Expansion Scope
+
+These capabilities have database/service foundations or product requirements but are not published
+as production UI/API features until route, OpenAPI, SDK, authorization, worker, and frontend
+contracts are complete.
+
+| Capability | Product Requirement |
+| --- | --- |
 | Modes | A game can define one or more modes with player-count limits, rule set binding, matchmaking policy, and leaderboard binding. |
-| Rooms | Players can create, list, join, leave, ready, start, close, expire, and inspect rooms. Rooms manage seats and room status. |
 | Points | Game score and point changes are recorded as append-only ledger entries with idempotency and source traceability. |
-| Leaderboards | Games expose ranked lists and "my rank" by game, mode, season, and leaderboard configuration. |
-| Operations | Backend users can inspect games, rooms, scores, rankings, and audit records. |
-
-### P1 Match And Session Scope
-
-| Capability | Product Requirement |
-| --- | --- |
 | Matchmaking | Players or parties can create match tickets, cancel tickets, wait in queues, and receive match results. |
 | Sessions | The engine can create a session from a room or match result, track participants, accept results, and drive settlement. |
 | Rules | Rule sets version configuration for room, match, score, ranking, and settlement behavior. |
@@ -167,7 +174,8 @@ It does not own:
 1. Player opens the game platform.
 2. Client calls the app SDK to list available games.
 3. Player opens a game detail page and chooses a mode.
-4. Player creates or joins a room, or starts matchmaking.
+4. Player creates or joins a room. Matchmaking starts only after matching ticket APIs and SDK/UI
+   surfaces are published.
 5. Engine creates a room/match/session boundary.
 6. Specific game runtime executes gameplay.
 7. Runtime submits the result.
@@ -199,11 +207,12 @@ It does not own:
 App API is for player-facing apps, PC/H5/mobile clients, and game platform frontends. It uses
 `/app/v3/api` and dual-token auth.
 
-P0 resources:
+Implemented resources:
 
+- `games.health.retrieve`
+- `games.ready.retrieve`
 - `games.catalog.list`
 - `games.catalog.retrieve`
-- `games.modes.list`
 - `games.rooms.list`
 - `games.rooms.create`
 - `games.rooms.retrieve`
@@ -213,22 +222,24 @@ P0 resources:
 - `games.rooms.ready`
 - `games.rooms.start`
 - `games.rooms.close`
-- `games.points.me.retrieve`
-- `games.points.me.ledger.list`
 - `games.leaderboard.list`
 - `games.leaderboard.me.retrieve`
 
-P1 resources:
+Planned resources:
 
+- `games.modes.list`
+- `games.points.me.retrieve`
+- `games.points.me.ledger.list`
 - `games.matchmaking.tickets.create`
 - `games.matchmaking.tickets.cancel`
 - `games.matchmaking.tickets.retrieve`
 - `games.sessions.retrieve`
 - `games.sessions.results.me.retrieve`
 
-Current implementation note: the Rust service/repository foundation for matchmaking tickets and
-sessions exists. App-api route crates, OpenAPI operations, generated SDK methods, and PC service
-facades for these P1 resources remain in the API/SDK expansion phase.
+Current implementation note: the Rust service/repository foundation for modes, rules, points,
+matchmaking tickets, sessions, settlement, events, and audit exists. App-api route crates, OpenAPI
+operations, generated SDK methods, workers, and PC service facades for these planned resources
+remain in the API/SDK expansion phase.
 
 ### Backend API
 
@@ -297,8 +308,12 @@ Internal resources:
 7. Leaderboards use explicit configuration and projection tables:
    `game_leaderboard_config` defines ranking policy and `game_leaderboard_entry` stores rank
    projection rows.
-8. Database design must preserve PostgreSQL first and allow future SQLite parity when the app surface
-   needs local/standalone packaging.
+8. Database design must preserve PostgreSQL and SQLite baseline parity for cloud, standalone, and
+   local packaging paths.
+9. Current pre-launch baseline must keep PostgreSQL and SQLite DDL, database manifest engines, and
+   materialized database contract aligned.
+10. Room/mode capacity is capped at 64 players to keep room-seat reads bounded and avoid OOM-prone
+    unbounded participant state.
 
 ## 10. Success Metrics
 
@@ -323,7 +338,48 @@ Internal resources:
 | Portability | Database contract and service boundaries remain compatible with standalone and cloud profiles. |
 | Governance | Public naming, generated SDK ownership, security posture, and database migrations require human review before implementation. |
 
-## 12. Phases
+## 12. Production Readiness Gates
+
+Commercial launch is allowed only for the current production baseline: catalog, rooms, read-only
+leaderboards, IAM-backed identity, PostgreSQL/SQLite lifecycle parity, cloud/standalone topology,
+and signed/SBOM-gated release artifacts.
+
+The following capabilities are excluded from production until their SDKWork-owned API/SDK/service,
+authorization, persistence, worker, and UI contracts are complete: wallet/recharge, VIP/
+subscription, compute tokens, mall/store, local economy ledgers, quiz, claws, ringmatch, arena,
+tournaments, AI challenge, simulated matchmaking, and local auth.
+
+Required release evidence:
+
+- API contracts pass SDKWork response envelope and operation pattern checks.
+- List/search paths pass SDKWork pagination checks and do not download all rows for client-side
+  slicing.
+- App consumers import composed SDK packages only; no raw HTTP or generated transport imports.
+- Database manifests, DDL, seeds, and materialized contracts validate for PostgreSQL and SQLite.
+- Rust services pass workspace tests and formatting checks.
+- PC packages pass typecheck and production-readiness contract tests.
+- Topology validates with cloud production gateway required and `/app/v3/api` gateway prefix.
+- Release packaging requires checksums, signatures, SBOM, and artifact attestations; missing
+  evidence fails the workflow.
+
+Canonical commands:
+
+```bash
+node ../sdkwork-specs/tools/check-api-operation-patterns.mjs --workspace .
+node ../sdkwork-specs/tools/check-api-response-envelope.mjs --workspace .
+node ../sdkwork-specs/tools/check-pagination.mjs --workspace .
+node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace .
+pnpm run db:validate
+pnpm run api:check
+pnpm run topology:validate
+node --test tests/contract/gameengine-production-readiness.contract.test.mjs
+pnpm run check
+cargo fmt --all --check
+cargo test --workspace
+pnpm run verify
+```
+
+## 13. Phases
 
 ### Phase 0: Canon And Design
 
@@ -349,7 +405,7 @@ Internal resources:
 
 - Add seasons, tournaments, achievements, missions, moderation, analytics, and advanced operator tools.
 
-## 13. Linked Requirements
+## 14. Linked Requirements
 
 Initial engineering requirement records should be created when implementation starts:
 
@@ -357,7 +413,7 @@ Initial engineering requirement records should be created when implementation st
 - `REQ-2026-0002-gameengine-match-session-settlement`: matchmaking/session/result/settlement P1.
 - `REQ-2026-0003-gameengine-ops-platform`: operator tooling, season, tournament, moderation P2.
 
-## 14. Resolved Decisions
+## 15. Resolved Decisions
 
 1. Game-server integration is internal-api first through `sdkwork-gameengine-internal-api`.
    Public third-party open-api is deferred until an explicit product/security approval exists.
