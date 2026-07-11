@@ -10,8 +10,8 @@ entries:
     layer: work
     audience: [architecture, engineering, product]
     status: accepted
-  - id: PLAN-2026-07-07-gameengine-foundation
-    path: docs/engineering/plans/PLAN-2026-07-07-gameengine-foundation.md
+  - id: PLAN-2026-0007-gameengine-foundation
+    path: docs/engineering/plans/PLAN-2026-0007-gameengine-foundation.md
     layer: work
     audience: [engineering]
     status: draft

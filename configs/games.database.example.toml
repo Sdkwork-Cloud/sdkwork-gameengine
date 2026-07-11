@@ -1,5 +1,25 @@
-# Games database config example (copy to host-local override, do not commit secrets)
+# Games database config example
+
+# Copy this file to a host-local protected runtime config path before use. It is
+# a safe template only; production password material must come from a secret file
+# or platform secret manager.
+
+[runtime]
+environment = "production"
+deployment_profile = "cloud"
+runtime_target = "container"
+app_code = "games"
+process_name = "sdkwork-gameengine-standalone-gateway"
 
 [database]
-url = "postgres://sdkwork:sdkwork@127.0.0.1:5432/sdkwork_games"
-max_connections = 10
+engine = "postgresql"
+host = "db.games.internal"
+port = 5432
+database = "sdkwork_games_prod"
+schema = "sdkwork_games_prod"
+username = "sdkwork_games"
+password_file = "/run/secrets/sdkwork/games/database-password"
+ssl_mode = "require"
+max_connections = 32
+auto_migrate = false
+auto_seed = false

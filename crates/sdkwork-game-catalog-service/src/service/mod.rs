@@ -1,5 +1,6 @@
 use sdkwork_utils_rust::id::uuid;
 use sdkwork_utils_rust::string::is_blank;
+use sdkwork_utils_rust::validated_offset_list_params;
 
 use crate::domain::models::{
     GameCatalogItem, GameCatalogPage, GameCatalogQuery, GameError, GameResult,
@@ -23,6 +24,7 @@ impl<R: GameCatalogRepository> GameCatalogService<R> {
         if is_blank(Some(tenant_id)) {
             return Err(GameError::invalid("tenant_id is required"));
         }
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_catalog(tenant_id, &query).await
     }
 
@@ -39,6 +41,14 @@ impl<R: GameCatalogRepository> GameCatalogService<R> {
     pub fn new_game_id() -> String {
         uuid()
     }
+}
+
+fn validate_pagination(page: Option<u32>, page_size: Option<u32>) -> GameResult<()> {
+    validated_offset_list_params(page.map(i64::from), page_size.map(i64::from))
+        .map(|_| ())
+        .map_err(|_| {
+            GameError::invalid_parameter("page and page_size must follow SDKWork pagination bounds")
+        })
 }
 
 #[cfg(test)]
@@ -77,6 +87,43 @@ mod tests {
         let service = GameCatalogService::new(EmptyRepo);
         let result = service.list_games("", GameCatalogQuery::default()).await;
         assert_eq!(result.unwrap_err().code(), "invalid");
+    }
+
+    #[tokio::test]
+    async fn list_games_rejects_invalid_pagination_before_repository_access() {
+        let service = GameCatalogService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_games(
+                "100001",
+                GameCatalogQuery {
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!(page_size_error.code(), "invalid_parameter");
+        assert_eq!(
+            page_size_error.message(),
+            "page and page_size must follow SDKWork pagination bounds"
+        );
+
+        let page_error = service
+            .list_games(
+                "100001",
+                GameCatalogQuery {
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!(page_error.code(), "invalid_parameter");
+        assert_eq!(
+            page_error.message(),
+            "page and page_size must follow SDKWork pagination bounds"
+        );
     }
 
     #[test]

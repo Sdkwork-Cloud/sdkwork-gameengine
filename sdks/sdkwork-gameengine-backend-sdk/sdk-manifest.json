@@ -14,7 +14,20 @@
       "generatedOutput": "sdkwork-gameengine-backend-sdk-typescript/generated/server-openapi"
     }
   },
-  "sdkDependencies": [],
+  "sdkDependencies": [
+    {
+      "workspace": "sdkwork-iam-backend-sdk",
+      "role": "appbase-identity-and-session-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/backend/v3/api",
+      "apiAuthority": "sdkwork-iam-backend-api",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/iam-backend-sdk"
+      }
+    }
+  ],
   "dependencyApiExports": [],
   "dependencyApiSurfaces": [],
   "generatorName": "sdkwork-sdk-generator",
@@ -66,5 +79,10 @@
       "consumerPackageName": "@sdkwork/gameengine-backend-sdk",
       "transportPackageName": "sdkwork-gameengine-backend-sdk-generated-typescript"
     }
-  ]
+  ],
+  "metadata": {
+    "standardVersion": "2026-06-10",
+    "materializationState": "authority-active",
+    "managedBy": "sdkwork-games-contract-foundation"
+  }
 }

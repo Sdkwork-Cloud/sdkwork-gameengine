@@ -39,10 +39,12 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
+    "test": "node --experimental-strip-types --test src/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@sdkwork/gameengine-app-sdk": "workspace:*",
+    "@sdkwork/utils": "workspace:*",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

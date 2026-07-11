@@ -29,6 +29,10 @@ const gameServicePath = path.join(
   root,
   'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-dashboard/src/services/game.service.ts',
 );
+const gameTypesPath = path.join(
+  root,
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-dashboard/src/types/game.types.ts',
+);
 const dashboardIndexPath = path.join(
   root,
   'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-dashboard/src/index.ts',
@@ -63,6 +67,10 @@ const userStorePath = path.join(
 );
 const appRoutesPath = path.join(root, 'apps/sdkwork-gameengine-pc/src/AppRoutes.tsx');
 const authGatePath = path.join(root, 'apps/sdkwork-gameengine-pc/src/AuthGate.tsx');
+const i18nIndexPath = path.join(
+  root,
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/index.ts',
+);
 const shellPackageJsonPath = path.join(
   root,
   'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-shell/package.json',
@@ -95,6 +103,18 @@ const leaderboardArenaModalPath = path.join(
   root,
   'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-dashboard/src/components/Leaderboard/ArenaModal.tsx',
 );
+const retiredI18nDictionaries = [
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/en/dashboard.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/en/arena.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/en/quiz.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/en/ringmatch.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/en/store.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/zh/dashboard.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/zh/arena.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/zh/quiz.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/zh/ringmatch.ts',
+  'apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-i18n/src/locales/zh/store.ts',
+];
 
 const forbiddenProductionShellImports = [
   'sdkwork-gameengine-pc-user',
@@ -221,6 +241,11 @@ test('production leaderboard is read-only until challenge APIs exist', () => {
     'wagerAmount',
     'challenged_alert',
     'arena_success_alert',
+    'strongest_ai',
+    'team_rankings',
+    'leaderboard_tab_coming_soon',
+    'activeTab === "ai"',
+    'activeTab !== "global"',
   ]) {
     assert.ok(
       !leaderboardSource.includes(forbiddenSnippet),
@@ -234,6 +259,7 @@ test('production game center has no simulated matchmaking, local recent list, or
   const gameCardSource = fs.readFileSync(gameCardPath, 'utf8');
   const liveMatchesGridSource = fs.readFileSync(liveMatchesGridPath, 'utf8');
   const gameServiceSource = fs.readFileSync(gameServicePath, 'utf8');
+  const gameTypesSource = fs.readFileSync(gameTypesPath, 'utf8');
 
   for (const forbiddenSnippet of [
     'MatchmakingModal',
@@ -251,6 +277,7 @@ test('production game center has no simulated matchmaking, local recent list, or
     'onSpectate',
     'onChallengeAI',
     'setCurrentView("quiz")',
+    "{ id: 'quiz'",
     'games.slice(',
   ]) {
     assert.ok(
@@ -265,7 +292,11 @@ test('production game center has no simulated matchmaking, local recent list, or
       gameCardSource,
       ['onPlay', 'onChallengeAI', 'challenge_ai', 'play_now', '<Play', 'rating'],
     ],
-    ['LiveMatchesGrid', liveMatchesGridSource, ['onSpectate', 'spectate', '<Play']],
+    [
+      'LiveMatchesGrid',
+      liveMatchesGridSource,
+      ['onSpectate', 'spectate', '<Play', 'AI vs Human', 'ai_vs_human', 'bottts', 'alt="AI"', '>AI<'],
+    ],
   ]) {
     for (const forbiddenSnippet of snippets) {
       assert.ok(
@@ -292,6 +323,10 @@ test('production game center has no simulated matchmaking, local recent list, or
   assert.ok(
     gameServiceSource.includes('getGamesRoomService().createRoom'),
     'production game service must create rooms through the configured app SDK room service',
+  );
+  assert.ok(
+    !gameTypesSource.includes("| 'ai'"),
+    'production live room types must not retain AI player variants without an AI challenge API',
   );
   for (const retiredPath of [gameBannerPath, recentGamesListPath]) {
     assert.ok(
@@ -356,6 +391,28 @@ test('production dashboard package only exports mounted SDK-backed pages', () =>
     assert.ok(
       !fs.existsSync(retiredPath),
       `retired dashboard source must be removed: ${path.basename(retiredPath)}`,
+    );
+  }
+});
+
+test('production i18n bundle does not load retired feature dictionaries', () => {
+  const i18nSource = fs.readFileSync(i18nIndexPath, 'utf8');
+
+  for (const forbiddenSnippet of ['dashboard', 'arena', 'quiz', 'ringmatch', 'store']) {
+    assert.ok(
+      !i18nSource.includes(`./locales/en/${forbiddenSnippet}`),
+      `production i18n must not import retired English dictionary ${forbiddenSnippet}`,
+    );
+    assert.ok(
+      !i18nSource.includes(`./locales/zh/${forbiddenSnippet}`),
+      `production i18n must not import retired Chinese dictionary ${forbiddenSnippet}`,
+    );
+  }
+
+  for (const dictionaryPath of retiredI18nDictionaries) {
+    assert.ok(
+      !fs.existsSync(path.join(root, dictionaryPath)),
+      `retired i18n dictionary must be removed: ${dictionaryPath}`,
     );
   }
 });

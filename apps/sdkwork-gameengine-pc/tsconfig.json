@@ -19,6 +19,18 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react/jsx-runtime": [
+        "./node_modules/@types/react/jsx-runtime.d.ts"
+      ],
+      "react/jsx-dev-runtime": [
+        "./node_modules/@types/react/jsx-dev-runtime.d.ts"
+      ],
+      "react-dom": [
+        "./node_modules/@types/react-dom"
       ]
     },
     "allowImportingTsExtensions": true,

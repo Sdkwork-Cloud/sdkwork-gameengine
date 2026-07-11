@@ -1,3 +1,6 @@
-# sdkwork-sdkwork-gameengine-common
+# sdkwork-gameengine-common
 
-Architecture-local application root per `SDKWORK_WORKSPACE_SPEC.md` section 1.1.2.
+Cross-architecture shared package-family root for `sdkwork-gameengine`.
+
+This root is not independently runnable. It is reserved for shared contracts, service ports, and
+runtime-neutral packages that must not live inside the PC surface.

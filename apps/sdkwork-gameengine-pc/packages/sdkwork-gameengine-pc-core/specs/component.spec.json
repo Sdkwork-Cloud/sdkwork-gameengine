@@ -39,19 +39,25 @@
       "moduleCatalogRefs": [
         {
           "moduleId": "catalog",
-          "manifestRef": "../sdkwork-catalog/database/database.manifest.json",
+          "manifestRef": "../../../../../../sdkwork-catalog/specs/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": false
         },
         {
           "moduleId": "gameengine",
-          "manifestRef": "database/database.manifest.json",
+          "manifestRef": "../../../../../specs/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": false
         },
         {
           "moduleId": "iam",
           "manifestRef": "../sdkwork-iam/iam/modules/iam-kernel/iam.module.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": false
+        },
+        {
+          "moduleId": "iam-kernel",
+          "manifestRef": "../../../../../../sdkwork-iam/iam/modules/iam-kernel/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": false
         }
@@ -70,6 +76,9 @@
         "forbidLocalPermissionCatalogForDependencyDomains": true,
         "allowExplicitOverridesOnly": true,
         "allowFrontendHintsWithoutServerDuplication": true
+      },
+      "applicationModule": {
+        "manifestRef": "../../../../../specs/iam.module.manifest.json"
       }
     },
     "dependencyApiExports": [],

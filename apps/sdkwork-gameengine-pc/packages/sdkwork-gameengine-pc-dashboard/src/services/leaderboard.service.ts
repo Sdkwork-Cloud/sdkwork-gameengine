@@ -3,14 +3,12 @@ import { getGamesLeaderboardService, type GameLeaderboardItem } from 'sdkwork-ga
 export interface LeaderboardRow {
   rank: number;
   name: string;
-  type: 'Human' | 'AI';
   score: number;
   title: string;
   avatar: string;
   winRate: string;
   trend: string;
   userId: string;
-  provider?: string;
 }
 
 export interface LeaderboardPageResult {
@@ -31,11 +29,10 @@ export function mapLeaderboardItem(item: GameLeaderboardItem, index: number): Le
   return {
     rank,
     name,
-    type: 'Human',
     score: item.score,
     title: 'Player',
     avatar: avatarForUser(item.userId, name),
-    winRate: '—',
+    winRate: '-',
     trend: '0',
     userId: item.userId,
   };

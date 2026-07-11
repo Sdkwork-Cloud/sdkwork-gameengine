@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-gameengine-pc",
+    "displayName": "SDKWork Games PC",
+    "version": "0.1.0",
+    "type": "pc-app",
+    "root": "sdkwork-gameengine/apps/sdkwork-gameengine-pc",
+    "domain": "game",
+    "capability": "pc-application",
+    "surface": "app",
+    "languages": [
+      "typescript",
+      "react"
+    ],
+    "generated": false,
+    "private": true,
+    "status": "prelaunch-production-baseline",
+    "manifests": [
+      "package.json",
+      "sdkwork.app.config.json"
+    ]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component-local contract and discovery rules."
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored code organization and generated-output boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "SDKWork naming and package identity rules."
+    },
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC application root architecture and package taxonomy."
+    },
+    {
+      "file": "APP_PC_REACT_UI_SPEC.md",
+      "path": "../../../sdkwork-specs/APP_PC_REACT_UI_SPEC.md",
+      "purpose": "PC React UI package and SDK integration rules."
+    },
+    {
+      "file": "FRONTEND_CODE_SPEC.md",
+      "path": "../../../sdkwork-specs/FRONTEND_CODE_SPEC.md",
+      "purpose": "Frontend source code and composition rules."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Generated/composed SDK consumption and token boundaries."
+    },
+    {
+      "file": "PAGINATION_SPEC.md",
+      "path": "../../../sdkwork-specs/PAGINATION_SPEC.md",
+      "purpose": "Server-side list/search pagination and frontend page consumption."
+    }
+  ],
+  "contracts": {
+    "layerRole": "frontend-host",
+    "publicExports": [
+      "."
+    ],
+    "providedPorts": [
+      {
+        "name": "pcApplication",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "gameengineAppSdk",
+        "export": "."
+      },
+      {
+        "name": "iamAppRuntime",
+        "export": "."
+      }
+    ],
+    "runtimeEntrypoints": [
+      "package.json#scripts.dev",
+      "package.json#scripts.build",
+      "package.json#scripts.typecheck"
+    ],
+    "routeManifest": null,
+    "sdkClients": [
+      "@sdkwork/gameengine-app-sdk",
+      "@sdkwork/iam-app-sdk"
+    ],
+    "sdkDependencies": [
+      "@sdkwork/iam-app-sdk"
+    ],
+    "permissionComposition": {
+      "owner": "sdkwork.app.config.json",
+      "mode": "app-runtime"
+    },
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [
+      "sdkwork.app.config.json#runtime.apiBaseUrl",
+      "sdkwork.app.config.json#runtime.appApiPrefix",
+      "sdkwork.app.config.json#runtime.backendApiPrefix"
+    ]
+  },
+  "verification": {
+    "commands": [
+      "pnpm --filter sdkwork-gameengine-pc-core test",
+      "pnpm --dir apps/sdkwork-gameengine-pc run typecheck",
+      "node ../sdkwork-specs/tools/check-frontend-composition.mjs --root .",
+      "node ../sdkwork-specs/tools/check-i18n-standard.mjs --root .",
+      "node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace ."
+    ]
+  }
+}

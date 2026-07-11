@@ -29,7 +29,7 @@ test('release workflow enforces supply-chain evidence instead of placeholders', 
 
 test('production topology requires the cloud API gateway', () => {
   const topology = readJson('specs/topology.spec.json');
-  const production = topology.orchestration.profiles['cloud.split-services.production'];
+  const production = topology.orchestration.profiles['cloud.production'];
   const gateway = production.processes.find((process) => process.id === 'platform.api-gateway');
 
   assert.equal(gateway.required, true);

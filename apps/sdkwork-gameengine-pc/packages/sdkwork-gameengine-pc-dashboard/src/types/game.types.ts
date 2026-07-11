@@ -30,14 +30,15 @@ export interface LiveMatchPlayer {
   id: string;
   nameKey: string;
   avatarSeed: string;
-  type: 'human' | 'ai';
 }
 
 export interface LiveMatch {
   id: string;
   gameId: string | number;
+  roomCode: string;
   gameNameKey: string;
-  spectators: string | number;
+  currentPlayers: number;
+  maxPlayers: number;
   status: 'live';
   teams: [LiveMatchPlayer, LiveMatchPlayer];
 }

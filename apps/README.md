@@ -14,6 +14,7 @@ The repository root `sdkwork.app.config.json` governs the primary application ma
 
 | Directory | Surface role | Runnable | Purpose | Entry |
 | --- | --- | --- | --- | --- |
+| sdkwork-gameengine-common | common | no | Cross-architecture shared package-family root for game engine contracts and future shared modules. | [README](sdkwork-gameengine-common/README.md) |
 | sdkwork-gameengine-pc | pc | yes | SDKWork Games pc application root. | [README](sdkwork-gameengine-pc/README.md) |
 
 ## Allowed Content

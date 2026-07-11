@@ -1,9 +1,10 @@
-use axum::extract::{Query, State};
+use axum::extract::State;
 use axum::response::Response;
 use axum::routing::get;
 use axum::Router;
 use sdkwork_game_catalog_service::{GameCatalogRepository, GameCatalogService};
 use sdkwork_routes_catalog_app_api::GamesListQuery;
+use sdkwork_routes_games_support::StrictListQuery;
 use sdkwork_web_axum::RequirePrincipal;
 use std::sync::Arc;
 
@@ -21,7 +22,7 @@ where
 async fn list_games<R>(
     RequirePrincipal(principal): RequirePrincipal,
     State(store): State<GamesCatalogStore<R>>,
-    Query(query): Query<GamesListQuery>,
+    StrictListQuery(query): StrictListQuery<GamesListQuery>,
 ) -> Response
 where
     R: GameCatalogRepository + Send + Sync,

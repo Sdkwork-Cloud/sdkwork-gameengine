@@ -162,7 +162,7 @@ mod tests {
             _tenant_id: &str,
             _command: &StartGameSessionCommand,
         ) -> GameSessionResult<GameSessionItem> {
-            Err(GameSessionError::invalid("not implemented"))
+            Err(GameSessionError::invalid("unexpected repository call"))
         }
 
         async fn submit_result(

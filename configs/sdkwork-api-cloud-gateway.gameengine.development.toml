@@ -15,13 +15,13 @@ apiAuthority = "sdkwork-gameengine-app-api"
 surface = "app"
 apiPrefix = "/app/v3/api"
 runtimeMode = "split"
-sameOriginAllowed = true
-requiredBaseUrlKey = "SDKWORK_GAMEENGINE_APPLICATION_PUBLIC_HTTP_URL"
+sameOriginAllowed = false
+requiredBaseUrlKey = "SDKWORK_GAMES_APPLICATION_PUBLIC_HTTP_URL"
 coverage = "gameengine-app-api-upstream-routes"
 
 [[upstreams]]
 serviceId = "sdkwork-gameengine-app-api"
-baseUrl = "http://127.0.0.1:8080"
+baseUrl = "http://127.0.0.1:8095"
 
 [cors]
 allowAnyOrigin = true

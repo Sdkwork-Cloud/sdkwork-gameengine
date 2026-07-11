@@ -1,3 +1,4 @@
+import { SdkWorkResultCode } from '@sdkwork/utils';
 import type { SdkWorkPageData } from '@sdkwork/gameengine-app-sdk';
 import type { SdkworkGameengineAppClient } from '@sdkwork/gameengine-app-sdk';
 
@@ -53,6 +54,25 @@ function mapPageData(page: SdkWorkPageData): GameLeaderboardPage {
   };
 }
 
+function readErrorRecord(error: unknown): Record<string, unknown> | null {
+  return error && typeof error === 'object' ? (error as Record<string, unknown>) : null;
+}
+
+function isNotFoundError(error: unknown): boolean {
+  const record = readErrorRecord(error);
+  if (!record) {
+    return false;
+  }
+
+  return (
+    record.code === SdkWorkResultCode.NOT_FOUND
+    || record.code === 'NOT_FOUND'
+    || record.httpStatus === 404
+    || record.status === 404
+    || record.statusCode === 404
+  );
+}
+
 export function createGamesLeaderboardService(client: SdkworkGameengineAppClient): GamesLeaderboardService {
   return {
     async listRankings(params) {
@@ -63,8 +83,11 @@ export function createGamesLeaderboardService(client: SdkworkGameengineAppClient
       try {
         const item = await client.leaderboard.games.leaderboard.me.retrieve(params);
         return item as unknown as GameLeaderboardItem;
-      } catch {
-        return null;
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return null;
+        }
+        throw error;
       }
     },
   };

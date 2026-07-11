@@ -54,7 +54,19 @@
     "routeManifest": "sdks/_route-manifests/app-api/sdkwork-routes-catalog-app-api.route-manifest.json",
     "sdkClients": ["sdkwork-gameengine-app-sdk", "sdkwork-gameengine-backend-sdk"],
     "events": [],
-    "configKeys": ["GAMES_DATABASE_URL", "SDKWORK_GAMES_APP_ROOT"]
+    "configKeys": [
+      "SDKWORK_GAMES_APP_ROOT",
+      "SDKWORK_GAMES_DATABASE_ENGINE",
+      "SDKWORK_GAMES_DATABASE_HOST",
+      "SDKWORK_GAMES_DATABASE_PORT",
+      "SDKWORK_GAMES_DATABASE_NAME",
+      "SDKWORK_GAMES_DATABASE_SCHEMA",
+      "SDKWORK_GAMES_DATABASE_USERNAME",
+      "SDKWORK_GAMES_DATABASE_PASSWORD_FILE",
+      "SDKWORK_GAMES_DATABASE_SSL_MODE",
+      "SDKWORK_GAMES_DATABASE_MAX_CONNECTIONS",
+      "SDKWORK_GAMES_DATABASE_AUTO_MIGRATE"
+    ]
   },
   "verification": {
     "commands": ["pnpm verify"]

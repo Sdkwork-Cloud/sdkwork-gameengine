@@ -1,5 +1,6 @@
 use axum::Router;
 use sdkwork_iam_web_adapter::{build_web_framework_layer, IamWebRequestContextResolver};
+use sdkwork_routes_games_support::with_problem_correlation;
 use sdkwork_web_axum::with_web_request_context;
 use sdkwork_web_core::HttpRouteManifest;
 
@@ -18,7 +19,7 @@ fn default_resolver() -> IamWebRequestContextResolver {
 
 fn wrap_router_with_manifest(router: Router, route_manifest: HttpRouteManifest) -> Router {
     with_web_request_context(
-        router,
+        with_problem_correlation(router),
         build_web_framework_layer(
             default_resolver(),
             route_manifest,

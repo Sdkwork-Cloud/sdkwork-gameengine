@@ -1,4 +1,5 @@
 use sdkwork_utils_rust::string::is_blank;
+use sdkwork_utils_rust::validated_offset_list_params;
 
 use crate::domain::models::{
     AppendAuditRecordCommand, AppendGameEngineEventCommand, AuditRecordItem, AuditRecordPage,
@@ -57,6 +58,7 @@ where
     ) -> GameEventResult<GameEngineEventPage> {
         validate_required("tenant_id", tenant_id)?;
         validate_required("due_at", &query.due_at)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_pending_events(tenant_id, &query).await
     }
 
@@ -115,6 +117,7 @@ where
         query: AuditRecordQuery,
     ) -> GameEventResult<AuditRecordPage> {
         validate_required("tenant_id", tenant_id)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository
             .search_audit_records(tenant_id, &query)
             .await
@@ -126,6 +129,16 @@ fn validate_required(field: &str, value: &str) -> GameEventResult<()> {
         return Err(GameEventError::invalid(format!("{field} is required")));
     }
     Ok(())
+}
+
+fn validate_pagination(page: Option<u32>, page_size: Option<u32>) -> GameEventResult<()> {
+    validated_offset_list_params(page.map(i64::from), page_size.map(i64::from))
+        .map(|_| ())
+        .map_err(|_| {
+            GameEventError::invalid_parameter(
+                "page and page_size must follow SDKWork pagination bounds",
+            )
+        })
 }
 
 fn validate_event_type(event_type: &str) -> GameEventResult<()> {
@@ -309,6 +322,82 @@ mod tests {
             .expect_err("unsupported actor must fail");
 
         assert_eq!("invalid", error.code());
+    }
+
+    #[tokio::test]
+    async fn list_pending_events_rejects_invalid_pagination_before_repository_access() {
+        let service = GameEventsService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_pending_events(
+                "100001",
+                PendingGameEngineEventQuery {
+                    due_at: "2026-07-07T00:00:00Z".into(),
+                    page: Some(1),
+                    page_size: Some(201),
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .list_pending_events(
+                "100001",
+                PendingGameEngineEventQuery {
+                    due_at: "2026-07-07T00:00:00Z".into(),
+                    page: Some(0),
+                    page_size: Some(20),
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
+    }
+
+    #[tokio::test]
+    async fn audit_query_rejects_invalid_pagination_before_repository_access() {
+        let service = GameEventsService::new(EmptyRepo);
+
+        let page_size_error = service
+            .search_audit_records(
+                "100001",
+                AuditRecordQuery {
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .search_audit_records(
+                "100001",
+                AuditRecordQuery {
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
     }
 
     #[tokio::test]

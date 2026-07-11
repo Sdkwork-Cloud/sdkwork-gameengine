@@ -38,16 +38,17 @@ function mapRoomToLiveMatch(room: GameRoomItem): LiveMatch {
   return {
     id: room.id,
     gameId: room.gameId,
+    roomCode: room.roomCode,
     gameNameKey: room.gameId,
-    spectators: String(room.currentPlayers),
+    currentPlayers: room.currentPlayers,
+    maxPlayers: room.maxPlayers,
     status: 'live',
     teams: [
-      { id: `${room.id}-host`, nameKey: room.roomCode, avatarSeed: room.roomCode, type: 'human' },
+      { id: `${room.id}-host`, nameKey: room.roomCode, avatarSeed: room.roomCode },
       {
         id: `${room.id}-guest`,
         nameKey: 'waiting_opponent',
         avatarSeed: room.id,
-        type: 'human',
       },
     ],
   };

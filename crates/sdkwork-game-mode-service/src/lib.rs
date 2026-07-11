@@ -95,6 +95,43 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn list_modes_rejects_invalid_pagination_before_repository_access() {
+        let service = GameModeService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_modes(
+                "100001",
+                GameModeQuery {
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .list_modes(
+                "100001",
+                GameModeQuery {
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
+    }
+
+    #[tokio::test]
     async fn create_mode_rejects_invalid_player_range() {
         let service = GameModeService::new(EmptyRepo);
 

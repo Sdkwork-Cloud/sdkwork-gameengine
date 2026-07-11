@@ -125,6 +125,13 @@ impl GameSettlementError {
         }
     }
 
+    pub fn invalid_parameter(message: impl Into<String>) -> Self {
+        Self {
+            code: "invalid_parameter".into(),
+            message: message.into(),
+        }
+    }
+
     pub fn not_found(message: impl Into<String>) -> Self {
         Self {
             code: "not_found".into(),

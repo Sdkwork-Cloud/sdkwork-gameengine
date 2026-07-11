@@ -1,4 +1,4 @@
-use axum::extract::{Path, Query, State};
+use axum::extract::{Path, State};
 use axum::response::Response;
 use axum::routing::{get, post};
 use axum::Json;
@@ -9,7 +9,7 @@ use sdkwork_game_room_service::{
 };
 use sdkwork_routes_games_support::{
     finish_created_resource_response, finish_page_response, finish_resource_response,
-    room_page_to_list_data,
+    room_page_to_list_data, StrictListQuery,
 };
 use sdkwork_web_axum::RequirePrincipal;
 use std::sync::Arc;
@@ -17,6 +17,7 @@ use std::sync::Arc;
 pub type GamesRoomStore<R> = Arc<GameRoomService<R>>;
 
 #[derive(Debug, serde::Deserialize, Default)]
+#[serde(deny_unknown_fields)]
 pub struct GamesRoomsListQuery {
     game_id: Option<String>,
     status: Option<String>,
@@ -81,7 +82,7 @@ where
 async fn list_rooms<R>(
     RequirePrincipal(principal): RequirePrincipal,
     State(store): State<GamesRoomStore<R>>,
-    Query(query): Query<GamesRoomsListQuery>,
+    StrictListQuery(query): StrictListQuery<GamesRoomsListQuery>,
 ) -> Response
 where
     R: sdkwork_game_room_service::GameRoomRepository + Send + Sync,
@@ -278,4 +279,29 @@ where
             )
             .await,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn room_list_query_rejects_forbidden_pagination_aliases() {
+        for alias in [
+            "pageSize=20",
+            "limit=20",
+            "page_no=1",
+            "pageNo=1",
+            "per_page=20",
+            "size=20",
+        ] {
+            let uri = format!("/app/v3/api/games/rooms?{alias}")
+                .parse()
+                .expect("uri");
+            assert!(
+                axum::extract::Query::<GamesRoomsListQuery>::try_from_uri(&uri).is_err(),
+                "forbidden pagination alias must be rejected: {alias}"
+            );
+        }
+    }
 }

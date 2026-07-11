@@ -2,7 +2,8 @@ pub mod bootstrap;
 mod web_bootstrap;
 
 pub use bootstrap::{
-    build_catalog_service, build_leaderboard_service, build_room_service, build_router,
+    build_catalog_service, build_gateway_services, build_leaderboard_service, build_room_service,
+    build_router, GatewayServices,
 };
 pub use route_manifest::{GAMES_APP_HTTP_ROUTES, GAMES_BACKEND_HTTP_ROUTES};
 pub use web_bootstrap::{

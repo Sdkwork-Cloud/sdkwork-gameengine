@@ -1,6 +1,4 @@
-use sdkwork_gameengine_standalone_gateway::{
-    build_catalog_service, build_leaderboard_service, build_room_service, build_router,
-};
+use sdkwork_gameengine_standalone_gateway::{build_gateway_services, build_router};
 
 #[tokio::main]
 async fn main() {
@@ -15,16 +13,10 @@ async fn main() {
         .or_else(|_| std::env::var("SDKWORK_GAMES_APPLICATION_PUBLIC_INGRESS_BIND"))
         .unwrap_or_else(|_| "127.0.0.1:8095".to_owned());
 
-    let catalog_service = build_catalog_service()
+    let services = build_gateway_services()
         .await
-        .expect("gameengine catalog service bootstrap failed");
-    let leaderboard_service = build_leaderboard_service()
-        .await
-        .expect("gameengine leaderboard service bootstrap failed");
-    let room_service = build_room_service()
-        .await
-        .expect("gameengine room service bootstrap failed");
-    let app = build_router(catalog_service, leaderboard_service, room_service).await;
+        .expect("gameengine gateway services bootstrap failed");
+    let app = build_router(services.catalog, services.leaderboard, services.room).await;
     let listener = tokio::net::TcpListener::bind(&bind_address)
         .await
         .expect("bind gameengine standalone-gateway listener failed");

@@ -20,6 +20,18 @@ Executable database assets remain under `database/`:
 - `database/migrations/sqlite/`
 - `database/drift/policy.yaml`
 
+Runtime database configuration is not inferred from legacy single URL keys. Server and container
+profiles use structured `SDKWORK_GAMES_DATABASE_*` fields. `SDKWORK_GAMES_DATABASE_URL` remains a
+private explicit override for protected operator-managed environments only; checked-in production
+topology profiles use `SDKWORK_GAMES_DATABASE_ENGINE`, host, port, name, schema, username,
+`SDKWORK_GAMES_DATABASE_PASSWORD_FILE`, SSL mode, max connections, and
+`SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`.
+
+Production startup fails closed when neither structured `SDKWORK_GAMES_DATABASE_ENGINE` nor the
+private explicit URL override is present. Structured PostgreSQL production config also fails closed
+when `SDKWORK_GAMES_DATABASE_PASSWORD_FILE` is missing. Development topology profiles may use a
+local inline `SDKWORK_GAMES_DATABASE_PASSWORD` for local PostgreSQL bootstrap only.
+
 ## 2. Current Baseline
 
 Current active pre-GA clean baseline tables:
@@ -62,6 +74,9 @@ Current contract version: `1.0.0`.
 10. Do not store wallet/payment balance facts in game tables.
 11. Keep PostgreSQL and SQLite baseline DDL and materialized contract engines aligned.
 12. Bound room/mode player capacity to 1..64 at service, API schema, and database constraint layers.
+13. Use structured `SDKWORK_GAMES_DATABASE_*` runtime config for server/container profiles.
+14. Require password-file based PostgreSQL secrets and disabled auto-migration in production
+    topology profiles.
 
 ## 4. Target Table Catalog
 

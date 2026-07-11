@@ -2048,12 +2048,14 @@ dependencies = [
 name = "sdkwork-routes-catalog-app-api"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum",
  "sdkwork-game-catalog-service",
  "sdkwork-routes-games-support",
  "sdkwork-web-axum",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -2063,6 +2065,7 @@ dependencies = [
  "axum",
  "sdkwork-game-catalog-service",
  "sdkwork-routes-catalog-app-api",
+ "sdkwork-routes-games-support",
  "sdkwork-web-axum",
  "serde",
  "serde_json",

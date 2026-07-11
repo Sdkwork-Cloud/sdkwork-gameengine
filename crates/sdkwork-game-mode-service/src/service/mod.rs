@@ -1,4 +1,5 @@
 use sdkwork_utils_rust::string::is_blank;
+use sdkwork_utils_rust::validated_offset_list_params;
 
 use crate::domain::models::{
     CreateGameModeCommand, GameModeError, GameModeItem, GameModePage, GameModeQuery,
@@ -28,6 +29,7 @@ where
         query: GameModeQuery,
     ) -> GameModeResult<GameModePage> {
         validate_required("tenant_id", tenant_id)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_modes(tenant_id, &query).await
     }
 
@@ -89,6 +91,16 @@ fn validate_required(field: &str, value: &str) -> GameModeResult<()> {
         return Err(GameModeError::invalid(format!("{field} is required")));
     }
     Ok(())
+}
+
+fn validate_pagination(page: Option<u32>, page_size: Option<u32>) -> GameModeResult<()> {
+    validated_offset_list_params(page.map(i64::from), page_size.map(i64::from))
+        .map(|_| ())
+        .map_err(|_| {
+            GameModeError::invalid_parameter(
+                "page and page_size must follow SDKWork pagination bounds",
+            )
+        })
 }
 
 fn validate_mode_status(status: &str) -> GameModeResult<()> {

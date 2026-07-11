@@ -1,4 +1,5 @@
 use sdkwork_utils_rust::string::is_blank;
+use sdkwork_utils_rust::validated_offset_list_params;
 
 use crate::domain::models::{
     CloseGameRoomCommand, CreateGameRoomCommand, GameRoomError, GameRoomItem, GameRoomPage,
@@ -29,6 +30,7 @@ where
         query: GameRoomQuery,
     ) -> GameRoomResult<GameRoomPage> {
         validate_required("tenant_id", tenant_id)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_rooms(tenant_id, &query).await
     }
 
@@ -224,6 +226,16 @@ fn validate_required(field: &str, value: &str) -> GameRoomResult<()> {
     Ok(())
 }
 
+fn validate_pagination(page: Option<u32>, page_size: Option<u32>) -> GameRoomResult<()> {
+    validated_offset_list_params(page.map(i64::from), page_size.map(i64::from))
+        .map(|_| ())
+        .map_err(|_| {
+            GameRoomError::invalid_parameter(
+                "page and page_size must follow SDKWork pagination bounds",
+            )
+        })
+}
+
 fn validate_visibility(value: &str) -> GameRoomResult<()> {
     if matches!(value, "public" | "private") {
         return Ok(());
@@ -330,7 +342,7 @@ mod tests {
             _tenant_id: &str,
             _command: &CreateGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
 
         async fn join_room(
@@ -338,7 +350,7 @@ mod tests {
             _tenant_id: &str,
             _command: &JoinGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
 
         async fn leave_room(
@@ -346,7 +358,7 @@ mod tests {
             _tenant_id: &str,
             _command: &LeaveGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
 
         async fn set_ready(
@@ -354,7 +366,7 @@ mod tests {
             _tenant_id: &str,
             _command: &ReadyGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
 
         async fn start_room(
@@ -362,7 +374,7 @@ mod tests {
             _tenant_id: &str,
             _command: &StartGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
 
         async fn close_room(
@@ -370,7 +382,7 @@ mod tests {
             _tenant_id: &str,
             _command: &CloseGameRoomCommand,
         ) -> GameRoomResult<GameRoomItem> {
-            Err(GameRoomError::invalid("not implemented"))
+            Err(GameRoomError::invalid("unexpected repository call"))
         }
     }
 
@@ -380,6 +392,43 @@ mod tests {
         let result = service.list_rooms("", GameRoomQuery::default()).await;
         assert!(result.is_err());
         assert_eq!(result.unwrap_err().code(), "invalid");
+    }
+
+    #[tokio::test]
+    async fn list_rooms_rejects_invalid_pagination_before_repository_access() {
+        let service = GameRoomService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_rooms(
+                "100001",
+                GameRoomQuery {
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .list_rooms(
+                "100001",
+                GameRoomQuery {
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
     }
 
     #[tokio::test]

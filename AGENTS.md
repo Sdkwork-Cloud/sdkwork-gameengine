@@ -15,6 +15,8 @@ Canonical SDKWORK specs path from this root:
 - `../sdkwork-specs/AGENTS_SPEC.md`
 - `../sdkwork-specs/CODE_STYLE_SPEC.md`
 - `../sdkwork-specs/NAMING_SPEC.md`
+- `../sdkwork-specs/PNPM_SCRIPT_SPEC.md`
+- `../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md`
 Build scripts, dev runners, and `pnpm clean` must follow `CODE_STYLE_SPEC.md` §7 (Build Source Integrity And Self-Healing). Git-tracked build-critical source files must be verified before builds and self-healed from git when missing; `clean` must not delete them.
 
 
@@ -52,15 +54,25 @@ Per-surface manifests live under `apps/sdkwork-gameengine-pc/sdkwork.app.config.
 5. Read `../sdkwork-specs/README.md` and task-specific root specs.
 6. Inspect implementation files only after the dictionary is clear.
 
+Loading is dynamic and progressive: read the nearest dictionary files first, then only the task-specific SDKWORK specs needed for the files being touched. Do not eagerly load every language, runtime, UI, deployment, or SDK spec for unrelated work.
+
 ## Required Specs By Task Type
 
 - Agent/workflow: `../sdkwork-specs/SOUL.md`, `../sdkwork-specs/AGENTS_SPEC.md`, `../sdkwork-specs/SDKWORK_WORKSPACE_SPEC.md`.
 - Code changes: `../sdkwork-specs/CODE_STYLE_SPEC.md`, `../sdkwork-specs/NAMING_SPEC.md`, plus the touched language/framework spec.
+- Build scripts, dev runners, clean commands, and package scripts: `../sdkwork-specs/CODE_STYLE_SPEC.md`, `../sdkwork-specs/PNPM_SCRIPT_SPEC.md`, `../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md`.
 - Rust: `../sdkwork-specs/RUST_CODE_SPEC.md`; RPC only when touching RPC crates.
+- TypeScript/Node: `../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md`.
 - HTTP APIs: `../sdkwork-specs/API_SPEC.md`, `../sdkwork-specs/WEB_FRAMEWORK_SPEC.md`, `../sdkwork-specs/WEB_BACKEND_SPEC.md`.
 - Database: `../sdkwork-specs/DATABASE_SPEC.md`, `../sdkwork-specs/DATABASE_FRAMEWORK_SPEC.md`.
 - Frontend: `../sdkwork-specs/FRONTEND_CODE_SPEC.md`, `../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md`, `../sdkwork-specs/APP_PC_REACT_UI_SPEC.md`.
 - Deployment/release: `../sdkwork-specs/DEPLOYMENT_SPEC.md`, `../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md`, `../sdkwork-specs/RELEASE_SPEC.md`.
+
+Language-specific specs are on-demand only. Load Rust, TypeScript, frontend, Java, or other language specs only when the task touches those files or their build/runtime contracts.
+
+## Code Style Rules
+
+Follow `../sdkwork-specs/CODE_STYLE_SPEC.md` and `../sdkwork-specs/NAMING_SPEC.md` for authored code. Keep generated SDK output generator-owned, keep public exports stable, and keep build scripts aligned with `../sdkwork-specs/PNPM_SCRIPT_SPEC.md` and `CODE_STYLE_SPEC.md` build source integrity rules.
 
 ## Build, Test, and Verification
 

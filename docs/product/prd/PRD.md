@@ -41,7 +41,8 @@ parity, and release safety:
 - PC production UI: only catalog/room creation and read-only leaderboard surfaces are mounted.
   Retired local-ledger, wallet/recharge, VIP/subscription, compute, mall, quiz, claws, arena,
   ringmatch, tournament, AI challenge, and simulated matchmaking packages are not production
-  surfaces.
+  surfaces. Production i18n bundles load only mounted baseline dictionaries; retired feature
+  dictionaries and stale extraction inventories are not shipped.
 - Rust service/repository foundations: mode/rules, points, matchmaking, sessions, settlement,
   events, and audit exist for pre-GA expansion. They must not be exposed as product capabilities
   until matching route crates, OpenAPI operations, generated SDK methods, workers, authorization
@@ -341,8 +342,8 @@ Internal resources:
 ## 12. Production Readiness Gates
 
 Commercial launch is allowed only for the current production baseline: catalog, rooms, read-only
-leaderboards, IAM-backed identity, PostgreSQL/SQLite lifecycle parity, cloud/standalone topology,
-and signed/SBOM-gated release artifacts.
+leaderboards, IAM-backed identity, PostgreSQL/SQLite lifecycle parity, SDKWork v4 cloud/standalone
+topology, and signed/SBOM-gated release artifacts.
 
 The following capabilities are excluded from production until their SDKWork-owned API/SDK/service,
 authorization, persistence, worker, and UI contracts are complete: wallet/recharge, VIP/
@@ -356,9 +357,19 @@ Required release evidence:
   slicing.
 - App consumers import composed SDK packages only; no raw HTTP or generated transport imports.
 - Database manifests, DDL, seeds, and materialized contracts validate for PostgreSQL and SQLite.
+- Production database runtime uses structured `SDKWORK_GAMES_DATABASE_*` fields, requires
+  `SDKWORK_GAMES_DATABASE_PASSWORD_FILE`, and keeps `SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`.
 - Rust services pass workspace tests and formatting checks.
 - PC packages pass typecheck and production-readiness contract tests.
-- Topology validates with cloud production gateway required and `/app/v3/api` gateway prefix.
+- Production PC bundle exposes only SDK-backed catalog, room, active-room, and global read-only
+  leaderboard views. It does not ship retired dashboard/store/quiz/arena/ringmatch dictionaries or
+  unbacked leaderboard segment tabs.
+- Topology validates with two-segment profile ids, no public process-layout axis, cloud production
+  gateway required, `/app/v3/api` gateway prefix, explicit `gameengine.sdkwork.com` application
+  ingress, `games.sdkwork.com` PC frontend origin, and `api.sdkwork.com` platform gateway.
+- Production cloud gateway config rejects permissive local defaults: no loopback upstream, no
+  `allowAnyOrigin = true`, `sameOriginAllowed = false`, upstream readiness checks enabled, and
+  metrics, tracing, WAF, rate limiting, and circuit breaker protection enabled.
 - Release packaging requires checksums, signatures, SBOM, and artifact attestations; missing
   evidence fails the workflow.
 

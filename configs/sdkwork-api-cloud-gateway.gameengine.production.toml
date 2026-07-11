@@ -5,7 +5,7 @@ name = "sdkwork-api-cloud-gateway"
 environment = "production"
 
 [server]
-bind = "127.0.0.1:3900"
+bind = "0.0.0.0:3900"
 
 [[dependencySurfaces]]
 serviceId = "sdkwork-gameengine-app-api"
@@ -15,34 +15,34 @@ apiAuthority = "sdkwork-gameengine-app-api"
 surface = "app"
 apiPrefix = "/app/v3/api"
 runtimeMode = "split"
-sameOriginAllowed = true
-requiredBaseUrlKey = "SDKWORK_GAMEENGINE_APPLICATION_PUBLIC_HTTP_URL"
+sameOriginAllowed = false
+requiredBaseUrlKey = "SDKWORK_GAMES_APPLICATION_PUBLIC_HTTP_URL"
 coverage = "gameengine-app-api-upstream-routes"
 
 [[upstreams]]
 serviceId = "sdkwork-gameengine-app-api"
-baseUrl = "http://127.0.0.1:8080"
+baseUrl = "https://gameengine.sdkwork.com"
 
 [cors]
-allowAnyOrigin = true
-allowedOrigins = []
+allowAnyOrigin = false
+allowedOrigins = ["https://games.sdkwork.com"]
 
 [request]
 maxBodyBytes = 33554432
-timeoutMs = 0
+timeoutMs = 30000
 
 [readiness]
-checkUpstreams = false
-timeoutMs = 1000
+checkUpstreams = true
+timeoutMs = 3000
 
 [observability]
 accessLogEnabled = true
 auditLogEnabled = true
 accessLogSampleRateBasisPoints = 10000
 auditLogSampleRateBasisPoints = 10000
-metricsEnabled = false
+metricsEnabled = true
 metricsPath = "/metrics"
-tracingEnabled = false
+tracingEnabled = true
 redactHeaders = ["authorization", "access-token", "cookie", "x-api-key", "set-cookie"]
 
 [diagnostics]
@@ -52,7 +52,7 @@ includePolicyInventory = true
 includeRouteInventory = true
 
 [security]
-allowedHosts = []
+allowedHosts = ["api.sdkwork.com"]
 trustedProxyCidrs = []
 secureHeadersEnabled = true
 maxHeaderBytes = 65536
@@ -61,14 +61,14 @@ rejectCredentialHeadersOnAnonymousAuthRoutes = true
 csrfGuardEnabled = false
 
 [security.waf]
-enabled = false
-mode = "monitor"
+enabled = true
+mode = "block"
 inspectQuery = true
 inspectHeaders = true
-inspectJsonBody = false
+inspectJsonBody = true
 
 [traffic]
-rateLimitEnabled = false
+rateLimitEnabled = true
 compatXRateLimitHeaders = true
 globalMaxInFlight = 1024
 rateLimits = []
@@ -84,7 +84,7 @@ retryEnabled = false
 maxAttempts = 1
 retryStatuses = [502, 503, 504]
 retryBackoffMs = 0
-circuitBreakerEnabled = false
+circuitBreakerEnabled = true
 failureThreshold = 5
 openSeconds = 30
 halfOpenMaxAttempts = 1

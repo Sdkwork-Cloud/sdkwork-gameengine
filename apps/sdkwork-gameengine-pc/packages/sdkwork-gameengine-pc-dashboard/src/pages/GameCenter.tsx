@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Activity,
   BrainCircuit,
-  Cpu,
   Filter,
   Flame,
   Gamepad2,
@@ -18,7 +17,7 @@ import { CreateRoomModal } from 'sdkwork-gameengine-pc-commons';
 import GameCard from '../components/GameCenter/GameCard';
 import LiveMatchesGrid from '../components/GameCenter/LiveMatchesGrid';
 import { GameService } from '../services/game.service';
-import type { Game } from '../types/game.types';
+import type { Game, LiveMatch } from '../types/game.types';
 
 export default function GameCenter() {
   const { t } = useTranslation();
@@ -27,7 +26,7 @@ export default function GameCenter() {
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [selectedRoomGame, setSelectedRoomGame] = useState<Game | null>(null);
   const [games, setGames] = useState<Game[]>([]);
-  const [liveMatches, setLiveMatches] = useState<any[]>([]);
+  const [liveMatches, setLiveMatches] = useState<LiveMatch[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'recommended' | 'title' | 'newest'>('recommended');
@@ -41,9 +40,8 @@ export default function GameCenter() {
     { id: 'rpg', name: t('rpg'), icon: <Users size={16} /> },
     { id: 'strategy', name: t('strategy'), icon: <BrainCircuit size={16} /> },
     { id: 'simulation', name: t('simulation'), icon: <Activity size={16} /> },
-    { id: 'quiz', name: t('quiz'), icon: <BrainCircuit size={16} /> },
     { id: 'chess', name: t('chess'), icon: <Gamepad2 size={16} /> },
-    { id: 'casual', name: t('casual'), icon: <Cpu size={16} /> },
+    { id: 'casual', name: t('casual'), icon: <Gamepad2 size={16} /> },
   ];
 
   useEffect(() => {

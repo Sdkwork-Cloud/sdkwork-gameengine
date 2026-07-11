@@ -119,7 +119,7 @@ mod tests {
         let repo = InMemoryGameCatalogRepository::with_seed(vec![sample_item(
             "g1",
             "puzzle",
-            "Demo Game",
+            "Catalog Sample",
         )]);
 
         let page = repo
@@ -128,7 +128,7 @@ mod tests {
             .expect("page");
 
         assert_eq!(page.total, 1);
-        assert_eq!(page.items[0].title, "Demo Game");
+        assert_eq!(page.items[0].title, "Catalog Sample");
     }
 
     #[tokio::test]

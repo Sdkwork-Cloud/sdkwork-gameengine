@@ -53,7 +53,7 @@ do not call private repositories, generated internals, or route implementation f
 | API contracts | OpenAPI/route manifests | Source for SDK generation and route verification. |
 | SDKs | Generated app/backend TypeScript SDKs with composed facade exports | Keeps consumers away from raw HTTP and generator transport names. |
 | PC app | React/Vite under `apps/sdkwork-gameengine-pc` | Current app root and package taxonomy. |
-| Runtime topology | standalone unified-process and cloud split-services | Declared in `specs/topology.spec.json`. |
+| Runtime topology | SDKWork v4 `standalone` and `cloud` profiles | Declared in `specs/topology.spec.json` with two-segment profile ids. |
 
 ## 3. System Boundaries
 
@@ -182,14 +182,28 @@ Generated SDK output remains generator-owned. Frontend services consume composed
 
 ### PC Production Surface
 
-The PC app mounts only SDK-backed catalog, room creation/lifecycle, and read-only leaderboard
-surfaces. IAM runtime owns session state and logout; the local user store is only an IAM session
-mirror.
+The PC app mounts only SDK-backed catalog, room creation/lifecycle, active room listing, and global
+read-only leaderboard surfaces. IAM runtime owns session state and logout; the local user store is
+only an IAM session mirror.
+
+Room cards and live-room panels render real app SDK room data only: game catalog rows, room code,
+room lifecycle status, current player count, max player count, and bounded seat display. The UI must
+not synthesize AI opponents, local recent games, unbacked featured banners, simulated matchmaking,
+spectate actions, or player-vs-AI semantics from room rows.
+
+Leaderboard UI is a global read-only list backed by the generated app SDK pagination contract. The
+PC bundle does not ship unbacked AI/team/arena/challenge leaderboard segment tabs, countdown-only
+future sections, local challenge modals, or client-side pagination over fully downloaded ranking
+arrays.
+
+Production i18n is mounted from the active baseline dictionaries only: common, game center,
+leaderboard, and login. Retired dashboard, mall/store, quiz, arena, and ringmatch dictionaries and
+stale extraction inventories are removed from the production package graph.
 
 The following surfaces are not part of production until matching API/SDK/service/storage contracts
 exist: local auth, local wallet/recharge, VIP/subscription, compute tokens, mall/store, quiz,
 claws, ringmatch, arena, tournaments, AI challenge, simulated matchmaking, local recent games,
-fake featured banners, local economy ledgers, and client-side pagination over full catalog
+client-synthesized featured banners, local economy ledgers, and client-side pagination over full catalog
 downloads.
 
 ### Data Ownership
@@ -276,20 +290,39 @@ Implemented point ledger behavior:
 
 ## 9. Deployment And Runtime Topology
 
-The root topology supports:
+The root topology is `schemaVersion: 4` and supports SDKWork v4 two-segment profile ids:
 
-- `standalone.unified-process.development`
-- `standalone.unified-process.production`
-- `standalone.split-services.development`
-- `cloud.split-services.development`
-- `cloud.split-services.production`
+- `standalone.development`
+- `standalone.production`
+- `cloud.development`
+- `cloud.production`
 
-The application public ingress is currently `sdkwork-gameengine-standalone-gateway`. Cloud profiles
-also account for `sdkwork-api-cloud-gateway` as the platform connectivity plane. The cloud
-production profile requires the platform API gateway process, and the gameengine cloud gateway
-dependency surface uses `apiPrefix = "/app/v3/api"` to match OpenAPI and SDK manifests. Standalone
-and cloud must preserve the same API contracts, SDK method shapes, database semantics, and security
-behavior.
+Process layout is internal runtime orchestration and is not encoded in profile ids, public env
+keys, scripts, SDK bootstrap, or documentation. Runtime profile files live under
+`configs/topology/<deploymentProfile>.<environment>.env`.
+
+The application public ingress is `application.public-ingress`, served by
+`sdkwork-gameengine-standalone-gateway` for the current executable baseline. Cloud profiles also
+declare `platform.api-gateway`, owned by `sdkwork-api-cloud-gateway`, as the platform connectivity
+plane. Public URL ownership is:
+
+- Application public ingress: `https://gameengine.sdkwork.com`
+- PC frontend origin: `https://games.sdkwork.com`
+- Platform API gateway: `https://api.sdkwork.com`
+
+Topology env keys use the application code prefix `SDKWORK_GAMES_*`; browser-visible mirrors use
+`VITE_SDKWORK_GAMES_*` and contain only non-secret public runtime values. The cloud production
+profile requires the platform API gateway process, and the gameengine cloud gateway dependency
+surface uses `apiPrefix = "/app/v3/api"` to match OpenAPI and SDK manifests. The production gateway
+does not use loopback upstreams, does not allow arbitrary origins, sets
+`sameOriginAllowed = false` for the external upstream surface, checks upstream readiness, enables
+metrics/tracing, and enables WAF, rate limiting, and circuit breaker protection.
+
+Standalone and cloud preserve the same API contracts, SDK method shapes, database semantics, and
+security behavior. Runtime database config uses structured `SDKWORK_GAMES_DATABASE_*` fields.
+Production profiles require `SDKWORK_GAMES_DATABASE_PASSWORD_FILE` and
+`SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`; development profiles may use local inline PostgreSQL
+password env values for bootstrap only.
 
 Release safety is enforced by `sdkwork.workflow.json` and the PC app manifest: checksums,
 signatures, SBOMs, and artifact attestations are required. The release lifecycle uses
@@ -379,7 +412,7 @@ Required decisions before implementation:
 | Leaderboard table split | accepted | Split config and projection in the pre-GA baseline. |
 | Realtime adapter timing | accepted | Keep realtime frame sync out of P0/P1 foundation. |
 
-Implementation plan: [../../engineering/plans/PLAN-2026-07-07-gameengine-foundation.md](../../engineering/plans/PLAN-2026-07-07-gameengine-foundation.md)
+Implementation plan: [../../engineering/plans/PLAN-2026-0007-gameengine-foundation.md](../../engineering/plans/PLAN-2026-0007-gameengine-foundation.md)
 
 ## 13. Verification
 
@@ -402,6 +435,7 @@ pnpm run api:check
 pnpm run sdk:check
 pnpm run topology:validate
 node --test tests/contract/gameengine-production-readiness.contract.test.mjs
+pnpm --dir apps/sdkwork-gameengine-pc run typecheck
 node --test scripts/release-supply-chain.test.mjs
 pnpm run check
 cargo fmt --all --check

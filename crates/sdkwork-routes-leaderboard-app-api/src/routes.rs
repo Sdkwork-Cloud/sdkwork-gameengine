@@ -4,7 +4,7 @@ use axum::routing::get;
 use axum::Router;
 use sdkwork_game_leaderboard_service::{LeaderboardQuery, LeaderboardService};
 use sdkwork_routes_games_support::{
-    finish_page_response, finish_resource_response, leaderboard_page_to_list_data,
+    finish_page_response, finish_resource_response, leaderboard_page_to_list_data, StrictListQuery,
 };
 use sdkwork_web_axum::RequirePrincipal;
 use std::sync::Arc;
@@ -12,6 +12,7 @@ use std::sync::Arc;
 pub type GamesLeaderboardStore<R> = Arc<LeaderboardService<R>>;
 
 #[derive(Debug, serde::Deserialize, Default)]
+#[serde(deny_unknown_fields)]
 pub struct GamesLeaderboardListQuery {
     game_id: Option<String>,
     page: Option<u32>,
@@ -42,7 +43,7 @@ pub struct GamesLeaderboardMeQuery {
 async fn list_leaderboard<R>(
     RequirePrincipal(principal): RequirePrincipal,
     State(store): State<GamesLeaderboardStore<R>>,
-    Query(query): Query<GamesLeaderboardListQuery>,
+    StrictListQuery(query): StrictListQuery<GamesLeaderboardListQuery>,
 ) -> Response
 where
     R: sdkwork_game_leaderboard_service::LeaderboardRepository + Send + Sync,
@@ -75,4 +76,29 @@ where
             .get_user_ranking(principal.tenant_id(), principal.user_id(), query.game_id)
             .await,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn leaderboard_list_query_rejects_forbidden_pagination_aliases() {
+        for alias in [
+            "pageSize=20",
+            "limit=20",
+            "page_no=1",
+            "pageNo=1",
+            "per_page=20",
+            "size=20",
+        ] {
+            let uri = format!("/app/v3/api/games/leaderboard?{alias}")
+                .parse()
+                .expect("uri");
+            assert!(
+                axum::extract::Query::<GamesLeaderboardListQuery>::try_from_uri(&uri).is_err(),
+                "forbidden pagination alias must be rejected: {alias}"
+            );
+        }
+    }
 }

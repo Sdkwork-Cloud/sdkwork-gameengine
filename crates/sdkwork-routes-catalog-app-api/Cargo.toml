@@ -18,3 +18,5 @@ sdkwork_routes_games_support.workspace = true
 sdkwork-web-axum.workspace = true
 
 [dev-dependencies]
+async-trait.workspace = true
+tokio.workspace = true

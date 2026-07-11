@@ -16,3 +16,4 @@ serde_json.workspace = true
 sdkwork_game_catalog_service.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork_routes_catalog_app_api.workspace = true
+sdkwork_routes_games_support.workspace = true

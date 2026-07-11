@@ -2,7 +2,10 @@
 
 Repository command dispatch and verification scripts for `sdkwork-games`.
 
-- `sdkwork-command.mjs`: standard `dev`, `build`, `test`, `check`, `clean` dispatcher
+- `sdkwork-command.mjs`: standard `dev`, `build`, `test`, `check`, `clean` dispatcher.
+  It validates standard runtime axes such as `--deployment-profile`, `--runtime-target`,
+  `--database`, and `--environment`; production `build` runs TypeScript typecheck and
+  `cargo build --workspace --release`.
 - `sdkwork-verify.mjs`: merge-ready verification aggregate
 - `release-supply-chain.mjs`: release checksum, signature, and CycloneDX SBOM evidence gate
 - `games-*.test.mjs`: standards and naming contract tests

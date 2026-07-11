@@ -1,4 +1,5 @@
 use sdkwork_utils_rust::string::is_blank;
+use sdkwork_utils_rust::validated_offset_list_params;
 
 use crate::domain::models::{
     CancelMatchTicketCommand, CreateMatchTicketCommand, GameMatchmakingError,
@@ -66,6 +67,7 @@ where
         query: MatchTicketQuery,
     ) -> GameMatchmakingResult<MatchTicketPage> {
         validate_required("tenant_id", tenant_id)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_tickets(tenant_id, &query).await
     }
 
@@ -76,6 +78,7 @@ where
     ) -> GameMatchmakingResult<MatchTicketPage> {
         validate_required("tenant_id", tenant_id)?;
         validate_required("game_id", &query.game_id)?;
+        validate_pagination(query.page, query.page_size)?;
         self.repository.list_queue(tenant_id, &query).await
     }
 }
@@ -87,6 +90,16 @@ fn validate_required(field: &str, value: &str) -> GameMatchmakingResult<()> {
         )));
     }
     Ok(())
+}
+
+fn validate_pagination(page: Option<u32>, page_size: Option<u32>) -> GameMatchmakingResult<()> {
+    validated_offset_list_params(page.map(i64::from), page_size.map(i64::from))
+        .map(|_| ())
+        .map_err(|_| {
+            GameMatchmakingError::invalid_parameter(
+                "page and page_size must follow SDKWork pagination bounds",
+            )
+        })
 }
 
 #[cfg(test)]
@@ -122,7 +135,7 @@ mod tests {
             _tenant_id: &str,
             _command: &CancelMatchTicketCommand,
         ) -> GameMatchmakingResult<MatchTicketItem> {
-            Err(GameMatchmakingError::invalid("not implemented"))
+            Err(GameMatchmakingError::invalid("unexpected repository call"))
         }
 
         async fn list_tickets(
@@ -211,6 +224,82 @@ mod tests {
             .expect_err("missing idempotency key must fail");
 
         assert_eq!("invalid", error.code());
+    }
+
+    #[tokio::test]
+    async fn list_tickets_rejects_invalid_pagination_before_repository_access() {
+        let service = GameMatchmakingService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_tickets(
+                "100001",
+                MatchTicketQuery {
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .list_tickets(
+                "100001",
+                MatchTicketQuery {
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
+    }
+
+    #[tokio::test]
+    async fn list_queue_rejects_invalid_pagination_before_repository_access() {
+        let service = GameMatchmakingService::new(EmptyRepo);
+
+        let page_size_error = service
+            .list_queue(
+                "100001",
+                MatchmakingQueueQuery {
+                    game_id: "game-xiangqi".into(),
+                    page_size: Some(201),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page_size above the SDKWork maximum must fail");
+        assert_eq!("invalid_parameter", page_size_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_size_error.message()
+        );
+
+        let page_error = service
+            .list_queue(
+                "100001",
+                MatchmakingQueueQuery {
+                    game_id: "game-xiangqi".into(),
+                    page: Some(0),
+                    ..Default::default()
+                },
+            )
+            .await
+            .expect_err("page zero must fail");
+        assert_eq!("invalid_parameter", page_error.code());
+        assert_eq!(
+            "page and page_size must follow SDKWork pagination bounds",
+            page_error.message()
+        );
     }
 
     #[tokio::test]

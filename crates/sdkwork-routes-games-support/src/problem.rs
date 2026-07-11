@@ -1,12 +1,15 @@
 use axum::{
+    http::header,
     http::StatusCode,
     response::{IntoResponse, Response},
+    Json,
 };
 use sdkwork_game_catalog_service::GameError;
 use sdkwork_game_leaderboard_service::LeaderboardError;
 use sdkwork_game_room_service::GameRoomError;
+use sdkwork_utils_rust::{SdkWorkProblemDetail, SdkWorkProblemRouting, SdkWorkResultCode};
 use sdkwork_web_core::{
-    problem_response, ProblemCorrelation, WebFrameworkError, WebFrameworkErrorKind,
+    new_request_id, problem_response, ProblemCorrelation, WebFrameworkError, WebFrameworkErrorKind,
 };
 
 pub type GamesRouteResult<T> = Result<T, GamesApiProblem>;
@@ -15,6 +18,7 @@ pub type GamesRouteResult<T> = Result<T, GamesApiProblem>;
 pub struct GamesApiError {
     status: StatusCode,
     detail: String,
+    result_code: Option<SdkWorkResultCode>,
 }
 
 impl GamesApiError {
@@ -22,7 +26,28 @@ impl GamesApiError {
         Self {
             status,
             detail: detail.into(),
+            result_code: None,
         }
+    }
+
+    pub fn with_result_code(
+        status: StatusCode,
+        detail: impl Into<String>,
+        result_code: SdkWorkResultCode,
+    ) -> Self {
+        Self {
+            status,
+            detail: detail.into(),
+            result_code: Some(result_code),
+        }
+    }
+
+    pub fn invalid_parameter(detail: impl Into<String>) -> Self {
+        Self::with_result_code(
+            StatusCode::BAD_REQUEST,
+            detail,
+            SdkWorkResultCode::InvalidParameter,
+        )
     }
 
     fn framework_error(&self) -> WebFrameworkError {
@@ -54,9 +79,14 @@ impl From<GameError> for GamesApiError {
         let status = match error.code() {
             "not_found" => StatusCode::NOT_FOUND,
             "invalid" => StatusCode::BAD_REQUEST,
+            "invalid_parameter" => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        Self::new(status, error.message())
+        if error.code() == "invalid_parameter" {
+            Self::with_result_code(status, error.message(), SdkWorkResultCode::InvalidParameter)
+        } else {
+            Self::new(status, error.message())
+        }
     }
 }
 
@@ -90,9 +120,14 @@ impl From<LeaderboardError> for GamesApiError {
         let status = match error.code() {
             "not_found" => StatusCode::NOT_FOUND,
             "invalid" => StatusCode::BAD_REQUEST,
+            "invalid_parameter" => StatusCode::BAD_REQUEST,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        Self::new(status, error.message())
+        if error.code() == "invalid_parameter" {
+            Self::with_result_code(status, error.message(), SdkWorkResultCode::InvalidParameter)
+        } else {
+            Self::new(status, error.message())
+        }
     }
 }
 
@@ -107,11 +142,16 @@ impl From<GameRoomError> for GamesApiError {
         let status = match error.code() {
             "not_found" => StatusCode::NOT_FOUND,
             "invalid" => StatusCode::BAD_REQUEST,
+            "invalid_parameter" => StatusCode::BAD_REQUEST,
             "conflict" => StatusCode::CONFLICT,
             "forbidden" => StatusCode::FORBIDDEN,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
-        Self::new(status, error.message())
+        if error.code() == "invalid_parameter" {
+            Self::with_result_code(status, error.message(), SdkWorkResultCode::InvalidParameter)
+        } else {
+            Self::new(status, error.message())
+        }
     }
 }
 
@@ -124,10 +164,40 @@ impl From<GameRoomError> for GamesApiProblem {
 impl IntoResponse for GamesApiProblem {
     fn into_response(self) -> Response {
         let correlation = crate::correlation::GamesProblemCorrelation::current();
-        let request_id = correlation.as_ref().map(|value| value.request_id.as_str());
+        let fallback_request_id = correlation.is_none().then(new_request_id);
+        let request_id = correlation
+            .as_ref()
+            .map(|value| value.request_id.as_str())
+            .or(fallback_request_id.as_deref());
         let trace_id = correlation
             .as_ref()
             .and_then(|value| value.trace_id.as_deref());
+        if let Some(result_code) = self.error.result_code {
+            let correlation = ProblemCorrelation::new(request_id, trace_id);
+            let resolved_trace_id = correlation
+                .resolved_trace_id()
+                .unwrap_or_else(|| "unknown".to_owned());
+            let mut problem = SdkWorkProblemDetail::platform_enriched(
+                result_code,
+                self.error.detail,
+                resolved_trace_id.clone(),
+                SdkWorkProblemRouting::default(),
+            );
+            problem.status = self.error.status.as_u16();
+            let mut response = (
+                self.error.status,
+                [(header::CONTENT_TYPE, "application/problem+json")],
+                Json(problem),
+            )
+                .into_response();
+            if let Ok(value) = axum::http::HeaderValue::from_str(&resolved_trace_id) {
+                response.headers_mut().insert(
+                    axum::http::HeaderName::from_static("x-sdkwork-trace-id"),
+                    value,
+                );
+            }
+            return response;
+        }
         problem_response(
             &self.error.framework_error(),
             ProblemCorrelation::new(request_id, trace_id),

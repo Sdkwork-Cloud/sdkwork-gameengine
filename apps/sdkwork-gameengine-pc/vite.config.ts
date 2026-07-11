@@ -15,6 +15,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
+      dedupe: ['react', 'react-dom'],
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
