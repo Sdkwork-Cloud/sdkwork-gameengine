@@ -1,5 +1,4 @@
 use axum::Router;
-use tower_http::cors::CorsLayer;
 
 use crate::bootstrap::catalog::SharedCatalogService;
 use crate::bootstrap::leaderboard::SharedLeaderboardService;
@@ -37,5 +36,8 @@ pub async fn build_router(
     Router::new()
         .merge(app_routes)
         .merge(backend_routes)
-        .layer(CorsLayer::permissive())
+        .layer(sdkwork_web_bootstrap::application_cors_layer_from_env(
+            &["SDKWORK_GAMEENGINE_ENVIRONMENT"],
+            &["SDKWORK_GAMEENGINE_CORS_ALLOWED_ORIGINS", "SDKWORK_CORS_ALLOWED_ORIGINS"],
+        ))
 }

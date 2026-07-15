@@ -12,6 +12,7 @@ import { createClient as createGameengineAppClient } from '@sdkwork/gameengine-a
 import type { SdkworkGameenginePcRuntimeConfig } from './environment';
 import {
   createSdkworkGameenginePcSessionStore,
+  SDKWORK_GAMEENGINE_PC_SESSION_STORAGE_KEY,
   type SdkworkGameenginePcSessionSnapshot,
   type SdkworkGameenginePcSessionStore,
 } from './sessionStore';
@@ -193,7 +194,18 @@ function resolveSessionStorage(): Storage | undefined {
   if (typeof window === 'undefined') {
     return undefined;
   }
-  return window.sessionStorage;
+  migrateLegacySessionStorage(SDKWORK_GAMEENGINE_PC_SESSION_STORAGE_KEY);
+  return window.localStorage;
+}
+
+function migrateLegacySessionStorage(storageKey: string): void {
+  const legacySession = window.sessionStorage.getItem(storageKey);
+  if (legacySession && !window.localStorage.getItem(storageKey)) {
+    window.localStorage.setItem(storageKey, legacySession);
+  }
+  if (legacySession) {
+    window.sessionStorage.removeItem(storageKey);
+  }
 }
 
 function toIamDeploymentMode(value: SdkworkGameenginePcRuntimeConfig['deploymentMode']): IamDeploymentMode {
