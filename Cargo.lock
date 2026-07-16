@@ -1955,6 +1955,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "sdkwork-gameengine-gateway-assembly"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-gameengine-standalone-gateway",
+ "sdkwork-routes-catalog-app-api",
+ "sdkwork-routes-catalog-backend-api",
+ "sdkwork-routes-leaderboard-app-api",
+ "sdkwork-routes-room-app-api",
+ "sdkwork-routes-room-backend-api",
+ "tokio",
+]
+
+[[package]]
 name = "sdkwork-gameengine-standalone-gateway"
 version = "0.1.0"
 dependencies = [

@@ -1,0 +1,60 @@
+{
+  "kind": "sdkwork.gateway.assembly",
+  "schemaVersion": 1,
+  "applicationCode": "gameengine",
+  "packageName": "sdkwork-gameengine-gateway-assembly",
+  "crateDir": "crates/sdkwork-gameengine-gateway-assembly",
+  "generatedAt": "2026-07-16T04:44:51.114Z",
+  "routeCrates": [
+    {
+      "packageName": "sdkwork-routes-catalog-app-api",
+      "memberDir": "crates/sdkwork-routes-catalog-app-api",
+      "libName": "sdkwork_routes_catalog_app_api",
+      "surface": "app-api",
+      "pathPrefix": null,
+      "mountOrder": 0,
+      "hasGatewayMount": false,
+      "hasGatewayRouteManifest": false
+    },
+    {
+      "packageName": "sdkwork-routes-catalog-backend-api",
+      "memberDir": "crates/sdkwork-routes-catalog-backend-api",
+      "libName": "sdkwork_routes_catalog_backend_api",
+      "surface": "backend-api",
+      "pathPrefix": null,
+      "mountOrder": 1,
+      "hasGatewayMount": false,
+      "hasGatewayRouteManifest": false
+    },
+    {
+      "packageName": "sdkwork-routes-leaderboard-app-api",
+      "memberDir": "crates/sdkwork-routes-leaderboard-app-api",
+      "libName": "sdkwork_routes_leaderboard_app_api",
+      "surface": "app-api",
+      "pathPrefix": null,
+      "mountOrder": 2,
+      "hasGatewayMount": false,
+      "hasGatewayRouteManifest": false
+    },
+    {
+      "packageName": "sdkwork-routes-room-app-api",
+      "memberDir": "crates/sdkwork-routes-room-app-api",
+      "libName": "sdkwork_routes_room_app_api",
+      "surface": "app-api",
+      "pathPrefix": null,
+      "mountOrder": 3,
+      "hasGatewayMount": false,
+      "hasGatewayRouteManifest": false
+    },
+    {
+      "packageName": "sdkwork-routes-room-backend-api",
+      "memberDir": "crates/sdkwork-routes-room-backend-api",
+      "libName": "sdkwork_routes_room_backend_api",
+      "surface": "backend-api",
+      "pathPrefix": null,
+      "mountOrder": 4,
+      "hasGatewayMount": false,
+      "hasGatewayRouteManifest": false
+    }
+  ]
+}

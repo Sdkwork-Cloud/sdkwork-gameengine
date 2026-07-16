@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/sdkwork-gameengine-gateway-assembly",
     "crates/sdkwork-gameengine-standalone-gateway",
     "crates/sdkwork-games-database-host",
     "crates/sdkwork-game-catalog-service",

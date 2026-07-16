@@ -68,7 +68,7 @@ function validateSdkFamily(surface, config) {
     console.error(`[games-sdk] missing SDK family directory: sdks/${config.sdkFamily}`);
     return false;
   }
-  const assemblyPath = resolve(sdkFamilyDir, '.sdkwork-assembly.json');
+  const assemblyPath = resolve(sdkFamilyDir, 'sdk-manifest.json');
   if (!existsSync(assemblyPath)) {
     console.error(`[games-sdk] missing assembly manifest for ${config.sdkFamily}`);
     return false;
