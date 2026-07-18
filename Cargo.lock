@@ -1959,13 +1959,33 @@ name = "sdkwork-gameengine-gateway-assembly"
 version = "0.1.0"
 dependencies = [
  "axum",
- "sdkwork-gameengine-standalone-gateway",
+ "sdkwork-gameengine-service-host",
+ "sdkwork-iam-web-adapter",
  "sdkwork-routes-catalog-app-api",
  "sdkwork-routes-catalog-backend-api",
+ "sdkwork-routes-games-support",
  "sdkwork-routes-leaderboard-app-api",
  "sdkwork-routes-room-app-api",
  "sdkwork-routes-room-backend-api",
+ "sdkwork-web-axum",
+ "sdkwork-web-contract",
+ "sdkwork-web-core",
+ "serde",
+ "serde_json",
  "tokio",
+]
+
+[[package]]
+name = "sdkwork-gameengine-service-host"
+version = "0.1.0"
+dependencies = [
+ "sdkwork-game-catalog-repository-sqlx",
+ "sdkwork-game-catalog-service",
+ "sdkwork-game-leaderboard-repository-sqlx",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-game-room-repository-sqlx",
+ "sdkwork-game-room-service",
+ "sdkwork-games-database-host",
 ]
 
 [[package]]
@@ -1980,19 +2000,10 @@ dependencies = [
  "sdkwork-game-leaderboard-service",
  "sdkwork-game-room-repository-sqlx",
  "sdkwork-game-room-service",
- "sdkwork-games-database-host",
- "sdkwork-iam-context-service",
- "sdkwork-iam-web-adapter",
+ "sdkwork-gameengine-gateway-assembly",
  "sdkwork-routes-catalog-app-api",
- "sdkwork-routes-catalog-backend-api",
- "sdkwork-routes-games-support",
  "sdkwork-routes-health-app-api",
- "sdkwork-routes-leaderboard-app-api",
- "sdkwork-routes-room-app-api",
- "sdkwork-routes-room-backend-api",
- "sdkwork-web-axum",
  "sdkwork-web-bootstrap",
- "sdkwork-web-contract",
  "sdkwork-web-core",
  "serde",
  "serde_json",

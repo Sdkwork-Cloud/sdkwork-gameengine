@@ -150,8 +150,8 @@ fn standalone_gateway_main_uses_single_database_bootstrap() {
     let main_source = include_str!("../src/main.rs");
 
     assert!(
-        main_source.contains("build_gateway_services"),
-        "standalone gateway main must bootstrap one shared database host for all services"
+        main_source.contains("assemble_application_router"),
+        "standalone gateway main must bootstrap all business routes through gateway assembly"
     );
     assert!(
         !main_source.contains("build_catalog_service()"),

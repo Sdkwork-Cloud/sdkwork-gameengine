@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-gameengine-service-host",
+    "type": "rust-crate",
+    "domain": "game",
+    "capability": "gameengine-service-host",
+    "surface": "service-host",
+    "languages": ["rust"],
+    "generated": false
+  },
+  "contracts": {
+    "publicExports": ["."],
+    "runtimeEntrypoints": [],
+    "sdkDependencies": [],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": []
+  }
+}

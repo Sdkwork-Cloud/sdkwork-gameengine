@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/sdkwork-gameengine-gateway-assembly",
     "crates/sdkwork-gameengine-standalone-gateway",
+    "crates/sdkwork-gameengine-service-host",
     "crates/sdkwork-games-database-host",
     "crates/sdkwork-game-catalog-service",
     "crates/sdkwork-game-catalog-repository-sqlx",
@@ -39,6 +40,8 @@ version = "0.1.0"
 
 [workspace.dependencies]
 sdkwork_gameengine_standalone_gateway = { package = "sdkwork-gameengine-standalone-gateway", path = "crates/sdkwork-gameengine-standalone-gateway" }
+sdkwork_gameengine_gateway_assembly = { package = "sdkwork-gameengine-gateway-assembly", path = "crates/sdkwork-gameengine-gateway-assembly" }
+sdkwork_gameengine_service_host = { package = "sdkwork-gameengine-service-host", path = "crates/sdkwork-gameengine-service-host" }
 sdkwork_games_database_host = { package = "sdkwork-games-database-host", path = "crates/sdkwork-games-database-host" }
 sdkwork_game_catalog_service = { package = "sdkwork-game-catalog-service", path = "crates/sdkwork-game-catalog-service" }
 sdkwork_game_catalog_repository_sqlx = { package = "sdkwork-game-catalog-repository-sqlx", path = "crates/sdkwork-game-catalog-repository-sqlx" }

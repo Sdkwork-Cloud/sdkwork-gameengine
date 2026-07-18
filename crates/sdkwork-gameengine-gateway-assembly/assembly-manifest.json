@@ -4,7 +4,7 @@
   "applicationCode": "gameengine",
   "packageName": "sdkwork-gameengine-gateway-assembly",
   "crateDir": "crates/sdkwork-gameengine-gateway-assembly",
-  "generatedAt": "2026-07-16T04:44:51.114Z",
+  "generatedAt": "2026-07-16T17:23:25.409Z",
   "routeCrates": [
     {
       "packageName": "sdkwork-routes-catalog-app-api",

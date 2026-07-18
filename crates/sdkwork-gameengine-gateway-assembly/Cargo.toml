@@ -11,9 +11,18 @@ path = "src/lib.rs"
 [dependencies]
 axum.workspace = true
 tokio.workspace = true
-sdkwork-gameengine-standalone-gateway = { path = "../sdkwork-gameengine-standalone-gateway" }
+sdkwork_gameengine_service_host.workspace = true
+sdkwork_routes_games_support.workspace = true
+sdkwork-web-core.workspace = true
+sdkwork-web-axum.workspace = true
+sdkwork-web-contract.workspace = true
+sdkwork-iam-web-adapter.workspace = true
 sdkwork-routes-catalog-app-api = { path = "../sdkwork-routes-catalog-app-api" }
 sdkwork-routes-catalog-backend-api = { path = "../sdkwork-routes-catalog-backend-api" }
 sdkwork-routes-leaderboard-app-api = { path = "../sdkwork-routes-leaderboard-app-api" }
 sdkwork-routes-room-app-api = { path = "../sdkwork-routes-room-app-api" }
 sdkwork-routes-room-backend-api = { path = "../sdkwork-routes-room-backend-api" }
+
+[build-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

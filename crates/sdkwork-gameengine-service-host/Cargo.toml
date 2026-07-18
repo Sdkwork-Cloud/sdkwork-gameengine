@@ -1,0 +1,15 @@
+[package]
+name = "sdkwork-gameengine-service-host"
+edition.workspace = true
+version.workspace = true
+license = "Apache-2.0"
+description = "In-process Gameengine service container for gateway assembly."
+
+[dependencies]
+sdkwork_games_database_host.workspace = true
+sdkwork_game_catalog_repository_sqlx.workspace = true
+sdkwork_game_catalog_service.workspace = true
+sdkwork_game_leaderboard_repository_sqlx.workspace = true
+sdkwork_game_leaderboard_service.workspace = true
+sdkwork_game_room_repository_sqlx.workspace = true
+sdkwork_game_room_service.workspace = true
