@@ -70,8 +70,8 @@ cargo test -p sdkwork-game-catalog-service list_games_rejects_invalid_pagination
 cargo test -p sdkwork-game-room-service -p sdkwork-game-leaderboard-service -p sdkwork-game-mode-service -p sdkwork-game-matchmaking-service -p sdkwork-game-settlement-service -p sdkwork-game-events-service invalid_pagination_before_repository_access
 cargo test -p sdkwork-routes-catalog-app-api catalog_list_invalid_page_size_returns_invalid_parameter_problem
 cargo test -p sdkwork-routes-catalog-app-api -p sdkwork-routes-room-app-api -p sdkwork-routes-room-backend-api -p sdkwork-routes-leaderboard-app-api forbidden_pagination_aliases
-cargo test -p sdkwork-gameengine-standalone-gateway catalog_router_rejects_forbidden_pagination_alias_with_problem_json
-cargo test -p sdkwork-routes-games-support -p sdkwork-routes-catalog-app-api -p sdkwork-routes-catalog-backend-api -p sdkwork-routes-room-app-api -p sdkwork-routes-room-backend-api -p sdkwork-routes-leaderboard-app-api -p sdkwork-gameengine-standalone-gateway
+cargo test -p sdkwork-api-gameengine-standalone-gateway catalog_router_rejects_forbidden_pagination_alias_with_problem_json
+cargo test -p sdkwork-routes-games-support -p sdkwork-routes-catalog-app-api -p sdkwork-routes-catalog-backend-api -p sdkwork-routes-room-app-api -p sdkwork-routes-room-backend-api -p sdkwork-routes-leaderboard-app-api -p sdkwork-api-gameengine-standalone-gateway
 node ../sdkwork-specs/tools/check-agent-workflow-standard.mjs --root .
 node ../sdkwork-specs/tools/check-component-port-bindings.mjs --root .
 node ../sdkwork-specs/tools/check-frontend-composition.mjs --root .

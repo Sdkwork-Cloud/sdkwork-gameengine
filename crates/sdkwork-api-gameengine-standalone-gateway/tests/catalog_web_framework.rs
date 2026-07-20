@@ -4,7 +4,7 @@ use sdkwork_game_catalog_repository_sqlx::{
     GameCatalogRepositoryKind, InMemoryGameCatalogRepository,
 };
 use sdkwork_game_catalog_service::GameCatalogService;
-use sdkwork_gameengine_standalone_gateway::{build_router, with_games_app_request_context};
+use sdkwork_api_gameengine_standalone_gateway::{build_router, with_games_app_request_context};
 use sdkwork_routes_catalog_app_api::build_catalog_app_router;
 use sdkwork_web_core::{access_token_jwt, auth_token_jwt, TRACEPARENT_HEADER};
 use std::sync::Arc;
@@ -150,7 +150,7 @@ fn standalone_gateway_main_uses_single_database_bootstrap() {
     let main_source = include_str!("../src/main.rs");
 
     assert!(
-        main_source.contains("assemble_application_router"),
+        main_source.contains("assemble_api_router"),
         "standalone gateway main must bootstrap all business routes through gateway assembly"
     );
     assert!(

@@ -74,8 +74,8 @@
   },
   "components": {
     "applicationServer": {
-      "crate": "sdkwork-gameengine-standalone-gateway",
-      "binary": "sdkwork-gameengine-standalone-gateway"
+      "crate": "sdkwork-api-gameengine-standalone-gateway",
+      "binary": "sdkwork-api-gameengine-standalone-gateway"
     }
   },
   "orchestration": {
@@ -84,8 +84,8 @@
         "processes": [
           {
             "id": "application.public-ingress",
-            "crate": "sdkwork-gameengine-standalone-gateway",
-            "binary": "sdkwork-gameengine-standalone-gateway",
+            "crate": "sdkwork-api-gameengine-standalone-gateway",
+            "binary": "sdkwork-api-gameengine-standalone-gateway",
             "required": true,
             "role": "api-standalone-gateway"
           }
@@ -105,8 +105,8 @@
         "processes": [
           {
             "id": "application.public-ingress",
-            "crate": "sdkwork-gameengine-standalone-gateway",
-            "binary": "sdkwork-gameengine-standalone-gateway",
+            "crate": "sdkwork-api-gameengine-standalone-gateway",
+            "binary": "sdkwork-api-gameengine-standalone-gateway",
             "required": true,
             "role": "api-standalone-gateway"
           }
@@ -120,8 +120,8 @@
         "processes": [
           {
             "id": "application.public-ingress",
-            "crate": "sdkwork-gameengine-standalone-gateway",
-            "binary": "sdkwork-gameengine-standalone-gateway",
+            "crate": "sdkwork-api-gameengine-standalone-gateway",
+            "binary": "sdkwork-api-gameengine-standalone-gateway",
             "required": true,
             "role": "api-standalone-gateway"
           }

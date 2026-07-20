@@ -4,7 +4,7 @@ Rust workspace members for the **sdkwork-gameengine** platform (shared across ga
 
 | Crate | Responsibility |
 | --- | --- |
-| `sdkwork-gameengine-standalone-gateway` | HTTP server with `sdkwork-web-framework` + route assembly |
+| `sdkwork-api-gameengine-standalone-gateway` | HTTP server with `sdkwork-web-framework` + route assembly |
 | `sdkwork-routes-games-support` | Shared `SdkWorkApiResponse`, ProblemDetail, trace correlation |
 | `sdkwork-routes-health-app-api` | Health/ready routes |
 | `sdkwork-routes-catalog-app-api` | Catalog list/detail app-api routes |

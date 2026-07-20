@@ -9,7 +9,7 @@ environment = "production"
 deployment_profile = "cloud"
 runtime_target = "container"
 app_code = "games"
-process_name = "sdkwork-gameengine-standalone-gateway"
+process_name = "sdkwork-api-gameengine-standalone-gateway"
 
 [database]
 engine = "postgresql"

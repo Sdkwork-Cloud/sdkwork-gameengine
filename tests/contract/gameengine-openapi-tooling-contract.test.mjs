@@ -91,7 +91,7 @@ test('authored production sources do not construct legacy response envelopes', (
 });
 
 test('gateway runtime bootstrap uses database repositories without demo memory seed paths', () => {
-  const gatewaySrc = path.join(root, 'crates/sdkwork-gameengine-standalone-gateway/src');
+  const gatewaySrc = path.join(root, 'crates/sdkwork-api-gameengine-standalone-gateway/src');
   const offenders = [];
   const forbiddenPatterns = [
     /\bGAMES_REPOSITORY_MODE\b/,

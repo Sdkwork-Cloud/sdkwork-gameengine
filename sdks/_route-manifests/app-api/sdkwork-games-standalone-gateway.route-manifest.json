@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "sdkwork.route.manifest",
-  "packageName": "sdkwork-gameengine-standalone-gateway",
+  "packageName": "sdkwork-api-gameengine-standalone-gateway",
   "surface": "app-api",
   "owner": "sdkwork-games",
   "domain": "game",
@@ -10,8 +10,8 @@
   "sdkFamily": "sdkwork-gameengine-app-sdk",
   "prefix": "/app/v3/api",
   "source": {
-    "crateRoot": "crates/sdkwork-gameengine-standalone-gateway",
-    "crateImport": "sdkwork_gameengine_standalone_gateway",
+    "crateRoot": "crates/sdkwork-api-gameengine-standalone-gateway",
+    "crateImport": "sdkwork_api_gameengine_standalone_gateway",
     "openapiAuthority": "apis/app-api/game/games-app-api.openapi.json"
   },
   "routes": [

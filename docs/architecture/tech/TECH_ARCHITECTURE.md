@@ -302,7 +302,7 @@ keys, scripts, SDK bootstrap, or documentation. Runtime profile files live under
 `configs/topology/<deploymentProfile>.<environment>.env`.
 
 The application public ingress is `application.public-ingress`, served by
-`sdkwork-gameengine-standalone-gateway` for the current executable baseline. Cloud profiles also
+`sdkwork-api-gameengine-standalone-gateway` for the current executable baseline. Cloud profiles also
 declare `platform.api-gateway`, owned by `sdkwork-api-cloud-gateway`, as the platform connectivity
 plane. Public URL ownership is:
 
@@ -395,7 +395,7 @@ is retained in the pre-GA baseline.
 | `crates/sdkwork-routes-*-backend-api` | Backend API route/path crates. |
 | `crates/sdkwork-game-*-service` | Domain services and ports. |
 | `crates/sdkwork-game-*-repository-sqlx` | SQLx repositories for PostgreSQL/SQLite plus feature-gated memory test stores. |
-| `crates/sdkwork-gameengine-standalone-gateway` | Runtime gateway and route composition. |
+| `crates/sdkwork-api-gameengine-standalone-gateway` | Runtime gateway and route composition. |
 | `database/` | Database contract, baseline, migrations, seeds, drift policy. |
 | `sdks/` | SDK families, route manifests, generated output, composed facades. |
 | `apps/sdkwork-gameengine-pc` | PC surface and frontend service composition. |

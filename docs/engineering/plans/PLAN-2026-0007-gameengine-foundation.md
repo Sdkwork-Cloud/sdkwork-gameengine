@@ -297,8 +297,8 @@ git commit -m "feat: expand game engine API and SDK surfaces"
 ## Task 9: Wire Gateway And PC Services
 
 **Files:**
-- Modify: `crates/sdkwork-gameengine-standalone-gateway/src/bootstrap/**`
-- Modify: `crates/sdkwork-gameengine-standalone-gateway/src/lib.rs`
+- Modify: `crates/sdkwork-api-gameengine-standalone-gateway/src/bootstrap/**`
+- Modify: `crates/sdkwork-api-gameengine-standalone-gateway/src/lib.rs`
 - Modify: `apps/sdkwork-gameengine-pc/src/bootstrap/**`
 - Modify: `apps/sdkwork-gameengine-pc/packages/sdkwork-gameengine-pc-core/**`
 
@@ -309,13 +309,13 @@ git commit -m "feat: expand game engine API and SDK surfaces"
 
 ```bash
 pnpm run check
-cargo test -p sdkwork-gameengine-standalone-gateway
+cargo test -p sdkwork-api-gameengine-standalone-gateway
 ```
 
 - [ ] Commit:
 
 ```bash
-git add crates/sdkwork-gameengine-standalone-gateway apps/sdkwork-gameengine-pc
+git add crates/sdkwork-api-gameengine-standalone-gateway apps/sdkwork-gameengine-pc
 git commit -m "feat: wire game engine gateway and pc services"
 ```
 

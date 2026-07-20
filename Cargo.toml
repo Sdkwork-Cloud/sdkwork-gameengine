@@ -1,8 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/sdkwork-gameengine-gateway-assembly",
-    "crates/sdkwork-gameengine-standalone-gateway",
+    "crates/sdkwork-api-gameengine-assembly",
+    "crates/sdkwork-api-gameengine-assembly",
+    "crates/sdkwork-api-gameengine-standalone-gateway",
     "crates/sdkwork-gameengine-service-host",
     "crates/sdkwork-games-database-host",
     "crates/sdkwork-game-catalog-service",
@@ -39,8 +40,8 @@ edition = "2021"
 version = "0.1.0"
 
 [workspace.dependencies]
-sdkwork_gameengine_standalone_gateway = { package = "sdkwork-gameengine-standalone-gateway", path = "crates/sdkwork-gameengine-standalone-gateway" }
-sdkwork_gameengine_gateway_assembly = { package = "sdkwork-gameengine-gateway-assembly", path = "crates/sdkwork-gameengine-gateway-assembly" }
+sdkwork_api_gameengine_standalone_gateway = { package = "sdkwork-api-gameengine-standalone-gateway", path = "crates/sdkwork-api-gameengine-standalone-gateway" }
+sdkwork_api_gameengine_assembly = { package = "sdkwork-api-gameengine-assembly", path = "crates/sdkwork-api-gameengine-assembly" }
 sdkwork_gameengine_service_host = { package = "sdkwork-gameengine-service-host", path = "crates/sdkwork-gameengine-service-host" }
 sdkwork_games_database_host = { package = "sdkwork-games-database-host", path = "crates/sdkwork-games-database-host" }
 sdkwork_game_catalog_service = { package = "sdkwork-game-catalog-service", path = "crates/sdkwork-game-catalog-service" }
