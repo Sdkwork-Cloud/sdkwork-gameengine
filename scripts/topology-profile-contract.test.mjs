@@ -71,14 +71,7 @@ test('topology profiles use SDKWork v4 two-segment profile ids', () => {
     assert.equal(values.VITE_SDKWORK_GAMES_DEPLOYMENT_PROFILE, deploymentProfile, `${profilePath} client profile`);
     assert.ok(!('SDKWORK_GAMES_SERVICE_LAYOUT' in values), `${profilePath} must not expose service layout`);
 
-    if (deploymentProfile === 'cloud') {
-      assert.equal(values.SDKWORK_GAMES_PLATFORM_API_GATEWAY_AUTOSTART, 'true', `${profilePath} platform gateway autostart`);
-      assert.equal(
-        values.SDKWORK_API_CLOUD_GATEWAY_CONFIG,
-        `configs/sdkwork-api-cloud-gateway.gameengine.${environment}.toml`,
-        `${profilePath} platform gateway config`,
-      );
-    }
+    assert.ok(!('SDKWORK_GAMES_PLATFORM_API_GATEWAY_AUTOSTART' in values));
   }
 });
 
@@ -111,31 +104,4 @@ test('production topology env uses structured PostgreSQL config without committe
     assert.ok(!('SDKWORK_GAMES_DATABASE_PASSWORD' in values), `${profilePath} must not commit database password`);
     assert.ok(!/postgres:\/\/sdkwork:sdkwork@127\.0\.0\.1/u.test(source), `${profilePath} must not commit a local password URL`);
   }
-});
-
-test('cloud gateway configs reference the games application ingress env key', () => {
-  for (const file of [
-    'configs/sdkwork-api-cloud-gateway.gameengine.development.toml',
-    'configs/sdkwork-api-cloud-gateway.gameengine.production.toml',
-  ]) {
-    const source = readFileSync(resolve(repoRoot, file), 'utf8');
-    assert.ok(source.includes('requiredBaseUrlKey = "SDKWORK_GAMES_APPLICATION_PUBLIC_HTTP_URL"'));
-    assert.ok(source.includes('sameOriginAllowed = false'));
-    assert.ok(!source.includes('SDKWORK_GAMEENGINE_APPLICATION_PUBLIC_HTTP_URL'));
-  }
-});
-
-test('production cloud gateway config is not a permissive local development profile', () => {
-  const source = readFileSync(
-    resolve(repoRoot, 'configs/sdkwork-api-cloud-gateway.gameengine.production.toml'),
-    'utf8',
-  );
-
-  assert.ok(!source.includes('baseUrl = "http://127.0.0.1'), 'production gateway must not default to a loopback upstream');
-  assert.ok(!source.includes('allowAnyOrigin = true'), 'production gateway must not allow any CORS origin');
-  assert.ok(source.includes('checkUpstreams = true'), 'production gateway readiness must check upstreams');
-  assert.ok(source.includes('metricsEnabled = true'), 'production gateway metrics must be enabled');
-  assert.ok(source.includes('tracingEnabled = true'), 'production gateway tracing must be enabled');
-  assert.ok(source.includes('rateLimitEnabled = true'), 'production gateway rate limiting must be enabled');
-  assert.ok(source.includes('circuitBreakerEnabled = true'), 'production gateway circuit breaker must be enabled');
 });

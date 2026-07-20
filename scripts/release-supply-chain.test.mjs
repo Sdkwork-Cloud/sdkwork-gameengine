@@ -27,23 +27,12 @@ test('release workflow enforces supply-chain evidence instead of placeholders', 
   assert.ok(!serialized.includes('deferred'));
 });
 
-test('production topology requires the cloud API gateway', () => {
+test('application topology does not own a platform gateway process', () => {
   const topology = readJson('specs/topology.spec.json');
   const production = topology.orchestration.profiles['cloud.production'];
   const gateway = production.processes.find((process) => process.id === 'platform.api-gateway');
 
-  assert.equal(gateway.required, true);
-});
-
-test('gateway app API prefixes match the SDKWork app API root', () => {
-  for (const file of [
-    'configs/sdkwork-api-cloud-gateway.gameengine.development.toml',
-    'configs/sdkwork-api-cloud-gateway.gameengine.production.toml',
-  ]) {
-    const source = readFileSync(resolve(repoRoot, file), 'utf8');
-    assert.ok(source.includes('apiPrefix = "/app/v3/api"'), `${file} must use the app API root`);
-    assert.ok(!source.includes('apiPrefix = "/app/v3/api/gameengine"'));
-  }
+  assert.equal(gateway, undefined);
 });
 
 test('PC app manifest requires checksum signature and SBOM release evidence', () => {
