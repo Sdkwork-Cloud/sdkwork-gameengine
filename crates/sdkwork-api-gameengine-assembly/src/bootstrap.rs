@@ -17,12 +17,12 @@ pub struct ApiAssembly {
     pub router: Router,
 }
 
-pub async fn assemble_business_router() -> Result<ApiAssembly, String> {
+pub async fn assemble_business_routes() -> Result<ApiAssembly, String> {
     let services = build_gateway_services().await?;
-    Ok(assemble_business_router_with_services(services))
+    Ok(assemble_api_router_with_services(services))
 }
 
-pub fn assemble_business_router_with_services(
+pub fn assemble_api_router_with_services(
     services: GatewayServices,
 ) -> ApiAssembly {
     let app = Router::new()
@@ -44,18 +44,18 @@ pub fn assemble_business_router_with_services(
     }
 }
 
-pub fn assemble_business_router_with_service_parts(
+pub fn assemble_api_router_with_service_parts(
     catalog: SharedCatalogService,
     leaderboard: SharedLeaderboardService,
     room: SharedRoomService,
 ) -> ApiAssembly {
-    assemble_business_router_with_services(GatewayServices {
+    assemble_api_router_with_services(GatewayServices {
         catalog,
         leaderboard,
         room,
     })
 }
 
-pub async fn assemble_api_router() -> Result<ApiAssembly, String> {
-    assemble_business_router().await
+pub async fn assemble_business_routes() -> Result<ApiAssembly, String> {
+    assemble_api_router().await
 }

@@ -1,7 +1,7 @@
 use axum::Router;
 
 use sdkwork_api_gameengine_assembly::{
-    assemble_business_router_with_service_parts, with_games_app_request_context,
+    assemble_api_router_with_service_parts, with_games_app_request_context,
     SharedCatalogService, SharedLeaderboardService, SharedRoomService,
 };
 use sdkwork_routes_health_app_api::build_health_router;
@@ -11,7 +11,7 @@ pub async fn build_router(
     leaderboard_service: SharedLeaderboardService,
     room_service: SharedRoomService,
 ) -> Router {
-    let business = assemble_business_router_with_service_parts(
+    let business = assemble_api_router_with_service_parts(
         catalog_service,
         leaderboard_service,
         room_service,
