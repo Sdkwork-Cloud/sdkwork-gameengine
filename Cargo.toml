@@ -5,13 +5,12 @@ members = [
     "crates/sdkwork-api-gameengine-assembly",
     "crates/sdkwork-api-gameengine-standalone-gateway",
     "crates/sdkwork-gameengine-service-host",
-    "crates/sdkwork-games-database-host",
+    "crates/sdkwork-gameengine-database-host",
     "crates/sdkwork-game-catalog-service",
     "crates/sdkwork-game-catalog-repository-sqlx",
     "crates/sdkwork-routes-games-support",
-    "crates/sdkwork-routes-health-app-api",
-    "crates/sdkwork-routes-catalog-app-api",
-    "crates/sdkwork-routes-catalog-backend-api",
+    "crates/sdkwork-routes-gameengine-catalog-app-api",
+    "crates/sdkwork-routes-gameengine-catalog-backend-api",
     "crates/sdkwork-game-leaderboard-service",
     "crates/sdkwork-game-leaderboard-repository-sqlx",
     "crates/sdkwork-routes-leaderboard-app-api",
@@ -43,13 +42,12 @@ version = "0.1.0"
 sdkwork_api_gameengine_standalone_gateway = { package = "sdkwork-api-gameengine-standalone-gateway", path = "crates/sdkwork-api-gameengine-standalone-gateway" }
 sdkwork_api_gameengine_assembly = { package = "sdkwork-api-gameengine-assembly", path = "crates/sdkwork-api-gameengine-assembly" }
 sdkwork_gameengine_service_host = { package = "sdkwork-gameengine-service-host", path = "crates/sdkwork-gameengine-service-host" }
-sdkwork_games_database_host = { package = "sdkwork-games-database-host", path = "crates/sdkwork-games-database-host" }
+sdkwork_gameengine_database_host = { package = "sdkwork-gameengine-database-host", path = "crates/sdkwork-gameengine-database-host" }
 sdkwork_game_catalog_service = { package = "sdkwork-game-catalog-service", path = "crates/sdkwork-game-catalog-service" }
 sdkwork_game_catalog_repository_sqlx = { package = "sdkwork-game-catalog-repository-sqlx", path = "crates/sdkwork-game-catalog-repository-sqlx" }
 sdkwork_routes_games_support = { package = "sdkwork-routes-games-support", path = "crates/sdkwork-routes-games-support" }
-sdkwork_routes_health_app_api = { package = "sdkwork-routes-health-app-api", path = "crates/sdkwork-routes-health-app-api" }
-sdkwork_routes_catalog_app_api = { package = "sdkwork-routes-catalog-app-api", path = "crates/sdkwork-routes-catalog-app-api" }
-sdkwork_routes_catalog_backend_api = { package = "sdkwork-routes-catalog-backend-api", path = "crates/sdkwork-routes-catalog-backend-api" }
+sdkwork_routes_gameengine_catalog_app_api = { package = "sdkwork-routes-gameengine-catalog-app-api", path = "crates/sdkwork-routes-gameengine-catalog-app-api" }
+sdkwork_routes_gameengine_catalog_backend_api = { package = "sdkwork-routes-gameengine-catalog-backend-api", path = "crates/sdkwork-routes-gameengine-catalog-backend-api" }
 sdkwork_game_leaderboard_service = { package = "sdkwork-game-leaderboard-service", path = "crates/sdkwork-game-leaderboard-service" }
 sdkwork_game_leaderboard_repository_sqlx = { package = "sdkwork-game-leaderboard-repository-sqlx", path = "crates/sdkwork-game-leaderboard-repository-sqlx" }
 sdkwork_routes_leaderboard_app_api = { package = "sdkwork-routes-leaderboard-app-api", path = "crates/sdkwork-routes-leaderboard-app-api" }

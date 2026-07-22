@@ -1,0 +1,16 @@
+[package]
+name = "sdkwork-gameengine-database-host"
+version.workspace = true
+edition.workspace = true
+description = "SDKWork Games database lifecycle bootstrap."
+
+[lib]
+name = "sdkwork_gameengine_database_host"
+path = "src/lib.rs"
+
+[dependencies]
+dotenvy.workspace = true
+sdkwork-database-config = { workspace = true }
+sdkwork-database-lifecycle = { workspace = true }
+sdkwork-database-spi = { workspace = true }
+sdkwork-database-sqlx = { workspace = true }

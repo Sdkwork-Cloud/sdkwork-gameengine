@@ -17,8 +17,8 @@ sdkwork-web-core.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-web-contract.workspace = true
 sdkwork-iam-web-adapter.workspace = true
-sdkwork-routes-catalog-app-api = { path = "../sdkwork-routes-catalog-app-api" }
-sdkwork-routes-catalog-backend-api = { path = "../sdkwork-routes-catalog-backend-api" }
+sdkwork-routes-gameengine-catalog-app-api = { path = "../sdkwork-routes-gameengine-catalog-app-api" }
+sdkwork-routes-gameengine-catalog-backend-api = { path = "../sdkwork-routes-gameengine-catalog-backend-api" }
 sdkwork-routes-leaderboard-app-api = { path = "../sdkwork-routes-leaderboard-app-api" }
 sdkwork-routes-room-app-api = { path = "../sdkwork-routes-room-app-api" }
 sdkwork-routes-room-backend-api = { path = "../sdkwork-routes-room-backend-api" }

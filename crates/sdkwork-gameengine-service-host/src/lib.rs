@@ -8,7 +8,7 @@ use sdkwork_game_leaderboard_repository_sqlx::{
 use sdkwork_game_leaderboard_service::LeaderboardService;
 use sdkwork_game_room_repository_sqlx::{GameRoomRepositoryKind, SqlxGameRoomRepository};
 use sdkwork_game_room_service::GameRoomService;
-use sdkwork_games_database_host::GamesDatabaseHost;
+use sdkwork_gameengine_database_host::GamesDatabaseHost;
 
 pub type SharedCatalogService = Arc<GameCatalogService<GameCatalogRepositoryKind>>;
 pub type SharedLeaderboardService = Arc<LeaderboardService<LeaderboardRepositoryKind>>;
@@ -21,7 +21,7 @@ pub struct GatewayServices {
 }
 
 pub async fn build_gateway_services() -> Result<GatewayServices, String> {
-    let host = sdkwork_games_database_host::bootstrap_games_database_from_env().await?;
+    let host = sdkwork_gameengine_database_host::bootstrap_games_database_from_env().await?;
     Ok(GatewayServices {
         catalog: build_catalog_service(&host),
         leaderboard: build_leaderboard_service(&host),

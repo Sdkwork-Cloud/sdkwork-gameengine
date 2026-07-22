@@ -20,7 +20,7 @@ leaderboard, audit, and operations foundations aligned with `../sdkwork-specs`.
 ## Framework integration
 
 - **HTTP**: `sdkwork-web-framework` via `crates/sdkwork-api-gameengine-standalone-gateway` (catalog, room, leaderboard)
-- **Database**: `sdkwork-database` via `crates/sdkwork-games-database-host` and `database/`
+- **Database**: `sdkwork-database` via `crates/sdkwork-gameengine-database-host` and `database/`
   (`game_catalog`, `game_mode`, `game_ruleset`, `game_room`, `game_room_seat`,
   `game_score_event`, `game_point_ledger`, `game_point_balance`,
   `game_leaderboard_config`, `game_leaderboard_entry`, `game_audit_record`)

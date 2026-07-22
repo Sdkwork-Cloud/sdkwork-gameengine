@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use sdkwork_game_room_repository_sqlx::{GameRoomRepositoryKind, SqlxGameRoomRepository};
 use sdkwork_game_room_service::GameRoomService;
-use sdkwork_games_database_host::GamesDatabaseHost;
+use sdkwork_gameengine_database_host::GamesDatabaseHost;
 
 pub type SharedRoomService = Arc<GameRoomService<GameRoomRepositoryKind>>;
 

@@ -6,12 +6,11 @@ Rust workspace members for the **sdkwork-gameengine** platform (shared across ga
 | --- | --- |
 | `sdkwork-api-gameengine-standalone-gateway` | HTTP server with `sdkwork-web-framework` + route assembly |
 | `sdkwork-routes-games-support` | Shared `SdkWorkApiResponse`, ProblemDetail, trace correlation |
-| `sdkwork-routes-health-app-api` | Health/ready routes |
-| `sdkwork-routes-catalog-app-api` | Catalog list/detail app-api routes |
-| `sdkwork-routes-catalog-backend-api` | Catalog backend-admin routes |
+| `sdkwork-routes-gameengine-catalog-app-api` | Catalog list/detail app-api routes |
+| `sdkwork-routes-gameengine-catalog-backend-api` | Catalog backend-admin routes |
 | `sdkwork-routes-leaderboard-app-api` | Leaderboard list + `me` app-api routes |
 | `sdkwork-routes-room-app-api` | Game room list app-api routes |
-| `sdkwork-games-database-host` | `sdkwork-database` lifecycle bootstrap |
+| `sdkwork-gameengine-database-host` | `sdkwork-database` lifecycle bootstrap |
 | `sdkwork-game-catalog-service` | Catalog domain service |
 | `sdkwork-game-catalog-repository-sqlx` | Catalog SQLx persistence and feature-gated memory test store |
 | `sdkwork-game-mode-service` | Game mode domain service |

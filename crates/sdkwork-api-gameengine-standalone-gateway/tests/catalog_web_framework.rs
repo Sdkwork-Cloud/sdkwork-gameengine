@@ -1,11 +1,11 @@
 use axum::body::{to_bytes, Body};
 use axum::http::{header, Request, StatusCode};
+use sdkwork_api_gameengine_standalone_gateway::{build_router, with_games_app_request_context};
 use sdkwork_game_catalog_repository_sqlx::{
     GameCatalogRepositoryKind, InMemoryGameCatalogRepository,
 };
 use sdkwork_game_catalog_service::GameCatalogService;
-use sdkwork_api_gameengine_standalone_gateway::{build_router, with_games_app_request_context};
-use sdkwork_routes_catalog_app_api::build_catalog_app_router;
+use sdkwork_routes_gameengine_catalog_app_api::build_catalog_app_router;
 use sdkwork_web_core::{access_token_jwt, auth_token_jwt, TRACEPARENT_HEADER};
 use std::sync::Arc;
 use tower::ServiceExt;
@@ -118,7 +118,7 @@ async fn catalog_router_rejects_forbidden_pagination_alias_with_problem_json() {
 }
 
 #[tokio::test]
-async fn build_router_merges_health_and_catalog_routes() {
+async fn build_router_mounts_infrastructure_and_catalog_routes() {
     use sdkwork_game_leaderboard_repository_sqlx::{
         InMemoryLeaderboardRepository, LeaderboardRepositoryKind,
     };
@@ -136,7 +136,7 @@ async fn build_router_merges_health_and_catalog_routes() {
     let response = app
         .oneshot(
             Request::builder()
-                .uri("/app/v3/api/games/health")
+                .uri("/healthz")
                 .body(Body::empty())
                 .unwrap(),
         )

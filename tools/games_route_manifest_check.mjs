@@ -5,9 +5,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifests = [
-  'sdks/_route-manifests/app-api/sdkwork-routes-health-app-api.route-manifest.json',
-  'sdks/_route-manifests/app-api/sdkwork-routes-catalog-app-api.route-manifest.json',
-  'sdks/_route-manifests/backend-api/sdkwork-routes-catalog-backend-api.route-manifest.json',
+  'sdks/_route-manifests/app-api/sdkwork-routes-gameengine-catalog-app-api.route-manifest.json',
+  'sdks/_route-manifests/backend-api/sdkwork-routes-gameengine-catalog-backend-api.route-manifest.json',
   'sdks/_route-manifests/backend-api/sdkwork-routes-room-backend-api.route-manifest.json',
 ];
 

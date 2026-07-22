@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "sdkwork-routes-catalog-backend-api",
+    "name": "sdkwork-routes-gameengine-catalog-backend-api",
     "displayName": "SDKWork Catalog Backend API Routes",
     "version": "0.1.0",
     "type": "rust-route-crate",
-    "root": "crates/sdkwork-routes-catalog-backend-api",
+    "root": "crates/sdkwork-routes-gameengine-catalog-backend-api",
     "domain": "game",
     "capability": "catalog",
     "surface": "backend-api",
@@ -70,7 +70,7 @@
     "runtimeEntrypoints": [
       "build_catalog_backend_router"
     ],
-    "routeManifest": "sdks/_route-manifests/backend-api/sdkwork-routes-catalog-backend-api.route-manifest.json",
+    "routeManifest": "sdks/_route-manifests/backend-api/sdkwork-routes-gameengine-catalog-backend-api.route-manifest.json",
     "sdkClients": [],
     "sdkDependencies": [],
     "dependencyApiExports": [],
@@ -80,7 +80,7 @@
   },
   "verification": {
     "commands": [
-      "cargo test -p sdkwork-routes-catalog-backend-api"
+      "cargo test -p sdkwork-routes-gameengine-catalog-backend-api"
     ]
   }
 }

@@ -1304,9 +1304,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.37.5"
+version = "0.41.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "331e97a1af0bf59823e6eadffe373d7b27f485be8748f71471c662c1f269b7fb"
+checksum = "e660451e55124f798a69a5af3f49ccfbefbd41910eefd25caf2393e1f3473ec1"
 dependencies = [
  "memchr",
 ]
@@ -1626,6 +1626,52 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "sdkwork-api-gameengine-assembly"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "sdkwork-gameengine-service-host",
+ "sdkwork-iam-web-adapter",
+ "sdkwork-routes-gameengine-catalog-app-api",
+ "sdkwork-routes-gameengine-catalog-backend-api",
+ "sdkwork-routes-games-support",
+ "sdkwork-routes-leaderboard-app-api",
+ "sdkwork-routes-room-app-api",
+ "sdkwork-routes-room-backend-api",
+ "sdkwork-web-axum",
+ "sdkwork-web-contract",
+ "sdkwork-web-core",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
+name = "sdkwork-api-gameengine-standalone-gateway"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "http-body-util",
+ "sdkwork-api-gameengine-assembly",
+ "sdkwork-game-catalog-repository-sqlx",
+ "sdkwork-game-catalog-service",
+ "sdkwork-game-leaderboard-repository-sqlx",
+ "sdkwork-game-leaderboard-service",
+ "sdkwork-game-room-repository-sqlx",
+ "sdkwork-game-room-service",
+ "sdkwork-routes-gameengine-catalog-app-api",
+ "sdkwork-web-bootstrap",
+ "sdkwork-web-core",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "sdkwork-database-config"
 version = "0.1.0"
 dependencies = [
@@ -1702,6 +1748,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+ "url",
 ]
 
 [[package]]
@@ -1955,24 +2002,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-gameengine-gateway-assembly"
+name = "sdkwork-gameengine-database-host"
 version = "0.1.0"
 dependencies = [
- "axum",
- "sdkwork-gameengine-service-host",
- "sdkwork-iam-web-adapter",
- "sdkwork-routes-catalog-app-api",
- "sdkwork-routes-catalog-backend-api",
- "sdkwork-routes-games-support",
- "sdkwork-routes-leaderboard-app-api",
- "sdkwork-routes-room-app-api",
- "sdkwork-routes-room-backend-api",
- "sdkwork-web-axum",
- "sdkwork-web-contract",
- "sdkwork-web-core",
- "serde",
- "serde_json",
- "tokio",
+ "dotenvy",
+ "sdkwork-database-config",
+ "sdkwork-database-lifecycle",
+ "sdkwork-database-spi",
+ "sdkwork-database-sqlx",
 ]
 
 [[package]]
@@ -1985,44 +2022,7 @@ dependencies = [
  "sdkwork-game-leaderboard-service",
  "sdkwork-game-room-repository-sqlx",
  "sdkwork-game-room-service",
- "sdkwork-games-database-host",
-]
-
-[[package]]
-name = "sdkwork-gameengine-standalone-gateway"
-version = "0.1.0"
-dependencies = [
- "axum",
- "http-body-util",
- "sdkwork-game-catalog-repository-sqlx",
- "sdkwork-game-catalog-service",
- "sdkwork-game-leaderboard-repository-sqlx",
- "sdkwork-game-leaderboard-service",
- "sdkwork-game-room-repository-sqlx",
- "sdkwork-game-room-service",
- "sdkwork-gameengine-gateway-assembly",
- "sdkwork-routes-catalog-app-api",
- "sdkwork-routes-health-app-api",
- "sdkwork-web-bootstrap",
- "sdkwork-web-core",
- "serde",
- "serde_json",
- "tokio",
- "tower",
- "tower-http",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "sdkwork-games-database-host"
-version = "0.1.0"
-dependencies = [
- "dotenvy",
- "sdkwork-database-config",
- "sdkwork-database-lifecycle",
- "sdkwork-database-spi",
- "sdkwork-database-sqlx",
+ "sdkwork-gameengine-database-host",
 ]
 
 [[package]]
@@ -2086,6 +2086,7 @@ dependencies = [
  "sdkwork-iam-context-service",
  "sdkwork-utils-rust",
  "sdkwork-web-axum",
+ "sdkwork-web-bootstrap",
  "sdkwork-web-core",
  "serde",
  "serde_json",
@@ -2104,7 +2105,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-routes-catalog-app-api"
+name = "sdkwork-routes-gameengine-catalog-app-api"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -2118,12 +2119,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-routes-catalog-backend-api"
+name = "sdkwork-routes-gameengine-catalog-backend-api"
 version = "0.1.0"
 dependencies = [
  "axum",
  "sdkwork-game-catalog-service",
- "sdkwork-routes-catalog-app-api",
+ "sdkwork-routes-gameengine-catalog-app-api",
  "sdkwork-routes-games-support",
  "sdkwork-web-axum",
  "serde",
@@ -2145,15 +2146,6 @@ dependencies = [
  "tokio",
  "tower",
  "tracing",
-]
-
-[[package]]
-name = "sdkwork-routes-health-app-api"
-version = "0.1.0"
-dependencies = [
- "axum",
- "sdkwork-web-core",
- "serde_json",
 ]
 
 [[package]]

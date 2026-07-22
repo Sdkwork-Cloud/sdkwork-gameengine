@@ -29,13 +29,12 @@ struct RouteManifestAuth {
 fn main() {
     let manifest_root = Path::new("../../sdks/_route-manifests");
     let app_manifest_paths = [
-        manifest_root.join("app-api/sdkwork-routes-health-app-api.route-manifest.json"),
-        manifest_root.join("app-api/sdkwork-routes-catalog-app-api.route-manifest.json"),
+        manifest_root.join("app-api/sdkwork-routes-gameengine-catalog-app-api.route-manifest.json"),
         manifest_root.join("app-api/sdkwork-routes-leaderboard-app-api.route-manifest.json"),
         manifest_root.join("app-api/sdkwork-routes-room-app-api.route-manifest.json"),
     ];
-    let backend_manifest_path =
-        manifest_root.join("backend-api/sdkwork-routes-catalog-backend-api.route-manifest.json");
+    let backend_manifest_path = manifest_root
+        .join("backend-api/sdkwork-routes-gameengine-catalog-backend-api.route-manifest.json");
 
     for path in app_manifest_paths
         .iter()

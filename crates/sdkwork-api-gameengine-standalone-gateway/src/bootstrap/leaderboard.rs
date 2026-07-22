@@ -4,7 +4,7 @@ use sdkwork_game_leaderboard_repository_sqlx::{
     LeaderboardRepositoryKind, SqlxLeaderboardRepository,
 };
 use sdkwork_game_leaderboard_service::LeaderboardService;
-use sdkwork_games_database_host::GamesDatabaseHost;
+use sdkwork_gameengine_database_host::GamesDatabaseHost;
 
 pub type SharedLeaderboardService = Arc<LeaderboardService<LeaderboardRepositoryKind>>;
 

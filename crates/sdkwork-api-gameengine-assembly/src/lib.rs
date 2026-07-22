@@ -7,9 +7,8 @@ mod generated;
 mod web_bootstrap;
 
 pub use bootstrap::{
-    assemble_api_router, assemble_api_router_with_service_parts,
-    assemble_api_router_with_services, assemble_api_router,
-    ApiAssembly,
+    assemble_api_router, assemble_api_router_with_service_parts, assemble_api_router_with_services,
+    assemble_business_routes, ApiAssembly,
 };
 pub use sdkwork_gameengine_service_host::{
     build_catalog_service, build_gateway_services, build_leaderboard_service, build_room_service,
