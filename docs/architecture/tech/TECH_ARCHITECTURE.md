@@ -337,9 +337,9 @@ The database is contract-first:
 ```text
 database/contract/schema.yaml
   -> database/ddl/baseline/postgres/0001_games_baseline.sql
-  -> database/ddl/baseline/sqlite/0001_games_baseline.sql
+  -> tests/fixtures/database/sqlite/ddl/baseline/0001_games_baseline.sql
   -> database/migrations/postgres/*
-  -> database/migrations/sqlite/*
+  -> tests/fixtures/database/sqlite/migrations/*
   -> repositories
   -> API/SDK DTOs
 ```

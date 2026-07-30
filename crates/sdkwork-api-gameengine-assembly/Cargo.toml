@@ -11,6 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 axum.workspace = true
 tokio.workspace = true
+sdkwork-web-bootstrap.workspace = true
 sdkwork_gameengine_service_host.workspace = true
 sdkwork_routes_games_support.workspace = true
 sdkwork-web-core.workspace = true

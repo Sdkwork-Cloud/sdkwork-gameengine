@@ -109,7 +109,7 @@ git commit -m "docs: define game engine foundation architecture"
 - Modify: `database/contract/schema.yaml`
 - Modify: `database/contract/table-registry.json`
 - Modify: `database/ddl/baseline/postgres/0001_games_baseline.sql`
-- Modify: `database/ddl/baseline/sqlite/0001_games_baseline.sql`
+- Modify: `tests/fixtures/database/sqlite/ddl/baseline/0001_games_baseline.sql`
 - Modify: `database/README.md`
 
 - [x] Add target P0 tables: `game_mode`, `game_ruleset`, `game_room_seat`, `game_score_event`, `game_point_ledger`, `game_point_balance`, `game_leaderboard_config`, `game_leaderboard_entry`, `game_settlement_job`, `game_reward_intent`, `game_engine_event`, `game_audit_record`.

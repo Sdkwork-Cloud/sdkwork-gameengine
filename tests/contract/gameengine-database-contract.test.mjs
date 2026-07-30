@@ -60,7 +60,7 @@ test('game engine foundation database contract declares all P0 tables', () => {
 
 test('legacy leaderboard table name and raw cover_url are not part of the pre-GA baseline', () => {
   const postgresSql = read('database/ddl/baseline/postgres/0001_games_baseline.sql');
-  const sqliteSql = read('database/ddl/baseline/sqlite/0001_games_baseline.sql');
+  const sqliteSql = read('tests/fixtures/database/sqlite/ddl/baseline/0001_games_baseline.sql');
   const registry = registryTables();
 
   assert.ok(!createdTables(postgresSql).includes('game_leaderboard'));

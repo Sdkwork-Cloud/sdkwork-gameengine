@@ -15,9 +15,9 @@ Executable database assets remain under `database/`:
 - `database/database.manifest.json`
 - `database/contract/schema.yaml`
 - `database/ddl/baseline/postgres/0001_games_baseline.sql`
-- `database/ddl/baseline/sqlite/0001_games_baseline.sql`
+- `tests/fixtures/database/sqlite/ddl/baseline/0001_games_baseline.sql`
 - `database/migrations/postgres/`
-- `database/migrations/sqlite/`
+- `tests/fixtures/database/sqlite/migrations/`
 - `database/drift/policy.yaml`
 
 Runtime database configuration is not inferred from legacy single URL keys. Server and container

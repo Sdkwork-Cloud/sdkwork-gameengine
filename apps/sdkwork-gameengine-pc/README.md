@@ -4,9 +4,9 @@ PC browser application root for the SDKWork Games platform.
 
 ## Structure
 
-- `packages/sdkwork-gameengine-pc-core` â€?shared runtime (stores, SDK wiring)
-- `packages/sdkwork-gameengine-pc-commons` â€?shared UI components and hooks
-- `packages/sdkwork-gameengine-pc-<capability>` â€?user-facing capability modules
+- `packages/sdkwork-gameengine-pc-core` â€”shared runtime (stores, SDK wiring)
+- `packages/sdkwork-gameengine-pc-commons` â€”shared UI components and hooks
+- `packages/sdkwork-gameengine-pc-<capability>` â€”user-facing capability modules
 
 Package names follow `APP_PC_ARCHITECTURE_SPEC.md`: `sdkwork-gameengine-pc-*` for app/user modules.
 
