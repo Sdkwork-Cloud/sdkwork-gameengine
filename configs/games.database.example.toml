@@ -13,11 +13,11 @@ process_name = "sdkwork-api-gameengine-standalone-gateway"
 
 [database]
 engine = "postgresql"
-host = "db.games.internal"
+host = "db.example.com"
 port = 5432
-database = "sdkwork_games_prod"
-schema = "sdkwork_games_prod"
-username = "sdkwork_games"
+database = "sdkwork_ai_prod"
+schema = "sdkwork_ai_prod"
+username = "sdkwork_ai_prod"
 password_file = "/run/secrets/sdkwork/games/database-password"
 ssl_mode = "require"
 max_connections = 32

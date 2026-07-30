@@ -357,8 +357,8 @@ Required release evidence:
   slicing.
 - App consumers import composed SDK packages only; no raw HTTP or generated transport imports.
 - Database manifests, DDL, seeds, and materialized contracts validate for PostgreSQL and SQLite.
-- Production database runtime uses structured `SDKWORK_GAMES_DATABASE_*` fields, requires
-  `SDKWORK_GAMES_DATABASE_PASSWORD_FILE`, and keeps `SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`.
+- Production database runtime uses structured `SDKWORK_DATABASE_*` fields, requires
+  `SDKWORK_DATABASE_PASSWORD_FILE`, and keeps `SDKWORK_DATABASE_AUTO_MIGRATE=false`.
 - Rust services pass workspace tests and formatting checks.
 - PC packages pass typecheck and production-readiness contract tests.
 - Production PC bundle exposes only SDK-backed catalog, room, active-room, and global read-only

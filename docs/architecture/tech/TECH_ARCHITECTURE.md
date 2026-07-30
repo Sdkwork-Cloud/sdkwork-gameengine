@@ -319,9 +319,9 @@ does not use loopback upstreams, does not allow arbitrary origins, sets
 metrics/tracing, and enables WAF, rate limiting, and circuit breaker protection.
 
 Standalone and cloud preserve the same API contracts, SDK method shapes, database semantics, and
-security behavior. Runtime database config uses structured `SDKWORK_GAMES_DATABASE_*` fields.
-Production profiles require `SDKWORK_GAMES_DATABASE_PASSWORD_FILE` and
-`SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`; development profiles may use local inline PostgreSQL
+security behavior. Runtime database config uses structured `SDKWORK_DATABASE_*` fields.
+Production profiles require `SDKWORK_DATABASE_PASSWORD_FILE` and
+`SDKWORK_DATABASE_AUTO_MIGRATE=false`; development profiles may use local inline PostgreSQL
 password env values for bootstrap only.
 
 Release safety is enforced by `sdkwork.workflow.json` and the PC app manifest: checksums,

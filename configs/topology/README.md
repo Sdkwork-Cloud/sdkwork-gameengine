@@ -23,7 +23,7 @@ Production URL ownership:
 
 Development profiles may use local PostgreSQL password env values for local
 bootstrap. Production profiles use structured PostgreSQL fields with
-`SDKWORK_GAMES_DATABASE_PASSWORD_FILE` and `SDKWORK_GAMES_DATABASE_AUTO_MIGRATE=false`.
+`SDKWORK_DATABASE_PASSWORD_FILE` and `SDKWORK_DATABASE_AUTO_MIGRATE=false`.
 
 See `../../../sdkwork-specs/APP_RUNTIME_TOPOLOGY_SPEC.md` and
 `../../../sdkwork-specs/APP_RUNTIME_TOPOLOGY_NAMING.md`.

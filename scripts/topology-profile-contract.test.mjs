@@ -94,14 +94,14 @@ test('production topology env uses structured PostgreSQL config without committe
 
     const { source, values } = readProfileEnv(profilePath);
 
-    assert.equal(values.SDKWORK_GAMES_DATABASE_ENGINE, 'postgresql', `${profilePath} database engine`);
-    assert.ok(values.SDKWORK_GAMES_DATABASE_HOST, `${profilePath} database host`);
-    assert.ok(values.SDKWORK_GAMES_DATABASE_NAME, `${profilePath} database name`);
-    assert.ok(values.SDKWORK_GAMES_DATABASE_USERNAME, `${profilePath} database username`);
-    assert.ok(values.SDKWORK_GAMES_DATABASE_PASSWORD_FILE, `${profilePath} database password file`);
-    assert.ok(values.SDKWORK_GAMES_DATABASE_SSL_MODE, `${profilePath} database ssl mode`);
+    assert.equal(values.SDKWORK_DATABASE_ENGINE, 'postgresql', `${profilePath} database engine`);
+    assert.ok(values.SDKWORK_DATABASE_HOST, `${profilePath} database host`);
+    assert.ok(values.SDKWORK_DATABASE_NAME, `${profilePath} database name`);
+    assert.ok(values.SDKWORK_DATABASE_USERNAME, `${profilePath} database username`);
+    assert.ok(values.SDKWORK_DATABASE_PASSWORD_FILE, `${profilePath} database password file`);
+    assert.ok(values.SDKWORK_DATABASE_SSL_MODE, `${profilePath} database ssl mode`);
     assert.ok(!('GAMES_DATABASE_URL' in values), `${profilePath} must not use legacy GAMES_DATABASE_URL`);
-    assert.ok(!('SDKWORK_GAMES_DATABASE_PASSWORD' in values), `${profilePath} must not commit database password`);
+    assert.ok(!('SDKWORK_DATABASE_PASSWORD' in values), `${profilePath} must not commit database password`);
     assert.ok(!/postgres:\/\/sdkwork:sdkwork@127\.0\.0\.1/u.test(source), `${profilePath} must not commit a local password URL`);
   }
 });

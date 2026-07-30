@@ -26,7 +26,7 @@ scope.
   `standalone.production`, `cloud.development`, and `cloud.production`.
 - Production cloud gateway config uses explicit public hosts, no loopback upstream, restricted CORS,
   upstream readiness checks, metrics, tracing, WAF, rate limiting, and circuit breaker protection.
-- Database runtime config uses structured `SDKWORK_GAMES_DATABASE_*` keys. Production requires an
+- Database runtime config uses structured `SDKWORK_DATABASE_*` keys. Production requires an
   explicit database config and a password file for structured PostgreSQL config.
 - List/search service boundaries now reject invalid SDKWork pagination input before repository
   access. Requests with `page_size > 200`, `page = 0`, or forbidden pre-launch query aliases are

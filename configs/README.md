@@ -5,7 +5,7 @@ Safe checked-in examples for `sdkwork-games`. Local overrides such as `.env.loca
 
 | File | Purpose |
 | --- | --- |
-| `games.database.example.toml` | Structured production PostgreSQL template using `SDKWORK_GAMES_DATABASE_*` fields and `password_file`; no committed database secrets. |
+| `games.database.example.toml` | Structured production PostgreSQL template using `SDKWORK_DATABASE_*` fields and `password_file`; no committed database secrets. |
 | `topology/` | SDKWork v4 deployment profile env templates using `<deploymentProfile>.<environment>.env`. |
 
 Runtime config follows `../../sdkwork-specs/CONFIG_SPEC.md`,

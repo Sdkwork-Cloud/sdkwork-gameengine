@@ -1,10 +1,8 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use sdkwork_database_config::claw_database::{
-    build_postgres_database_url, postgres_url_with_search_path,
-};
-use sdkwork_database_config::{DatabaseConfig, DatabaseEngine, PgSslMode, PostgresConfig};
+use sdkwork_database_config::workspace_database::workspace_database_env_is_configured;
+use sdkwork_database_config::DatabaseConfig;
 use sdkwork_database_lifecycle::{lifecycle_options_from_env, LifecycleOrchestrator};
 use sdkwork_database_spi::{DatabaseAssetProvider, DatabaseManifest, DefaultDatabaseModule};
 use sdkwork_database_sqlx::{create_pool_from_config, DatabasePool};
@@ -61,75 +59,30 @@ pub async fn bootstrap_games_database_from_env() -> Result<GamesDatabaseHost, St
 }
 
 fn resolve_games_database_config_from_env() -> Result<DatabaseConfig, String> {
-    if let Some(url) = env_string("SDKWORK_GAMES_DATABASE_URL") {
-        let mut config = DatabaseConfig::from_env("GAMES")
-            .map_err(|error| format!("read games database config failed: {error}"))?;
-        config.url = url;
-        return Ok(config);
-    }
-
-    match env_string("SDKWORK_GAMES_DATABASE_ENGINE").as_deref() {
-        Some("postgres") | Some("postgresql") => resolve_structured_postgres_config(),
-        Some("sqlite") => DatabaseConfig::from_env("GAMES")
-            .map_err(|error| format!("read games database config failed: {error}")),
-        Some(other) => Err(format!(
-            "unsupported SDKWORK_GAMES_DATABASE_ENGINE: {other}; expected postgresql or sqlite"
-        )),
-        None if is_production_environment() => Err(
-            "SDKWORK_GAMES_DATABASE_ENGINE or SDKWORK_GAMES_DATABASE_URL is required for production"
-                .to_string(),
-        ),
-        None => DatabaseConfig::from_env("GAMES")
-            .map_err(|error| format!("read games database config failed: {error}")),
-    }
-}
-
-fn resolve_structured_postgres_config() -> Result<DatabaseConfig, String> {
-    let host = required_env("SDKWORK_GAMES_DATABASE_HOST")?;
-    let database = required_env("SDKWORK_GAMES_DATABASE_NAME")?;
-    let username = required_env("SDKWORK_GAMES_DATABASE_USERNAME")?;
-    let ssl_mode = env_string("SDKWORK_GAMES_DATABASE_SSL_MODE").unwrap_or_else(|| "prefer".into());
-    let port = env_string("SDKWORK_GAMES_DATABASE_PORT");
-    let password = resolve_database_password()?;
-    let database_url = build_postgres_database_url(
-        &host,
-        port.as_deref(),
-        &database,
-        &username,
-        &password,
-        Some(&ssl_mode),
-    );
-    let default_config = DatabaseConfig::default();
-    Ok(DatabaseConfig {
-        engine: DatabaseEngine::Postgres,
-        url: postgres_url_with_search_path(&database_url, "SDKWORK_GAMES"),
-        max_connections: env_u32(
-            "SDKWORK_GAMES_DATABASE_MAX_CONNECTIONS",
-            default_config.max_connections,
-        )?,
-        postgres: PostgresConfig {
-            ssl_mode: parse_pg_ssl_mode(&ssl_mode),
-            ..Default::default()
-        },
-        ..default_config
-    })
-}
-
-fn resolve_database_password() -> Result<String, String> {
-    if let Some(path) = env_string("SDKWORK_GAMES_DATABASE_PASSWORD_FILE") {
-        return std::fs::read_to_string(&path)
-            .map(|value| value.trim_end_matches(['\r', '\n']).to_string())
-            .map_err(|error| format!("read SDKWORK_GAMES_DATABASE_PASSWORD_FILE failed: {error}"));
-    }
-
     if is_production_environment() {
-        return Err(
-            "SDKWORK_GAMES_DATABASE_PASSWORD_FILE is required for production PostgreSQL config"
-                .to_string(),
-        );
+        if !workspace_database_env_is_configured() {
+            return Err(
+                "SDKWORK_DATABASE_ENGINE or SDKWORK_DATABASE_URL is required for production"
+                    .to_string(),
+            );
+        }
+        let structured_postgres = matches!(
+            env_string("SDKWORK_DATABASE_ENGINE")
+                .as_deref()
+                .map(str::to_ascii_lowercase)
+                .as_deref(),
+            Some("postgres") | Some("postgresql")
+        ) && env_string("SDKWORK_DATABASE_URL").is_none();
+        if structured_postgres && env_string("SDKWORK_DATABASE_PASSWORD_FILE").is_none() {
+            return Err(
+                "SDKWORK_DATABASE_PASSWORD_FILE is required for production PostgreSQL config"
+                    .to_string(),
+            );
+        }
     }
 
-    required_env("SDKWORK_GAMES_DATABASE_PASSWORD")
+    DatabaseConfig::from_env("GAMES")
+        .map_err(|error| format!("read games database config failed: {error}"))
 }
 
 fn is_production_environment() -> bool {
@@ -139,36 +92,11 @@ fn is_production_environment() -> bool {
     )
 }
 
-fn required_env(key: &str) -> Result<String, String> {
-    env_string(key).ok_or_else(|| format!("{key} is required"))
-}
-
 fn env_string(key: &str) -> Option<String> {
     std::env::var(key)
         .ok()
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty())
-}
-
-fn env_u32(key: &str, default: u32) -> Result<u32, String> {
-    match env_string(key) {
-        Some(value) => value
-            .parse::<u32>()
-            .map_err(|_| format!("{key} must be an unsigned integer")),
-        None => Ok(default),
-    }
-}
-
-fn parse_pg_ssl_mode(value: &str) -> PgSslMode {
-    match value.trim().to_ascii_lowercase().as_str() {
-        "disable" => PgSslMode::Disable,
-        "allow" => PgSslMode::Allow,
-        "prefer" => PgSslMode::Prefer,
-        "require" => PgSslMode::Require,
-        "verify-ca" | "verify_ca" => PgSslMode::VerifyCa,
-        "verify-full" | "verify_full" => PgSslMode::VerifyFull,
-        _ => PgSslMode::Prefer,
-    }
 }
 
 fn resolve_app_root() -> PathBuf {
@@ -243,24 +171,22 @@ mod tests {
         fs::write(&password_path, "secret value\n").expect("write secret");
         let password_path_string = password_path.to_string_lossy().to_string();
         let _guard = EnvGuard::set(&[
-            ("SDKWORK_GAMES_DATABASE_URL", None),
             ("SDKWORK_DATABASE_URL", None),
             ("DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_ENGINE", None),
-            ("SDKWORK_GAMES_DATABASE_ENGINE", Some("postgresql")),
-            ("SDKWORK_GAMES_DATABASE_HOST", Some("db.internal")),
-            ("SDKWORK_GAMES_DATABASE_PORT", Some("5433")),
-            ("SDKWORK_GAMES_DATABASE_NAME", Some("sdkwork_games_prod")),
-            ("SDKWORK_GAMES_DATABASE_SCHEMA", Some("sdkwork_games_prod")),
-            ("SDKWORK_GAMES_DATABASE_USERNAME", Some("sdkwork_games")),
+            ("SDKWORK_GAMES_ENVIRONMENT", None),
+            ("SDKWORK_DATABASE_ENGINE", Some("postgresql")),
+            ("SDKWORK_DATABASE_HOST", Some("db.internal")),
+            ("SDKWORK_DATABASE_PORT", Some("5433")),
+            ("SDKWORK_DATABASE_NAME", Some("sdkwork_ai_prod")),
+            ("SDKWORK_DATABASE_SCHEMA", Some("sdkwork_ai_prod")),
+            ("SDKWORK_DATABASE_USERNAME", Some("sdkwork_ai_prod")),
             (
-                "SDKWORK_GAMES_DATABASE_PASSWORD_FILE",
+                "SDKWORK_DATABASE_PASSWORD_FILE",
                 Some(password_path_string.as_str()),
             ),
-            ("SDKWORK_GAMES_DATABASE_PASSWORD", None),
-            ("SDKWORK_GAMES_DATABASE_SSL_MODE", Some("require")),
-            ("SDKWORK_GAMES_DATABASE_MAX_CONNECTIONS", Some("24")),
+            ("SDKWORK_DATABASE_PASSWORD", None),
+            ("SDKWORK_DATABASE_SSL_MODE", Some("require")),
+            ("SDKWORK_DATABASE_MAX_CONNECTIONS", Some("24")),
         ]);
 
         let config = resolve_games_database_config_from_env().expect("database config");
@@ -268,12 +194,12 @@ mod tests {
         assert_eq!(config.engine, DatabaseEngine::Postgres);
         assert_eq!(config.max_connections, 24);
         assert!(config.url.starts_with(
-            "postgresql://sdkwork_games:secret%20value@db.internal:5433/sdkwork_games_prod"
+            "postgresql://sdkwork_ai_prod:secret%20value@db.internal:5433/sdkwork_ai_prod"
         ));
         assert!(config.url.contains("sslmode=require"));
         assert!(config
             .url
-            .contains("options=-c%20search_path%3Dsdkwork_games_prod%2Cpublic"));
+            .contains("search_path%3Dsdkwork_ai_prod%2Cpublic"));
 
         let _ = fs::remove_file(password_path);
     }
@@ -282,43 +208,46 @@ mod tests {
     fn production_structured_postgres_requires_password_file() {
         let _lock = env_lock().lock().expect("env lock");
         let _guard = EnvGuard::set(&[
-            ("SDKWORK_GAMES_DATABASE_URL", None),
             ("SDKWORK_DATABASE_URL", None),
             ("DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_ENGINE", None),
             ("SDKWORK_GAMES_ENVIRONMENT", Some("production")),
-            ("SDKWORK_GAMES_DATABASE_ENGINE", Some("postgresql")),
-            ("SDKWORK_GAMES_DATABASE_HOST", Some("db.internal")),
-            ("SDKWORK_GAMES_DATABASE_PORT", Some("5432")),
-            ("SDKWORK_GAMES_DATABASE_NAME", Some("sdkwork_games_prod")),
-            ("SDKWORK_GAMES_DATABASE_USERNAME", Some("sdkwork_games")),
-            ("SDKWORK_GAMES_DATABASE_PASSWORD_FILE", None),
-            ("SDKWORK_GAMES_DATABASE_PASSWORD", Some("inline-secret")),
-            ("SDKWORK_GAMES_DATABASE_SSL_MODE", Some("require")),
+            ("SDKWORK_DATABASE_ENGINE", Some("postgresql")),
+            ("SDKWORK_DATABASE_HOST", Some("db.internal")),
+            ("SDKWORK_DATABASE_PORT", Some("5432")),
+            ("SDKWORK_DATABASE_NAME", Some("sdkwork_ai_prod")),
+            ("SDKWORK_DATABASE_SCHEMA", Some("sdkwork_ai_prod")),
+            ("SDKWORK_DATABASE_USERNAME", Some("sdkwork_ai_prod")),
+            ("SDKWORK_DATABASE_PASSWORD_FILE", None),
+            ("SDKWORK_DATABASE_PASSWORD", Some("inline-secret")),
+            ("SDKWORK_DATABASE_SSL_MODE", Some("require")),
         ]);
 
         let error = resolve_games_database_config_from_env().expect_err("missing password file");
 
-        assert!(error.contains("SDKWORK_GAMES_DATABASE_PASSWORD_FILE"));
+        assert!(error.contains("SDKWORK_DATABASE_PASSWORD_FILE"));
     }
 
     #[test]
     fn production_requires_explicit_database_config() {
         let _lock = env_lock().lock().expect("env lock");
         let _guard = EnvGuard::set(&[
-            ("SDKWORK_GAMES_DATABASE_URL", None),
             ("SDKWORK_DATABASE_URL", None),
             ("DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_URL", None),
-            ("SDKWORK_CLAW_DATABASE_ENGINE", None),
             ("SDKWORK_GAMES_ENVIRONMENT", Some("production")),
-            ("SDKWORK_GAMES_DATABASE_ENGINE", None),
+            ("SDKWORK_DATABASE_ENGINE", None),
+            ("SDKWORK_DATABASE_HOST", None),
+            ("SDKWORK_DATABASE_PORT", None),
+            ("SDKWORK_DATABASE_NAME", None),
+            ("SDKWORK_DATABASE_SCHEMA", None),
+            ("SDKWORK_DATABASE_USERNAME", None),
+            ("SDKWORK_DATABASE_PASSWORD", None),
+            ("SDKWORK_DATABASE_PASSWORD_FILE", None),
+            ("SDKWORK_DATABASE_FILE", None),
         ]);
 
         let error =
             resolve_games_database_config_from_env().expect_err("production database config");
 
-        assert!(error.contains("SDKWORK_GAMES_DATABASE_ENGINE"));
+        assert!(error.contains("SDKWORK_DATABASE_ENGINE"));
     }
 }
