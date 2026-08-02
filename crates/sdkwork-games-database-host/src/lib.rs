@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use sdkwork_database_config::workspace_database::workspace_database_env_is_configured;
+use sdkwork_database_config::workspace_database::workspace_postgres_env_is_configured;
 use sdkwork_database_config::DatabaseConfig;
 use sdkwork_database_lifecycle::{lifecycle_options_from_env, LifecycleOrchestrator};
 use sdkwork_database_spi::{DatabaseAssetProvider, DatabaseManifest, DefaultDatabaseModule};
@@ -60,7 +60,7 @@ pub async fn bootstrap_games_database_from_env() -> Result<GamesDatabaseHost, St
 
 fn resolve_games_database_config_from_env() -> Result<DatabaseConfig, String> {
     if is_production_environment() {
-        if !workspace_database_env_is_configured() {
+        if !workspace_postgres_env_is_configured() {
             return Err(
                 "SDKWORK_DATABASE_ENGINE or SDKWORK_DATABASE_URL is required for production"
                     .to_string(),
