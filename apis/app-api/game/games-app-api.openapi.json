@@ -25,7 +25,12 @@
         "x-sdkwork-api-surface": "app-api",
         "x-sdkwork-owner": "sdkwork-games",
         "x-sdkwork-domain": "game",
-        "security": [],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -76,7 +81,12 @@
         "x-sdkwork-api-surface": "app-api",
         "x-sdkwork-owner": "sdkwork-games",
         "x-sdkwork-domain": "game",
-        "security": [],
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
