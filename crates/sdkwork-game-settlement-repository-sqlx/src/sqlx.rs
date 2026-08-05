@@ -242,13 +242,13 @@ async fn create_job_postgres(
     }
     let id = uuid();
     let payload = command.job_payload.to_string();
-    let row = sqlx::query_as::<_, JobRow>(&format!(
+    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_settlement_job \
          (id, uuid, tenant_id, organization_id, session_id, session_result_id, idempotency_key, \
           job_payload, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7::jsonb, $8, $8) \
          ON CONFLICT (tenant_id, idempotency_key) DO NOTHING RETURNING {JOB_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -309,10 +309,10 @@ async fn get_existing_job_postgres(
     tenant_id: &str,
     command: &CreateSettlementJobCommand,
 ) -> GameSettlementResult<Option<GameSettlementJobItem>> {
-    let row = sqlx::query_as::<_, JobRow>(&format!(
+    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_POSTGRES} FROM game_settlement_job \
          WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -326,10 +326,10 @@ async fn get_existing_job_sqlite(
     tenant_id: &str,
     command: &CreateSettlementJobCommand,
 ) -> GameSettlementResult<Option<GameSettlementJobItem>> {
-    let row = sqlx::query_as::<_, JobRow>(&format!(
+    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
          WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -355,10 +355,10 @@ async fn get_job_postgres(
     tenant_id: &str,
     job_id: &str,
 ) -> GameSettlementResult<GameSettlementJobItem> {
-    let row = sqlx::query_as::<_, JobRow>(&format!(
+    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_POSTGRES} FROM game_settlement_job \
          WHERE tenant_id = $1 AND id = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(job_id)
     .fetch_optional(pool)
@@ -373,10 +373,10 @@ async fn get_job_sqlite(
     tenant_id: &str,
     job_id: &str,
 ) -> GameSettlementResult<GameSettlementJobItem> {
-    let row = sqlx::query_as::<_, JobRow>(&format!(
+    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
          WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(job_id)
     .fetch_optional(pool)
@@ -395,11 +395,11 @@ async fn list_due_jobs_postgres(
 ) -> GameSettlementResult<GameSettlementJobPage> {
     let filter = "tenant_id = $1 AND (status = 'pending' OR \
         (status = 'retrying' AND next_retry_at IS NOT NULL AND next_retry_at::timestamptz <= $2::timestamptz))";
-    let rows = sqlx::query_as::<_, JobRow>(&format!(
+    let rows = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_POSTGRES} FROM game_settlement_job \
          WHERE {filter} \
          ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT $3 OFFSET $4",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .bind(limit)
@@ -407,9 +407,9 @@ async fn list_due_jobs_postgres(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_settlement_job WHERE {filter}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .fetch_one(pool)
@@ -427,11 +427,11 @@ async fn list_due_jobs_sqlite(
 ) -> GameSettlementResult<GameSettlementJobPage> {
     let filter = "tenant_id = ?1 AND (status = 'pending' OR \
         (status = 'retrying' AND next_retry_at IS NOT NULL AND next_retry_at <= ?2))";
-    let rows = sqlx::query_as::<_, JobRow>(&format!(
+    let rows = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
          WHERE {filter} \
          ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT ?3 OFFSET ?4",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .bind(limit)
@@ -439,9 +439,9 @@ async fn list_due_jobs_sqlite(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_settlement_job WHERE {filter}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .fetch_one(pool)
@@ -457,12 +457,12 @@ async fn start_job_postgres(
     timestamp: &str,
 ) -> GameSettlementResult<GameSettlementJobItem> {
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = 'running', attempt_count = attempt_count + 1, \
              started_at = $4, next_retry_at = NULL, updated_at = $4, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 AND status IN ('pending', 'retrying') \
              RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(expected_version)
@@ -470,12 +470,12 @@ async fn start_job_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = 'running', attempt_count = attempt_count + 1, \
              started_at = $3, next_retry_at = NULL, updated_at = $3, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND status IN ('pending', 'retrying') \
              RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(timestamp)
@@ -530,11 +530,11 @@ async fn record_failure_postgres(
 ) -> GameSettlementResult<GameSettlementJobItem> {
     let status = failure_status(command);
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = $4, error_code = $5, error_detail = $6, \
              next_retry_at = $7, updated_at = $8, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(expected_version)
@@ -546,11 +546,11 @@ async fn record_failure_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = $3, error_code = $4, error_detail = $5, \
              next_retry_at = $6, updated_at = $7, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(status)
@@ -617,11 +617,11 @@ async fn complete_job_postgres(
     timestamp: &str,
 ) -> GameSettlementResult<GameSettlementJobItem> {
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = 'succeeded', completed_at = $4, \
              next_retry_at = NULL, updated_at = $4, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(expected_version)
@@ -629,11 +629,11 @@ async fn complete_job_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, JobRow>(&format!(
+        sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_settlement_job SET status = 'succeeded', completed_at = $3, \
              next_retry_at = NULL, updated_at = $3, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 RETURNING {JOB_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.job_id)
         .bind(timestamp)
@@ -692,13 +692,13 @@ async fn create_reward_postgres(
     }
     let id = uuid();
     let payload = command.intent_payload.to_string();
-    let row = sqlx::query_as::<_, RewardRow>(&format!(
+    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_reward_intent \
          (id, uuid, tenant_id, organization_id, settlement_job_id, user_id, reward_type, \
           external_owner, intent_payload, idempotency_key, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8::jsonb, $9, $10, $10) \
          ON CONFLICT (tenant_id, idempotency_key) DO NOTHING RETURNING {REWARD_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -802,10 +802,10 @@ async fn get_existing_reward_postgres(
     tenant_id: &str,
     command: &CreateRewardIntentCommand,
 ) -> GameSettlementResult<Option<GameRewardIntentItem>> {
-    let row = sqlx::query_as::<_, RewardRow>(&format!(
+    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {REWARD_COLUMNS_POSTGRES} FROM game_reward_intent \
          WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -819,10 +819,10 @@ async fn get_existing_reward_sqlite(
     tenant_id: &str,
     command: &CreateRewardIntentCommand,
 ) -> GameSettlementResult<Option<GameRewardIntentItem>> {
-    let row = sqlx::query_as::<_, RewardRow>(&format!(
+    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {REWARD_COLUMNS_SQLITE} FROM game_reward_intent \
          WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -836,10 +836,10 @@ async fn get_reward_sqlite(
     tenant_id: &str,
     reward_id: &str,
 ) -> GameSettlementResult<GameRewardIntentItem> {
-    let row = sqlx::query_as::<_, RewardRow>(&format!(
+    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {REWARD_COLUMNS_SQLITE} FROM game_reward_intent \
          WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(reward_id)
     .fetch_optional(pool)

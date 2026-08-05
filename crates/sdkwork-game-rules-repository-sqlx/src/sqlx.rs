@@ -103,12 +103,12 @@ async fn get_active_postgres(
     game_id: &str,
     mode_id: Option<&str>,
 ) -> GameRulesetResult<GameRulesetItem> {
-    let row = sqlx::query_as::<_, RulesetRow>(&format!(
+    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {RULESET_COLUMNS} FROM game_ruleset \
          WHERE tenant_id = $1 AND game_id = $2 AND deleted_at IS NULL AND status = 'active' \
          AND (($3::text IS NULL AND mode_id IS NULL) OR mode_id = $3) \
          ORDER BY version_no DESC LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(mode_id)
@@ -126,12 +126,12 @@ async fn get_active_sqlite(
     game_id: &str,
     mode_id: Option<&str>,
 ) -> GameRulesetResult<GameRulesetItem> {
-    let row = sqlx::query_as::<_, RulesetRow>(&format!(
+    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SQLITE_RULESET_COLUMNS} FROM game_ruleset \
          WHERE tenant_id = ?1 AND game_id = ?2 AND deleted_at IS NULL AND status = 'active' \
          AND ((?3 IS NULL AND mode_id IS NULL) OR mode_id = ?3) \
          ORDER BY version_no DESC LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(mode_id)
@@ -150,14 +150,14 @@ async fn create_postgres(
     now: &str,
     command: &CreateGameRulesetCommand,
 ) -> GameRulesetResult<GameRulesetItem> {
-    let row = sqlx::query_as::<_, RulesetRow>(&format!(
+    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_ruleset \
          (id, uuid, tenant_id, organization_id, game_id, mode_id, ruleset_code, version_no, status, \
           config_schema, config_values, activated_at, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, CAST($9 AS jsonb), CAST($10 AS jsonb), \
           CASE WHEN $8 = 'active' THEN $11 ELSE NULL END, $11, $11) \
          RETURNING {RULESET_COLUMNS}",
-    ))
+    )))
     .bind(id)
     .bind(uuid())
     .bind(tenant_id)
@@ -209,9 +209,9 @@ async fn create_sqlite(
         return get_active_sqlite(pool, tenant_id, &command.game_id, mode_id).await;
     }
 
-    let row = sqlx::query_as::<_, RulesetRow>(&format!(
+    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SQLITE_RULESET_COLUMNS} FROM game_ruleset WHERE tenant_id = ?1 AND id = ?2",
-    ))
+    )))
     .bind(tenant_id)
     .bind(id)
     .fetch_one(pool)

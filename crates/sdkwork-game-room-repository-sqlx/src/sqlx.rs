@@ -291,13 +291,13 @@ async fn list_postgres(
     limit: i64,
     offset: i64,
 ) -> GameRoomResult<GameRoomPage> {
-    let rows = sqlx::query_as::<_, RoomRow>(&format!(
+    let rows = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ROOM_COLUMNS} FROM game_room \
          WHERE tenant_id = $1 AND deleted_at IS NULL \
          AND ($2::text IS NULL OR game_id = $2) \
          AND ($3::text IS NULL OR status = $3) \
          ORDER BY updated_at DESC LIMIT $4 OFFSET $5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -331,13 +331,13 @@ async fn list_sqlite(
     limit: i64,
     offset: i64,
 ) -> GameRoomResult<GameRoomPage> {
-    let rows = sqlx::query_as::<_, RoomRow>(&format!(
+    let rows = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ROOM_COLUMNS} FROM game_room \
          WHERE tenant_id = ?1 AND deleted_at IS NULL \
          AND (?2 IS NULL OR game_id = ?2) \
          AND (?3 IS NULL OR status = ?3) \
          ORDER BY updated_at DESC LIMIT ?4 OFFSET ?5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -377,10 +377,10 @@ async fn get_postgres(
     tenant_id: &str,
     room_id: &str,
 ) -> GameRoomResult<GameRoomItem> {
-    let row = sqlx::query_as::<_, RoomRow>(&format!(
+    let row = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ROOM_COLUMNS} FROM game_room \
          WHERE tenant_id = $1 AND deleted_at IS NULL AND (id = $2 OR room_code = $2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(room_id)
     .fetch_optional(pool)
@@ -396,10 +396,10 @@ async fn get_sqlite(
     tenant_id: &str,
     room_id: &str,
 ) -> GameRoomResult<GameRoomItem> {
-    let row = sqlx::query_as::<_, RoomRow>(&format!(
+    let row = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ROOM_COLUMNS} FROM game_room \
          WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR room_code = ?2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(room_id)
     .fetch_optional(pool)
@@ -415,10 +415,10 @@ async fn list_seats_postgres(
     tenant_id: &str,
     room_id: &str,
 ) -> GameRoomResult<Vec<GameRoomSeatItem>> {
-    let rows = sqlx::query_as::<_, SeatRow>(&format!(
+    let rows = sqlx::query_as::<_, SeatRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SEAT_COLUMNS} FROM game_room_seat \
          WHERE tenant_id = $1 AND room_id = $2 ORDER BY seat_no ASC",
-    ))
+    )))
     .bind(tenant_id)
     .bind(room_id)
     .fetch_all(pool)
@@ -432,10 +432,10 @@ async fn list_seats_sqlite(
     tenant_id: &str,
     room_id: &str,
 ) -> GameRoomResult<Vec<GameRoomSeatItem>> {
-    let rows = sqlx::query_as::<_, SeatRow>(&format!(
+    let rows = sqlx::query_as::<_, SeatRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SEAT_COLUMNS} FROM game_room_seat \
          WHERE tenant_id = ?1 AND room_id = ?2 ORDER BY seat_no ASC",
-    ))
+    )))
     .bind(tenant_id)
     .bind(room_id)
     .fetch_all(pool)
@@ -452,14 +452,14 @@ async fn create_postgres(
     command: &CreateGameRoomCommand,
 ) -> GameRoomResult<GameRoomItem> {
     let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    let row = sqlx::query_as::<_, RoomRow>(&format!(
+    let row = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_room \
          (id, uuid, tenant_id, organization_id, game_id, mode_id, ruleset_id, room_code, \
           host_user_id, visibility, join_policy, max_players, current_players, status, \
           opened_at, created_at, created_by, updated_at, updated_by) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, $10, $11, 1, 'open', \
           $12, $12, $8, $12, $8) RETURNING {ROOM_COLUMNS}",
-    ))
+    )))
     .bind(id)
     .bind(uuid())
     .bind(tenant_id)
@@ -1119,10 +1119,10 @@ async fn update_room_status_postgres(
         let timestamp_assignment = timestamp_column
             .map(|column| format!(", {column} = $5"))
             .unwrap_or_default();
-        sqlx::query(&format!(
+        sqlx::query(sqlx::AssertSqlSafe(format!(
             "UPDATE game_room SET status = $4{timestamp_assignment}, updated_at = $5, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 AND deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(room_id)
         .bind(expected_version)
@@ -1134,10 +1134,10 @@ async fn update_room_status_postgres(
         let timestamp_assignment = timestamp_column
             .map(|column| format!(", {column} = $4"))
             .unwrap_or_default();
-        sqlx::query(&format!(
+        sqlx::query(sqlx::AssertSqlSafe(format!(
             "UPDATE game_room SET status = $3{timestamp_assignment}, updated_at = $4, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(room_id)
         .bind(status)
@@ -1162,10 +1162,10 @@ async fn update_room_status_sqlite(
         let timestamp_assignment = timestamp_column
             .map(|column| format!(", {column} = ?5"))
             .unwrap_or_default();
-        sqlx::query(&format!(
+        sqlx::query(sqlx::AssertSqlSafe(format!(
             "UPDATE game_room SET status = ?4{timestamp_assignment}, updated_at = ?5, version = version + 1 \
              WHERE tenant_id = ?1 AND id = ?2 AND version = ?3 AND deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(room_id)
         .bind(expected_version)
@@ -1177,10 +1177,10 @@ async fn update_room_status_sqlite(
         let timestamp_assignment = timestamp_column
             .map(|column| format!(", {column} = ?4"))
             .unwrap_or_default();
-        sqlx::query(&format!(
+        sqlx::query(sqlx::AssertSqlSafe(format!(
             "UPDATE game_room SET status = ?3{timestamp_assignment}, updated_at = ?4, version = version + 1 \
              WHERE tenant_id = ?1 AND id = ?2 AND deleted_at IS NULL",
-        ))
+        )))
         .bind(tenant_id)
         .bind(room_id)
         .bind(status)

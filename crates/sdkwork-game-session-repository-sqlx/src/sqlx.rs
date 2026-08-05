@@ -244,13 +244,13 @@ async fn create_postgres(
     let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
     let id = uuid();
     let metadata = command.metadata.to_string();
-    let row = sqlx::query_as::<_, SessionRow>(&format!(
+    let row = sqlx::query_as::<_, SessionRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_session \
          (id, uuid, tenant_id, organization_id, session_code, game_id, mode_id, ruleset_id, room_id, \
           match_result_id, server_id, status, metadata, created_at, created_by, updated_at, updated_by) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, $10, 'created', $11::jsonb, $12, $13, $12, $13) \
          RETURNING {SESSION_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -371,10 +371,10 @@ async fn get_postgres(
     tenant_id: &str,
     session_id: &str,
 ) -> GameSessionResult<GameSessionItem> {
-    let row = sqlx::query_as::<_, SessionRow>(&format!(
+    let row = sqlx::query_as::<_, SessionRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SESSION_COLUMNS_POSTGRES} FROM game_session \
          WHERE tenant_id = $1 AND deleted_at IS NULL AND (id = $2 OR session_code = $2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(session_id)
     .fetch_optional(pool)
@@ -389,10 +389,10 @@ async fn get_sqlite(
     tenant_id: &str,
     session_id: &str,
 ) -> GameSessionResult<GameSessionItem> {
-    let row = sqlx::query_as::<_, SessionRow>(&format!(
+    let row = sqlx::query_as::<_, SessionRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {SESSION_COLUMNS_SQLITE} FROM game_session \
          WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR session_code = ?2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(session_id)
     .fetch_optional(pool)
@@ -407,10 +407,10 @@ async fn list_participants_postgres(
     tenant_id: &str,
     session_id: &str,
 ) -> GameSessionResult<Vec<GameSessionParticipantItem>> {
-    let rows = sqlx::query_as::<_, ParticipantRow>(&format!(
+    let rows = sqlx::query_as::<_, ParticipantRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {PARTICIPANT_COLUMNS_POSTGRES} FROM game_session_participant \
          WHERE tenant_id = $1 AND session_id = $2 ORDER BY COALESCE(team_no, 0), user_id",
-    ))
+    )))
     .bind(tenant_id)
     .bind(session_id)
     .fetch_all(pool)
@@ -424,10 +424,10 @@ async fn list_participants_sqlite(
     tenant_id: &str,
     session_id: &str,
 ) -> GameSessionResult<Vec<GameSessionParticipantItem>> {
-    let rows = sqlx::query_as::<_, ParticipantRow>(&format!(
+    let rows = sqlx::query_as::<_, ParticipantRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {PARTICIPANT_COLUMNS_SQLITE} FROM game_session_participant \
          WHERE tenant_id = ?1 AND session_id = ?2 ORDER BY COALESCE(team_no, 0), user_id",
-    ))
+    )))
     .bind(tenant_id)
     .bind(session_id)
     .fetch_all(pool)
@@ -444,12 +444,12 @@ async fn start_postgres(
 ) -> GameSessionResult<GameSessionItem> {
     let server_id = command.server_id.as_deref();
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, SessionRow>(&format!(
+        sqlx::query_as::<_, SessionRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_session SET status = 'started', server_id = COALESCE($4, server_id), \
              started_at = $5, updated_at = $5, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 AND deleted_at IS NULL \
              RETURNING {SESSION_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.session_id)
         .bind(expected_version)
@@ -458,12 +458,12 @@ async fn start_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, SessionRow>(&format!(
+        sqlx::query_as::<_, SessionRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_session SET status = 'started', server_id = COALESCE($3, server_id), \
              started_at = $4, updated_at = $4, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL \
              RETURNING {SESSION_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.session_id)
         .bind(server_id)
@@ -529,13 +529,13 @@ async fn submit_result_postgres(
     ensure_session_exists_postgres(&mut tx, tenant_id, &command.session_id).await?;
     let id = uuid();
     let payload = command.result_payload.to_string();
-    let row = sqlx::query_as::<_, ResultRow>(&format!(
+    let row = sqlx::query_as::<_, ResultRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_session_result \
          (id, uuid, tenant_id, organization_id, session_id, source_type, source_id, idempotency_key, \
           payload_hash, signature_status, validation_status, result_payload, received_at, validated_at, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, 'not_required', 'validated', $9::jsonb, $10, $10, $10, $10) \
          ON CONFLICT (tenant_id, session_id, idempotency_key) DO NOTHING RETURNING {RESULT_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -652,10 +652,10 @@ async fn get_existing_result_postgres(
     tenant_id: &str,
     command: &SubmitSessionResultCommand,
 ) -> GameSessionResult<Option<GameSessionResultItem>> {
-    let row = sqlx::query_as::<_, ResultRow>(&format!(
+    let row = sqlx::query_as::<_, ResultRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {RESULT_COLUMNS_POSTGRES} FROM game_session_result \
          WHERE tenant_id = $1 AND session_id = $2 AND idempotency_key = $3 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.session_id)
     .bind(&command.idempotency_key)
@@ -670,10 +670,10 @@ async fn get_existing_result_sqlite(
     tenant_id: &str,
     command: &SubmitSessionResultCommand,
 ) -> GameSessionResult<Option<GameSessionResultItem>> {
-    let row = sqlx::query_as::<_, ResultRow>(&format!(
+    let row = sqlx::query_as::<_, ResultRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {RESULT_COLUMNS_SQLITE} FROM game_session_result \
          WHERE tenant_id = ?1 AND session_id = ?2 AND idempotency_key = ?3 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.session_id)
     .bind(&command.idempotency_key)
@@ -740,9 +740,9 @@ async fn get_result_by_id_sqlite(
     tenant_id: &str,
     result_id: &str,
 ) -> GameSessionResult<GameSessionResultItem> {
-    let row = sqlx::query_as::<_, ResultRow>(&format!(
+    let row = sqlx::query_as::<_, ResultRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {RESULT_COLUMNS_SQLITE} FROM game_session_result WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(result_id)
     .fetch_optional(&mut **tx)

@@ -194,7 +194,7 @@ async fn create_postgres(
     let id = uuid();
     let ticket_code = format!("MT-{id}");
     let attributes = command.match_attributes.to_string();
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_match_ticket \
          (id, uuid, tenant_id, organization_id, ticket_code, game_id, mode_id, ruleset_id, \
           user_id, party_id, status, priority, match_attributes, idempotency_key, queued_at, \
@@ -202,7 +202,7 @@ async fn create_postgres(
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, 'queued', $10, $11::jsonb, \
           $12, $13, $14, $13, $13) \
          ON CONFLICT (tenant_id, idempotency_key) DO NOTHING RETURNING {TICKET_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -280,10 +280,10 @@ async fn get_existing_postgres(
     tenant_id: &str,
     command: &CreateMatchTicketCommand,
 ) -> GameMatchmakingResult<Option<MatchTicketItem>> {
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_POSTGRES} FROM game_match_ticket \
          WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -297,10 +297,10 @@ async fn get_existing_sqlite(
     tenant_id: &str,
     command: &CreateMatchTicketCommand,
 ) -> GameMatchmakingResult<Option<MatchTicketItem>> {
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
          WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -326,10 +326,10 @@ async fn get_postgres(
     tenant_id: &str,
     ticket_id: &str,
 ) -> GameMatchmakingResult<MatchTicketItem> {
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_POSTGRES} FROM game_match_ticket \
          WHERE tenant_id = $1 AND (id = $2 OR ticket_code = $2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(ticket_id)
     .fetch_optional(pool)
@@ -344,10 +344,10 @@ async fn get_sqlite(
     tenant_id: &str,
     ticket_id: &str,
 ) -> GameMatchmakingResult<MatchTicketItem> {
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
          WHERE tenant_id = ?1 AND (id = ?2 OR ticket_code = ?2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(ticket_id)
     .fetch_optional(pool)
@@ -363,12 +363,12 @@ async fn cancel_postgres(
     command: &CancelMatchTicketCommand,
     timestamp: &str,
 ) -> GameMatchmakingResult<MatchTicketItem> {
-    let row = sqlx::query_as::<_, TicketRow>(&format!(
+    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "UPDATE game_match_ticket SET status = 'cancelled', cancelled_at = $4, updated_at = $4, \
          version = version + 1 \
          WHERE tenant_id = $1 AND (id = $2 OR ticket_code = $2) AND user_id = $3 AND status = 'queued' \
          RETURNING {TICKET_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.ticket_id)
     .bind(&command.user_id)
@@ -430,7 +430,7 @@ async fn list_tickets_postgres(
     pool: &sqlx::PgPool,
     params: TicketListParams<'_>,
 ) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(&format!(
+    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_POSTGRES} FROM game_match_ticket \
          WHERE tenant_id = $1 \
          AND ($2::text IS NULL OR game_id = $2) \
@@ -438,7 +438,7 @@ async fn list_tickets_postgres(
          AND ($4::text IS NULL OR status = $4) \
          AND ($5::text IS NULL OR user_id = $5) \
          ORDER BY queued_at DESC LIMIT $6 OFFSET $7",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.game_id)
     .bind(params.mode_id)
@@ -472,7 +472,7 @@ async fn list_tickets_sqlite(
     pool: &sqlx::SqlitePool,
     params: TicketListParams<'_>,
 ) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(&format!(
+    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
          WHERE tenant_id = ?1 \
          AND (?2 IS NULL OR game_id = ?2) \
@@ -480,7 +480,7 @@ async fn list_tickets_sqlite(
          AND (?4 IS NULL OR status = ?4) \
          AND (?5 IS NULL OR user_id = ?5) \
          ORDER BY queued_at DESC LIMIT ?6 OFFSET ?7",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.game_id)
     .bind(params.mode_id)
@@ -518,12 +518,12 @@ async fn list_queue_postgres(
     limit: i64,
     offset: i64,
 ) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(&format!(
+    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_POSTGRES} FROM game_match_ticket \
          WHERE tenant_id = $1 AND game_id = $2 AND status = 'queued' \
          AND ($3::text IS NULL OR mode_id = $3) \
          ORDER BY priority DESC, queued_at ASC LIMIT $4 OFFSET $5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(mode_id)
@@ -554,12 +554,12 @@ async fn list_queue_sqlite(
     limit: i64,
     offset: i64,
 ) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(&format!(
+    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
          WHERE tenant_id = ?1 AND game_id = ?2 AND status = 'queued' \
          AND (?3 IS NULL OR mode_id = ?3) \
          ORDER BY priority DESC, queued_at ASC LIMIT ?4 OFFSET ?5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(mode_id)

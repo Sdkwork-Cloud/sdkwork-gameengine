@@ -71,7 +71,7 @@ async fn list_postgres(
 ) -> GameResult<GameCatalogPage> {
     let list_sql = build_catalog_list_sql(query, SqlDialect::Postgres);
 
-    let mut select = sqlx::query_as::<_, CatalogRow>(&list_sql.select_sql).bind(tenant_id);
+    let mut select = sqlx::query_as::<_, CatalogRow>(sqlx::AssertSqlSafe(list_sql.select_sql.as_str())).bind(tenant_id);
     for value in &list_sql.bind_values {
         select = select.bind(value);
     }
@@ -82,7 +82,7 @@ async fn list_postgres(
         .await
         .map_err(map_sqlx_error)?;
 
-    let mut count = sqlx::query_scalar::<_, i64>(&list_sql.count_sql).bind(tenant_id);
+    let mut count = sqlx::query_scalar::<_, i64>(sqlx::AssertSqlSafe(list_sql.count_sql.as_str())).bind(tenant_id);
     for value in &list_sql.bind_values {
         count = count.bind(value);
     }
@@ -100,7 +100,7 @@ async fn list_sqlite(
 ) -> GameResult<GameCatalogPage> {
     let list_sql = build_catalog_list_sql(query, SqlDialect::Sqlite);
 
-    let mut select = sqlx::query_as::<_, CatalogRow>(&list_sql.select_sql).bind(tenant_id);
+    let mut select = sqlx::query_as::<_, CatalogRow>(sqlx::AssertSqlSafe(list_sql.select_sql.as_str())).bind(tenant_id);
     for value in &list_sql.bind_values {
         select = select.bind(value);
     }
@@ -111,7 +111,7 @@ async fn list_sqlite(
         .await
         .map_err(map_sqlx_error)?;
 
-    let mut count = sqlx::query_scalar::<_, i64>(&list_sql.count_sql).bind(tenant_id);
+    let mut count = sqlx::query_scalar::<_, i64>(sqlx::AssertSqlSafe(list_sql.count_sql.as_str())).bind(tenant_id);
     for value in &list_sql.bind_values {
         count = count.bind(value);
     }

@@ -163,14 +163,14 @@ async fn list_postgres(
     limit: i64,
     offset: i64,
 ) -> GameModeResult<GameModePage> {
-    let rows = sqlx::query_as::<_, ModeRow>(&format!(
+    let rows = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {MODE_COLUMNS} FROM game_mode \
          WHERE tenant_id = $1 AND deleted_at IS NULL \
          AND ($2::text IS NULL OR game_id = $2) \
          AND ($3::text IS NULL OR status = $3) \
          AND ($4::text IS NULL OR LOWER(title) LIKE LOWER($4) OR LOWER(mode_code) LIKE LOWER($4)) \
          ORDER BY sort_order ASC, mode_code ASC LIMIT $5 OFFSET $6",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -208,14 +208,14 @@ async fn list_sqlite(
     limit: i64,
     offset: i64,
 ) -> GameModeResult<GameModePage> {
-    let rows = sqlx::query_as::<_, ModeRow>(&format!(
+    let rows = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {MODE_COLUMNS} FROM game_mode \
          WHERE tenant_id = ?1 AND deleted_at IS NULL \
          AND (?2 IS NULL OR game_id = ?2) \
          AND (?3 IS NULL OR status = ?3) \
          AND (?4 IS NULL OR LOWER(title) LIKE LOWER(?4) OR LOWER(mode_code) LIKE LOWER(?4)) \
          ORDER BY sort_order ASC, mode_code ASC LIMIT ?5 OFFSET ?6",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -258,10 +258,10 @@ async fn get_postgres(
     tenant_id: &str,
     mode_id: &str,
 ) -> GameModeResult<GameModeItem> {
-    let row = sqlx::query_as::<_, ModeRow>(&format!(
+    let row = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {MODE_COLUMNS} FROM game_mode \
          WHERE tenant_id = $1 AND deleted_at IS NULL AND (id = $2 OR mode_code = $2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(mode_id)
     .fetch_optional(pool)
@@ -277,10 +277,10 @@ async fn get_sqlite(
     tenant_id: &str,
     mode_id: &str,
 ) -> GameModeResult<GameModeItem> {
-    let row = sqlx::query_as::<_, ModeRow>(&format!(
+    let row = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {MODE_COLUMNS} FROM game_mode \
          WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR mode_code = ?2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(mode_id)
     .fetch_optional(pool)
@@ -298,13 +298,13 @@ async fn create_postgres(
     now: &str,
     command: &CreateGameModeCommand,
 ) -> GameModeResult<GameModeItem> {
-    let row = sqlx::query_as::<_, ModeRow>(&format!(
+    let row = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_mode \
          (id, uuid, tenant_id, organization_id, game_id, mode_code, title, status, min_players, max_players, \
           team_size, ruleset_id, matchmaking_enabled, room_enabled, leaderboard_enabled, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $15) \
          RETURNING {MODE_COLUMNS}",
-    ))
+    )))
     .bind(id)
     .bind(uuid())
     .bind(tenant_id)
@@ -368,12 +368,12 @@ async fn update_postgres(
     item: &GameModeItem,
     now: &str,
 ) -> GameModeResult<GameModeItem> {
-    let row = sqlx::query_as::<_, ModeRow>(&format!(
+    let row = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
         "UPDATE game_mode SET title = $3, status = $4, min_players = $5, max_players = $6, \
          team_size = $7, ruleset_id = $8, matchmaking_enabled = $9, room_enabled = $10, \
          leaderboard_enabled = $11, updated_at = $12, version = version + 1 \
          WHERE tenant_id = $1 AND id = $2 AND deleted_at IS NULL RETURNING {MODE_COLUMNS}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&item.id)
     .bind(&item.title)

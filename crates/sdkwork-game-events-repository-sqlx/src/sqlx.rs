@@ -264,13 +264,13 @@ async fn append_event_postgres(
     }
     let id = uuid();
     let payload = command.event_payload.to_string();
-    let row = sqlx::query_as::<_, EventRow>(&format!(
+    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_engine_event \
          (id, uuid, tenant_id, organization_id, event_type, aggregate_type, aggregate_id, \
           idempotency_key, event_payload, trace_id, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8::jsonb, $9, $10, $10) \
          ON CONFLICT (tenant_id, idempotency_key) DO NOTHING RETURNING {EVENT_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -335,10 +335,10 @@ async fn get_existing_event_postgres(
     tenant_id: &str,
     command: &AppendGameEngineEventCommand,
 ) -> GameEventResult<Option<GameEngineEventItem>> {
-    let row = sqlx::query_as::<_, EventRow>(&format!(
+    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_POSTGRES} FROM game_engine_event \
          WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -352,10 +352,10 @@ async fn get_existing_event_sqlite(
     tenant_id: &str,
     command: &AppendGameEngineEventCommand,
 ) -> GameEventResult<Option<GameEngineEventItem>> {
-    let row = sqlx::query_as::<_, EventRow>(&format!(
+    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
          WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(pool)
@@ -381,10 +381,10 @@ async fn get_event_postgres(
     tenant_id: &str,
     event_id: &str,
 ) -> GameEventResult<GameEngineEventItem> {
-    let row = sqlx::query_as::<_, EventRow>(&format!(
+    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_POSTGRES} FROM game_engine_event \
          WHERE tenant_id = $1 AND id = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(event_id)
     .fetch_optional(pool)
@@ -399,10 +399,10 @@ async fn get_event_sqlite(
     tenant_id: &str,
     event_id: &str,
 ) -> GameEventResult<GameEngineEventItem> {
-    let row = sqlx::query_as::<_, EventRow>(&format!(
+    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
          WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(event_id)
     .fetch_optional(pool)
@@ -421,11 +421,11 @@ async fn list_pending_postgres(
 ) -> GameEventResult<GameEngineEventPage> {
     let filter = "tenant_id = $1 AND (status = 'pending' OR \
         (status = 'failed' AND next_retry_at IS NOT NULL AND next_retry_at::timestamptz <= $2::timestamptz))";
-    let rows = sqlx::query_as::<_, EventRow>(&format!(
+    let rows = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_POSTGRES} FROM game_engine_event \
          WHERE {filter} \
          ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT $3 OFFSET $4",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .bind(limit)
@@ -433,9 +433,9 @@ async fn list_pending_postgres(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_engine_event WHERE {filter}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .fetch_one(pool)
@@ -453,11 +453,11 @@ async fn list_pending_sqlite(
 ) -> GameEventResult<GameEngineEventPage> {
     let filter = "tenant_id = ?1 AND (status = 'pending' OR \
         (status = 'failed' AND next_retry_at IS NOT NULL AND next_retry_at <= ?2))";
-    let rows = sqlx::query_as::<_, EventRow>(&format!(
+    let rows = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
          WHERE {filter} \
          ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT ?3 OFFSET ?4",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .bind(limit)
@@ -465,9 +465,9 @@ async fn list_pending_sqlite(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_engine_event WHERE {filter}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(due_at)
     .fetch_one(pool)
@@ -483,11 +483,11 @@ async fn mark_published_postgres(
     timestamp: &str,
 ) -> GameEventResult<GameEngineEventItem> {
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, EventRow>(&format!(
+        sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_engine_event SET status = 'published', published_at = $4, \
              next_retry_at = NULL, updated_at = $4, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 RETURNING {EVENT_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.event_id)
         .bind(expected_version)
@@ -495,11 +495,11 @@ async fn mark_published_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, EventRow>(&format!(
+        sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_engine_event SET status = 'published', published_at = $3, \
              next_retry_at = NULL, updated_at = $3, version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 RETURNING {EVENT_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.event_id)
         .bind(timestamp)
@@ -554,11 +554,11 @@ async fn mark_failed_postgres(
 ) -> GameEventResult<GameEngineEventItem> {
     let status = failed_status(command);
     let row = if let Some(expected_version) = command.expected_version {
-        sqlx::query_as::<_, EventRow>(&format!(
+        sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_engine_event SET status = $4, next_retry_at = $5, updated_at = $6, \
              version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 AND version = $3 RETURNING {EVENT_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.event_id)
         .bind(expected_version)
@@ -568,11 +568,11 @@ async fn mark_failed_postgres(
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, EventRow>(&format!(
+        sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
             "UPDATE game_engine_event SET status = $3, next_retry_at = $4, updated_at = $5, \
              version = version + 1 \
              WHERE tenant_id = $1 AND id = $2 RETURNING {EVENT_COLUMNS_POSTGRES}",
-        ))
+        )))
         .bind(tenant_id)
         .bind(&command.event_id)
         .bind(status)
@@ -631,13 +631,13 @@ async fn append_audit_postgres(
     timestamp: &str,
 ) -> GameEventResult<AuditRecordItem> {
     let id = uuid();
-    let row = sqlx::query_as::<_, AuditRow>(&format!(
+    let row = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_audit_record \
          (id, uuid, tenant_id, organization_id, actor_type, actor_id, action, target_type, \
           target_id, reason_code, before_snapshot, after_snapshot, trace_id, created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, $10::jsonb, $11::jsonb, $12, $13, $13) \
          RETURNING {AUDIT_COLUMNS_POSTGRES}",
-    ))
+    )))
     .bind(&id)
     .bind(uuid())
     .bind(tenant_id)
@@ -694,10 +694,10 @@ async fn get_audit_sqlite(
     tenant_id: &str,
     audit_id: &str,
 ) -> GameEventResult<AuditRecordItem> {
-    let row = sqlx::query_as::<_, AuditRow>(&format!(
+    let row = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {AUDIT_COLUMNS_SQLITE} FROM game_audit_record \
          WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(audit_id)
     .fetch_optional(pool)
@@ -717,10 +717,10 @@ async fn search_audit_postgres(
         AND ($4::text IS NULL OR actor_type = $4) \
         AND ($5::text IS NULL OR actor_id = $5) \
         AND ($6::text IS NULL OR action = $6)";
-    let rows = sqlx::query_as::<_, AuditRow>(&format!(
+    let rows = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {AUDIT_COLUMNS_POSTGRES} FROM game_audit_record \
          WHERE {filter} ORDER BY created_at DESC LIMIT $7 OFFSET $8",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.target_type)
     .bind(params.target_id)
@@ -732,9 +732,9 @@ async fn search_audit_postgres(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_audit_record WHERE {filter}",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.target_type)
     .bind(params.target_id)
@@ -757,10 +757,10 @@ async fn search_audit_sqlite(
         AND (?4 IS NULL OR actor_type = ?4) \
         AND (?5 IS NULL OR actor_id = ?5) \
         AND (?6 IS NULL OR action = ?6)";
-    let rows = sqlx::query_as::<_, AuditRow>(&format!(
+    let rows = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {AUDIT_COLUMNS_SQLITE} FROM game_audit_record \
          WHERE {filter} ORDER BY created_at DESC LIMIT ?7 OFFSET ?8",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.target_type)
     .bind(params.target_id)
@@ -772,9 +772,9 @@ async fn search_audit_sqlite(
     .fetch_all(pool)
     .await
     .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(&format!(
+    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
         "SELECT COUNT(*) FROM game_audit_record WHERE {filter}",
-    ))
+    )))
     .bind(params.tenant_id)
     .bind(params.target_type)
     .bind(params.target_id)

@@ -152,14 +152,14 @@ async fn append_postgres(
     }
 
     let ledger_id = uuid();
-    let inserted = sqlx::query_as::<_, LedgerRow>(&format!(
+    let inserted = sqlx::query_as::<_, LedgerRow>(sqlx::AssertSqlSafe(format!(
         "INSERT INTO game_point_ledger \
          (id, uuid, tenant_id, organization_id, ledger_account_id, game_id, mode_id, season_id, \
           user_id, direction, points_delta, source_event_id, reason_code, idempotency_key, \
           created_at, updated_at) \
          VALUES ($1, $2, $3, '0', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $14) \
          ON CONFLICT (tenant_id, idempotency_key) DO NOTHING RETURNING {LEDGER_COLUMNS}",
-    ))
+    )))
     .bind(&ledger_id)
     .bind(uuid())
     .bind(tenant_id)
@@ -188,10 +188,10 @@ async fn append_postgres(
 
     let points_after =
         upsert_balance_postgres(&mut tx, tenant_id, command, &ledger_id, timestamp).await?;
-    let row = sqlx::query_as::<_, LedgerRow>(&format!(
+    let row = sqlx::query_as::<_, LedgerRow>(sqlx::AssertSqlSafe(format!(
         "UPDATE game_point_ledger SET points_after = $3, updated_at = $4, version = version + 1 \
          WHERE tenant_id = $1 AND id = $2 RETURNING {LEDGER_COLUMNS}",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&ledger_id)
     .bind(points_after)
@@ -275,10 +275,10 @@ async fn get_existing_ledger_postgres(
     tenant_id: &str,
     command: &AppendPointLedgerCommand,
 ) -> GamePointResult<Option<GamePointLedgerEntry>> {
-    let row = sqlx::query_as::<_, LedgerRow>(&format!(
+    let row = sqlx::query_as::<_, LedgerRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {LEDGER_COLUMNS} FROM game_point_ledger \
          WHERE tenant_id = $1 AND idempotency_key = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(&mut **tx)
@@ -292,10 +292,10 @@ async fn get_existing_ledger_sqlite(
     tenant_id: &str,
     command: &AppendPointLedgerCommand,
 ) -> GamePointResult<Option<GamePointLedgerEntry>> {
-    let row = sqlx::query_as::<_, LedgerRow>(&format!(
+    let row = sqlx::query_as::<_, LedgerRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {LEDGER_COLUMNS} FROM game_point_ledger \
          WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.idempotency_key)
     .fetch_optional(&mut **tx)
@@ -401,9 +401,9 @@ async fn get_ledger_by_id_sqlite(
     tenant_id: &str,
     ledger_id: &str,
 ) -> GamePointResult<GamePointLedgerEntry> {
-    let row = sqlx::query_as::<_, LedgerRow>(&format!(
+    let row = sqlx::query_as::<_, LedgerRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {LEDGER_COLUMNS} FROM game_point_ledger WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(ledger_id)
     .fetch_optional(&mut **tx)
@@ -418,10 +418,10 @@ async fn get_balance_postgres(
     tenant_id: &str,
     ledger_account_id: &str,
 ) -> GamePointResult<GamePointBalance> {
-    let row = sqlx::query_as::<_, BalanceRow>(&format!(
+    let row = sqlx::query_as::<_, BalanceRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {BALANCE_COLUMNS} FROM game_point_balance \
          WHERE tenant_id = $1 AND ledger_account_id = $2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(ledger_account_id)
     .fetch_optional(pool)
@@ -436,10 +436,10 @@ async fn get_balance_sqlite(
     tenant_id: &str,
     ledger_account_id: &str,
 ) -> GamePointResult<GamePointBalance> {
-    let row = sqlx::query_as::<_, BalanceRow>(&format!(
+    let row = sqlx::query_as::<_, BalanceRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {BALANCE_COLUMNS} FROM game_point_balance \
          WHERE tenant_id = ?1 AND ledger_account_id = ?2 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(ledger_account_id)
     .fetch_optional(pool)

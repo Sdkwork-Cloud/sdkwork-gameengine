@@ -249,13 +249,13 @@ async fn list_configs_postgres(
     limit: i64,
     offset: i64,
 ) -> LeaderboardResult<LeaderboardConfigPage> {
-    let rows = sqlx::query_as::<_, ConfigRow>(&format!(
+    let rows = sqlx::query_as::<_, ConfigRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {CONFIG_COLUMNS} FROM game_leaderboard_config \
          WHERE tenant_id = $1 AND deleted_at IS NULL \
          AND ($2::text IS NULL OR game_id = $2) \
          AND ($3::text IS NULL OR status = $3) \
          ORDER BY sort_order ASC, leaderboard_code ASC LIMIT $4 OFFSET $5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -289,13 +289,13 @@ async fn list_configs_sqlite(
     limit: i64,
     offset: i64,
 ) -> LeaderboardResult<LeaderboardConfigPage> {
-    let rows = sqlx::query_as::<_, ConfigRow>(&format!(
+    let rows = sqlx::query_as::<_, ConfigRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {CONFIG_COLUMNS} FROM game_leaderboard_config \
          WHERE tenant_id = ?1 AND deleted_at IS NULL \
          AND (?2 IS NULL OR game_id = ?2) \
          AND (?3 IS NULL OR status = ?3) \
          ORDER BY sort_order ASC, leaderboard_code ASC LIMIT ?4 OFFSET ?5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(game_id)
     .bind(status)
@@ -340,10 +340,10 @@ async fn get_config_postgres(
     tenant_id: &str,
     leaderboard_id: &str,
 ) -> LeaderboardResult<LeaderboardConfigItem> {
-    let row = sqlx::query_as::<_, ConfigRow>(&format!(
+    let row = sqlx::query_as::<_, ConfigRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {CONFIG_COLUMNS} FROM game_leaderboard_config \
          WHERE tenant_id = $1 AND deleted_at IS NULL AND (id = $2 OR leaderboard_code = $2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(leaderboard_id)
     .fetch_optional(pool)
@@ -358,10 +358,10 @@ async fn get_config_sqlite(
     tenant_id: &str,
     leaderboard_id: &str,
 ) -> LeaderboardResult<LeaderboardConfigItem> {
-    let row = sqlx::query_as::<_, ConfigRow>(&format!(
+    let row = sqlx::query_as::<_, ConfigRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {CONFIG_COLUMNS} FROM game_leaderboard_config \
          WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR leaderboard_code = ?2) LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(leaderboard_id)
     .fetch_optional(pool)
@@ -380,13 +380,13 @@ async fn list_rankings_postgres(
     offset: i64,
     query: &LeaderboardQuery,
 ) -> LeaderboardResult<LeaderboardPage> {
-    let rows = sqlx::query_as::<_, LeaderboardRow>(&format!(
+    let rows = sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
          WHERE tenant_id = $1 \
          AND ($2::text IS NULL OR leaderboard_id = $2) \
          AND ($3::text IS NULL OR game_id = $3) \
          ORDER BY score_value DESC, recorded_at ASC, id ASC LIMIT $4 OFFSET $5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(leaderboard_id)
     .bind(game_id)
@@ -421,13 +421,13 @@ async fn list_rankings_sqlite(
     offset: i64,
     query: &LeaderboardQuery,
 ) -> LeaderboardResult<LeaderboardPage> {
-    let rows = sqlx::query_as::<_, LeaderboardRow>(&format!(
+    let rows = sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
          WHERE tenant_id = ?1 \
          AND (?2 IS NULL OR leaderboard_id = ?2) \
          AND (?3 IS NULL OR game_id = ?3) \
          ORDER BY score_value DESC, recorded_at ASC, id ASC LIMIT ?4 OFFSET ?5",
-    ))
+    )))
     .bind(tenant_id)
     .bind(leaderboard_id)
     .bind(game_id)
@@ -479,12 +479,12 @@ async fn get_user_postgres(
     user_id: &str,
     game_id: Option<&str>,
 ) -> LeaderboardResult<LeaderboardEntry> {
-    let row = sqlx::query_as::<_, LeaderboardRow>(&format!(
+    let row = sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
          WHERE tenant_id = $1 AND user_id = $2 \
          AND ($3::text IS NULL OR game_id = $3) \
          ORDER BY score_value DESC, recorded_at ASC, id ASC LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(user_id)
     .bind(game_id)
@@ -504,22 +504,22 @@ async fn get_user_sqlite(
     game_id: Option<&str>,
 ) -> LeaderboardResult<LeaderboardEntry> {
     let row = if let Some(game_id) = game_id {
-        sqlx::query_as::<_, LeaderboardRow>(&format!(
+        sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
             "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
              WHERE tenant_id = ?1 AND user_id = ?2 AND game_id = ?3 \
              ORDER BY score_value DESC, recorded_at ASC, id ASC LIMIT 1",
-        ))
+        )))
         .bind(tenant_id)
         .bind(user_id)
         .bind(game_id)
         .fetch_optional(pool)
         .await
     } else {
-        sqlx::query_as::<_, LeaderboardRow>(&format!(
+        sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
             "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
              WHERE tenant_id = ?1 AND user_id = ?2 \
              ORDER BY score_value DESC, recorded_at ASC, id ASC LIMIT 1",
-        ))
+        )))
         .bind(tenant_id)
         .bind(user_id)
         .fetch_optional(pool)
@@ -883,10 +883,10 @@ async fn get_entry_by_user_postgres(
     tenant_id: &str,
     command: &LeaderboardEntryUpdateCommand,
 ) -> LeaderboardResult<LeaderboardRow> {
-    sqlx::query_as::<_, LeaderboardRow>(&format!(
+    sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
          WHERE tenant_id = $1 AND leaderboard_id = $2 AND user_id = $3 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.leaderboard_id)
     .bind(&command.user_id)
@@ -901,10 +901,10 @@ async fn get_entry_by_user_sqlite(
     tenant_id: &str,
     command: &LeaderboardEntryUpdateCommand,
 ) -> LeaderboardResult<LeaderboardRow> {
-    sqlx::query_as::<_, LeaderboardRow>(&format!(
+    sqlx::query_as::<_, LeaderboardRow>(sqlx::AssertSqlSafe(format!(
         "SELECT {ENTRY_COLUMNS} FROM game_leaderboard_entry \
          WHERE tenant_id = ?1 AND leaderboard_id = ?2 AND user_id = ?3 LIMIT 1",
-    ))
+    )))
     .bind(tenant_id)
     .bind(&command.leaderboard_id)
     .bind(&command.user_id)
