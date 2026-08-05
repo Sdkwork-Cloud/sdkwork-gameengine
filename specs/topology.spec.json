@@ -2,7 +2,7 @@
   "schemaVersion": 5,
   "kind": "sdkwork.app.topology",
   "appId": "sdkwork-gameengine",
-  "applicationCode": "games",
+  "applicationCode": "gameengine",
   "archetype": "application-http-gateway",
   "profileRoot": "configs/topology",
   "profilePattern": "{deploymentProfile}.{environment}.env",

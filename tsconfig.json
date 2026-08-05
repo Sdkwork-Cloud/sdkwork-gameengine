@@ -11,17 +11,7 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "allowJs": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
-    "paths": {
-      "@sdkwork/utils": [
-        "../sdkwork-utils/packages/sdkwork-utils-typescript/src/index.ts"
-      ],
-      "@sdkwork/games-contracts": [
-        "apps/sdkwork-gameengine-common/packages/sdkwork-games-contracts/src/index.ts"
-      ]
-    }
+    "allowJs": true
   },
   "include": [
     "scripts/**/*.mjs",

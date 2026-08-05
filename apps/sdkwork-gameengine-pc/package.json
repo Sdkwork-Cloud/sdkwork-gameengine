@@ -5,9 +5,6 @@
   "type": "module",
   "description": "SDKWork Game Engine PC browser application composition root.",
   "packageManager": "pnpm@10.33.0",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "dev": "node ../../../sdkwork-iam/scripts/dev/run-pc-renderer-dev-with-bootstrap.mjs -- vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
