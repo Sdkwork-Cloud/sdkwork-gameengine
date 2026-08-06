@@ -31,6 +31,14 @@ The executable baseline is the pre-GA clean baseline. Leaderboards are already s
 `game_leaderboard_config` for ranking policy and `game_leaderboard_entry` for rank projection rows;
 there is no compatibility leaderboard table in this application state.
 
+## Initialization state
+
+This module is in **initialization state** for greenfield deployments:
+
+1. **Baseline** — `database/ddl/baseline/{engine}/0001_games_baseline.sql` contains the full DDL snapshot.
+2. **Migrations** — `database/migrations/{engine}/` is reserved for post-GA incremental schema changes only. It is intentionally empty at initialization.
+3. **Drift** — run `pnpm db:drift:check` before release.
+
 ## Commands
 
 ```bash
