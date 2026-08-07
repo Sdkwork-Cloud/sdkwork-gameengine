@@ -37,8 +37,8 @@ impl GameCatalogRepository for SqlxGameCatalogRepository {
             DatabasePool::Postgres(pool, _) => {
                 list_postgres(pool, tenant_id, query, limit, offset).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_sqlite(pool, tenant_id, query, limit, offset).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -57,7 +57,8 @@ impl GameCatalogRepository for SqlxGameCatalogRepository {
 
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_postgres(pool, tenant_id, game_id).await,
-            DatabasePool::Sqlite(pool, _) => get_sqlite(pool, tenant_id, game_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 }
@@ -91,34 +92,6 @@ async fn list_postgres(
     Ok(page_from_rows(rows, total, limit, offset))
 }
 
-async fn list_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    query: &GameCatalogQuery,
-    limit: i64,
-    offset: i64,
-) -> GameResult<GameCatalogPage> {
-    let list_sql = build_catalog_list_sql(query, SqlDialect::Sqlite);
-
-    let mut select = sqlx::query_as::<_, CatalogRow>(sqlx::AssertSqlSafe(list_sql.select_sql.as_str())).bind(tenant_id);
-    for value in &list_sql.bind_values {
-        select = select.bind(value);
-    }
-    let rows = select
-        .bind(limit)
-        .bind(offset)
-        .fetch_all(pool)
-        .await
-        .map_err(map_sqlx_error)?;
-
-    let mut count = sqlx::query_scalar::<_, i64>(sqlx::AssertSqlSafe(list_sql.count_sql.as_str())).bind(tenant_id);
-    for value in &list_sql.bind_values {
-        count = count.bind(value);
-    }
-    let total = count.fetch_one(pool).await.map_err(map_sqlx_error)?;
-
-    Ok(page_from_rows(rows, total, limit, offset))
-}
 
 fn page_from_rows(rows: Vec<CatalogRow>, total: i64, limit: i64, offset: i64) -> GameCatalogPage {
     GameCatalogPage {
@@ -148,25 +121,6 @@ async fn get_postgres(
     Ok(row.into_item())
 }
 
-async fn get_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    game_id: &str,
-) -> GameResult<GameCatalogItem> {
-    let row = sqlx::query_as::<_, CatalogRow>(
-        "SELECT id, game_code, title, summary, genre, status FROM game_catalog \
-         WHERE tenant_id = ? AND deleted_at IS NULL AND (id = ? OR game_code = ?) LIMIT 1",
-    )
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(game_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameError::not_found(format!("game {game_id} not found")))?;
-
-    Ok(row.into_item())
-}
 
 #[derive(sqlx::FromRow)]
 struct CatalogRow {
@@ -197,6 +151,13 @@ fn map_sqlx_error(error: sqlx::Error) -> GameError {
 
 #[cfg(test)]
 mod tests {
+
+fn optional_postgres_database_url() -> Option<String> {
+    std::env::var("SDKWORK_DATABASE_URL")
+        .or_else(|_| std::env::var("DATABASE_URL"))
+        .ok()
+        .filter(|url| url.starts_with("postgres://") || url.starts_with("postgresql://"))
+}
     use super::*;
 
     #[test]

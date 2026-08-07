@@ -38,8 +38,8 @@ impl GameRulesetRepository for SqlxGameRulesetRepository {
             DatabasePool::Postgres(pool, _) => {
                 get_active_postgres(pool, tenant_id, game_id, mode_id).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                get_active_sqlite(pool, tenant_id, game_id, mode_id).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -55,8 +55,8 @@ impl GameRulesetRepository for SqlxGameRulesetRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_postgres(pool, tenant_id, &id, &now, command).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_sqlite(pool, tenant_id, &id, &now, command).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -120,28 +120,6 @@ async fn get_active_postgres(
     row.into_item()
 }
 
-async fn get_active_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    game_id: &str,
-    mode_id: Option<&str>,
-) -> GameRulesetResult<GameRulesetItem> {
-    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {SQLITE_RULESET_COLUMNS} FROM game_ruleset \
-         WHERE tenant_id = ?1 AND game_id = ?2 AND deleted_at IS NULL AND status = 'active' \
-         AND ((?3 IS NULL AND mode_id IS NULL) OR mode_id = ?3) \
-         ORDER BY version_no DESC LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(mode_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameRulesetError::not_found("active ruleset not found"))?;
-
-    row.into_item()
-}
 
 async fn create_postgres(
     pool: &sqlx::PgPool,
@@ -176,50 +154,6 @@ async fn create_postgres(
     row.into_item()
 }
 
-async fn create_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    id: &str,
-    now: &str,
-    command: &CreateGameRulesetCommand,
-) -> GameRulesetResult<GameRulesetItem> {
-    sqlx::query(
-        "INSERT INTO game_ruleset \
-         (id, uuid, tenant_id, organization_id, game_id, mode_id, ruleset_code, version_no, status, \
-          config_schema, config_values, activated_at, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, CASE WHEN ?8 = 'active' THEN ?11 ELSE NULL END, ?11, ?11)",
-    )
-    .bind(id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.game_id)
-    .bind(&command.mode_id)
-    .bind(&command.ruleset_code)
-    .bind(command.version_no)
-    .bind(&command.status)
-    .bind(command.config_schema.to_string())
-    .bind(command.config_values.to_string())
-    .bind(now)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    let mode_id = command.mode_id.as_deref();
-    if command.status == "active" {
-        return get_active_sqlite(pool, tenant_id, &command.game_id, mode_id).await;
-    }
-
-    let row = sqlx::query_as::<_, RulesetRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {SQLITE_RULESET_COLUMNS} FROM game_ruleset WHERE tenant_id = ?1 AND id = ?2",
-    )))
-    .bind(tenant_id)
-    .bind(id)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    row.into_item()
-}
 
 fn parse_json(value: &str) -> GameRulesetResult<serde_json::Value> {
     serde_json::from_str(value).map_err(|error| GameRulesetError::invalid(error.to_string()))

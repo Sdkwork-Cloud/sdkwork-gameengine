@@ -34,8 +34,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_job_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_job_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -51,7 +51,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
         }
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_job_postgres(pool, tenant_id, job_id).await,
-            DatabasePool::Sqlite(pool, _) => get_job_sqlite(pool, tenant_id, job_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -67,8 +68,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 list_due_jobs_postgres(pool, tenant_id, &query.due_at, limit, offset).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_due_jobs_sqlite(pool, tenant_id, &query.due_at, limit, offset).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -84,8 +85,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 start_job_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                start_job_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -101,8 +102,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 record_failure_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                record_failure_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -118,8 +119,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 complete_job_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                complete_job_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -135,8 +136,8 @@ impl GameSettlementRepository for SqlxGameSettlementRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_reward_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_reward_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -268,41 +269,6 @@ async fn create_job_postgres(
         .ok_or_else(|| GameSettlementError::conflict("settlement job idempotency conflict"))
 }
 
-async fn create_job_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateSettlementJobCommand,
-    timestamp: &str,
-) -> GameSettlementResult<GameSettlementJobItem> {
-    if let Some(existing) = get_existing_job_sqlite(pool, tenant_id, command).await? {
-        return Ok(existing);
-    }
-    let id = uuid();
-    let result = sqlx::query(
-        "INSERT INTO game_settlement_job \
-         (id, uuid, tenant_id, organization_id, session_id, session_result_id, idempotency_key, \
-          job_payload, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?8) \
-         ON CONFLICT (tenant_id, idempotency_key) DO NOTHING",
-    )
-    .bind(&id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.session_id)
-    .bind(&command.session_result_id)
-    .bind(&command.idempotency_key)
-    .bind(command.job_payload.to_string())
-    .bind(timestamp)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        return get_existing_job_sqlite(pool, tenant_id, command)
-            .await?
-            .ok_or_else(|| GameSettlementError::conflict("settlement job idempotency conflict"));
-    }
-    get_job_sqlite(pool, tenant_id, &id).await
-}
 
 async fn get_existing_job_postgres(
     pool: &sqlx::PgPool,
@@ -321,22 +287,6 @@ async fn get_existing_job_postgres(
     map_existing_job(row, command)
 }
 
-async fn get_existing_job_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateSettlementJobCommand,
-) -> GameSettlementResult<Option<GameSettlementJobItem>> {
-    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
-         WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(&command.idempotency_key)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    map_existing_job(row, command)
-}
 
 fn map_existing_job(
     row: Option<JobRow>,
@@ -368,23 +318,6 @@ async fn get_job_postgres(
     row.into_item()
 }
 
-async fn get_job_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    job_id: &str,
-) -> GameSettlementResult<GameSettlementJobItem> {
-    let row = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
-         WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(job_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameSettlementError::not_found("settlement job not found"))?;
-    row.into_item()
-}
 
 async fn list_due_jobs_postgres(
     pool: &sqlx::PgPool,
@@ -418,37 +351,6 @@ async fn list_due_jobs_postgres(
     page_from_rows(rows, total, limit, offset)
 }
 
-async fn list_due_jobs_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    due_at: &str,
-    limit: i64,
-    offset: i64,
-) -> GameSettlementResult<GameSettlementJobPage> {
-    let filter = "tenant_id = ?1 AND (status = 'pending' OR \
-        (status = 'retrying' AND next_retry_at IS NOT NULL AND next_retry_at <= ?2))";
-    let rows = sqlx::query_as::<_, JobRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {JOB_COLUMNS_SQLITE} FROM game_settlement_job \
-         WHERE {filter} \
-         ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT ?3 OFFSET ?4",
-    )))
-    .bind(tenant_id)
-    .bind(due_at)
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
-        "SELECT COUNT(*) FROM game_settlement_job WHERE {filter}",
-    )))
-    .bind(tenant_id)
-    .bind(due_at)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    page_from_rows(rows, total, limit, offset)
-}
 
 async fn start_job_postgres(
     pool: &sqlx::PgPool,
@@ -487,40 +389,6 @@ async fn start_job_postgres(
     row.into_item()
 }
 
-async fn start_job_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &StartSettlementJobCommand,
-    timestamp: &str,
-) -> GameSettlementResult<GameSettlementJobItem> {
-    let result = if let Some(expected_version) = command.expected_version {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = 'running', attempt_count = attempt_count + 1, \
-             started_at = ?4, next_retry_at = NULL, updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3 AND status IN ('pending', 'retrying')",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(expected_version)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = 'running', attempt_count = attempt_count + 1, \
-             started_at = ?3, next_retry_at = NULL, updated_at = ?3, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND status IN ('pending', 'retrying')",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "settlement job version has changed")?;
-    get_job_sqlite(pool, tenant_id, &command.job_id).await
-}
 
 async fn record_failure_postgres(
     pool: &sqlx::PgPool,
@@ -566,49 +434,6 @@ async fn record_failure_postgres(
     row.into_item()
 }
 
-async fn record_failure_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &RecordSettlementFailureCommand,
-    timestamp: &str,
-) -> GameSettlementResult<GameSettlementJobItem> {
-    let status = failure_status(command);
-    let result = if let Some(expected_version) = command.expected_version {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = ?4, error_code = ?5, error_detail = ?6, \
-             next_retry_at = ?7, updated_at = ?8, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(expected_version)
-        .bind(status)
-        .bind(&command.error_code)
-        .bind(&command.error_detail)
-        .bind(&command.next_retry_at)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = ?3, error_code = ?4, error_detail = ?5, \
-             next_retry_at = ?6, updated_at = ?7, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(status)
-        .bind(&command.error_code)
-        .bind(&command.error_detail)
-        .bind(&command.next_retry_at)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "settlement job version has changed")?;
-    get_job_sqlite(pool, tenant_id, &command.job_id).await
-}
 
 async fn complete_job_postgres(
     pool: &sqlx::PgPool,
@@ -645,40 +470,6 @@ async fn complete_job_postgres(
     row.into_item()
 }
 
-async fn complete_job_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CompleteSettlementJobCommand,
-    timestamp: &str,
-) -> GameSettlementResult<GameSettlementJobItem> {
-    let result = if let Some(expected_version) = command.expected_version {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = 'succeeded', completed_at = ?4, \
-             next_retry_at = NULL, updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(expected_version)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_settlement_job SET status = 'succeeded', completed_at = ?3, \
-             next_retry_at = NULL, updated_at = ?3, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2",
-        )
-        .bind(tenant_id)
-        .bind(&command.job_id)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "settlement job version has changed")?;
-    get_job_sqlite(pool, tenant_id, &command.job_id).await
-}
 
 async fn create_reward_postgres(
     pool: &sqlx::PgPool,
@@ -720,44 +511,6 @@ async fn create_reward_postgres(
         .ok_or_else(|| GameSettlementError::conflict("reward intent idempotency conflict"))
 }
 
-async fn create_reward_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateRewardIntentCommand,
-    timestamp: &str,
-) -> GameSettlementResult<GameRewardIntentItem> {
-    ensure_job_exists_sqlite(pool, tenant_id, &command.settlement_job_id).await?;
-    if let Some(existing) = get_existing_reward_sqlite(pool, tenant_id, command).await? {
-        return Ok(existing);
-    }
-    let id = uuid();
-    let result = sqlx::query(
-        "INSERT INTO game_reward_intent \
-         (id, uuid, tenant_id, organization_id, settlement_job_id, user_id, reward_type, \
-          external_owner, intent_payload, idempotency_key, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10) \
-         ON CONFLICT (tenant_id, idempotency_key) DO NOTHING",
-    )
-    .bind(&id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.settlement_job_id)
-    .bind(&command.user_id)
-    .bind(&command.reward_type)
-    .bind(&command.external_owner)
-    .bind(command.intent_payload.to_string())
-    .bind(&command.idempotency_key)
-    .bind(timestamp)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        return get_existing_reward_sqlite(pool, tenant_id, command)
-            .await?
-            .ok_or_else(|| GameSettlementError::conflict("reward intent idempotency conflict"));
-    }
-    get_reward_sqlite(pool, tenant_id, &id).await
-}
 
 async fn ensure_job_exists_postgres(
     pool: &sqlx::PgPool,
@@ -778,24 +531,6 @@ async fn ensure_job_exists_postgres(
     Ok(())
 }
 
-async fn ensure_job_exists_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    job_id: &str,
-) -> GameSettlementResult<()> {
-    let exists: Option<i64> = sqlx::query_scalar(
-        "SELECT 1 FROM game_settlement_job WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    )
-    .bind(tenant_id)
-    .bind(job_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if exists.is_none() {
-        return Err(GameSettlementError::not_found("settlement job not found"));
-    }
-    Ok(())
-}
 
 async fn get_existing_reward_postgres(
     pool: &sqlx::PgPool,
@@ -814,40 +549,7 @@ async fn get_existing_reward_postgres(
     map_existing_reward(row, command)
 }
 
-async fn get_existing_reward_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateRewardIntentCommand,
-) -> GameSettlementResult<Option<GameRewardIntentItem>> {
-    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {REWARD_COLUMNS_SQLITE} FROM game_reward_intent \
-         WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(&command.idempotency_key)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    map_existing_reward(row, command)
-}
 
-async fn get_reward_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    reward_id: &str,
-) -> GameSettlementResult<GameRewardIntentItem> {
-    let row = sqlx::query_as::<_, RewardRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {REWARD_COLUMNS_SQLITE} FROM game_reward_intent \
-         WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(reward_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameSettlementError::not_found("reward intent not found"))?;
-    row.into_item()
-}
 
 fn map_existing_reward(
     row: Option<RewardRow>,
@@ -943,16 +645,27 @@ fn map_sqlx_error(error: sqlx::Error) -> GameSettlementError {
 
 #[cfg(test)]
 mod tests {
+
+fn optional_postgres_database_url() -> Option<String> {
+    std::env::var("SDKWORK_DATABASE_URL")
+        .or_else(|_| std::env::var("DATABASE_URL"))
+        .ok()
+        .filter(|url| url.starts_with("postgres://") || url.starts_with("postgresql://"))
+}
     use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
     use sdkwork_database_sqlx::create_pool_from_config;
     use serde_json::json;
 
     use super::*;
 
-    async fn sqlite_repo() -> SqlxGameSettlementRepository {
-        let pool = create_pool_from_config(DatabaseConfig {
-            engine: DatabaseEngine::Sqlite,
-            url: "sqlite::memory:".into(),
+    async fn postgres_repo() -> Option<SqlxGameSettlementRepository> {
+    let Some(database_url) = optional_postgres_database_url() else {
+        eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+        return None;
+    };
+                let pool = create_pool_from_config(DatabaseConfig {
+            engine: DatabaseEngine::Postgres,
+            url: database_url,
             max_connections: 1,
             ..Default::default()
         })
@@ -1003,7 +716,7 @@ mod tests {
         )
         .await
         .unwrap();
-        SqlxGameSettlementRepository::new(pool)
+        Some(SqlxGameSettlementRepository::new(pool))
     }
 
     fn job_command(idempotency_key: &str) -> CreateSettlementJobCommand {
@@ -1028,7 +741,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_create_job_is_idempotent_and_conflict_checked() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let command = job_command("idem-job-sqlite");
 
         let first = repository.create_job("100001", &command).await.unwrap();
@@ -1046,7 +762,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_failed_job_retry_is_listed_when_due() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let job = repository
             .create_job("100001", &job_command("idem-retry-sqlite"))
             .await
@@ -1096,7 +815,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_reward_intent_is_idempotent_and_conflict_checked() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let job = repository
             .create_job("100001", &job_command("idem-reward-sqlite"))
             .await

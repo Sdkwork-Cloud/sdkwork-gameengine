@@ -34,8 +34,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
             DatabasePool::Postgres(pool, _) => {
                 append_event_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                append_event_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -51,7 +51,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
         }
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_event_postgres(pool, tenant_id, event_id).await,
-            DatabasePool::Sqlite(pool, _) => get_event_sqlite(pool, tenant_id, event_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -67,8 +68,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
             DatabasePool::Postgres(pool, _) => {
                 list_pending_postgres(pool, tenant_id, &query.due_at, limit, offset).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_pending_sqlite(pool, tenant_id, &query.due_at, limit, offset).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -84,8 +85,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
             DatabasePool::Postgres(pool, _) => {
                 mark_published_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                mark_published_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -101,8 +102,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
             DatabasePool::Postgres(pool, _) => {
                 mark_failed_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                mark_failed_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -118,8 +119,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
             DatabasePool::Postgres(pool, _) => {
                 append_audit_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                append_audit_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -135,7 +136,8 @@ impl GameEventsRepository for SqlxGameEventsRepository {
         let params = AuditSearchParams::from_query(tenant_id, query, limit, offset);
         match &self.pool {
             DatabasePool::Postgres(pool, _) => search_audit_postgres(pool, params).await,
-            DatabasePool::Sqlite(pool, _) => search_audit_sqlite(pool, params).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 }
@@ -292,43 +294,6 @@ async fn append_event_postgres(
         .ok_or_else(|| GameEventError::conflict("engine event idempotency conflict"))
 }
 
-async fn append_event_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &AppendGameEngineEventCommand,
-    timestamp: &str,
-) -> GameEventResult<GameEngineEventItem> {
-    if let Some(existing) = get_existing_event_sqlite(pool, tenant_id, command).await? {
-        return Ok(existing);
-    }
-    let id = uuid();
-    let result = sqlx::query(
-        "INSERT INTO game_engine_event \
-         (id, uuid, tenant_id, organization_id, event_type, aggregate_type, aggregate_id, \
-          idempotency_key, event_payload, trace_id, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10) \
-         ON CONFLICT (tenant_id, idempotency_key) DO NOTHING",
-    )
-    .bind(&id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.event_type)
-    .bind(&command.aggregate_type)
-    .bind(&command.aggregate_id)
-    .bind(&command.idempotency_key)
-    .bind(command.event_payload.to_string())
-    .bind(&command.trace_id)
-    .bind(timestamp)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        return get_existing_event_sqlite(pool, tenant_id, command)
-            .await?
-            .ok_or_else(|| GameEventError::conflict("engine event idempotency conflict"));
-    }
-    get_event_sqlite(pool, tenant_id, &id).await
-}
 
 async fn get_existing_event_postgres(
     pool: &sqlx::PgPool,
@@ -347,22 +312,6 @@ async fn get_existing_event_postgres(
     map_existing_event(row, command)
 }
 
-async fn get_existing_event_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &AppendGameEngineEventCommand,
-) -> GameEventResult<Option<GameEngineEventItem>> {
-    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
-         WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(&command.idempotency_key)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    map_existing_event(row, command)
-}
 
 fn map_existing_event(
     row: Option<EventRow>,
@@ -394,23 +343,6 @@ async fn get_event_postgres(
     row.into_item()
 }
 
-async fn get_event_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    event_id: &str,
-) -> GameEventResult<GameEngineEventItem> {
-    let row = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
-         WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(event_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameEventError::not_found("engine event not found"))?;
-    row.into_item()
-}
 
 async fn list_pending_postgres(
     pool: &sqlx::PgPool,
@@ -444,37 +376,6 @@ async fn list_pending_postgres(
     event_page_from_rows(rows, total, limit, offset)
 }
 
-async fn list_pending_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    due_at: &str,
-    limit: i64,
-    offset: i64,
-) -> GameEventResult<GameEngineEventPage> {
-    let filter = "tenant_id = ?1 AND (status = 'pending' OR \
-        (status = 'failed' AND next_retry_at IS NOT NULL AND next_retry_at <= ?2))";
-    let rows = sqlx::query_as::<_, EventRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {EVENT_COLUMNS_SQLITE} FROM game_engine_event \
-         WHERE {filter} \
-         ORDER BY COALESCE(next_retry_at, created_at), created_at LIMIT ?3 OFFSET ?4",
-    )))
-    .bind(tenant_id)
-    .bind(due_at)
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
-        "SELECT COUNT(*) FROM game_engine_event WHERE {filter}",
-    )))
-    .bind(tenant_id)
-    .bind(due_at)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    event_page_from_rows(rows, total, limit, offset)
-}
 
 async fn mark_published_postgres(
     pool: &sqlx::PgPool,
@@ -511,40 +412,6 @@ async fn mark_published_postgres(
     row.into_item()
 }
 
-async fn mark_published_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &MarkGameEngineEventPublishedCommand,
-    timestamp: &str,
-) -> GameEventResult<GameEngineEventItem> {
-    let result = if let Some(expected_version) = command.expected_version {
-        sqlx::query(
-            "UPDATE game_engine_event SET status = 'published', published_at = ?4, \
-             next_retry_at = NULL, updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3",
-        )
-        .bind(tenant_id)
-        .bind(&command.event_id)
-        .bind(expected_version)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_engine_event SET status = 'published', published_at = ?3, \
-             next_retry_at = NULL, updated_at = ?3, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2",
-        )
-        .bind(tenant_id)
-        .bind(&command.event_id)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "engine event version has changed")?;
-    get_event_sqlite(pool, tenant_id, &command.event_id).await
-}
 
 async fn mark_failed_postgres(
     pool: &sqlx::PgPool,
@@ -586,43 +453,6 @@ async fn mark_failed_postgres(
     row.into_item()
 }
 
-async fn mark_failed_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &MarkGameEngineEventFailedCommand,
-    timestamp: &str,
-) -> GameEventResult<GameEngineEventItem> {
-    let status = failed_status(command);
-    let result = if let Some(expected_version) = command.expected_version {
-        sqlx::query(
-            "UPDATE game_engine_event SET status = ?4, next_retry_at = ?5, updated_at = ?6, \
-             version = version + 1 WHERE tenant_id = ?1 AND id = ?2 AND version = ?3",
-        )
-        .bind(tenant_id)
-        .bind(&command.event_id)
-        .bind(expected_version)
-        .bind(status)
-        .bind(&command.next_retry_at)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_engine_event SET status = ?3, next_retry_at = ?4, updated_at = ?5, \
-             version = version + 1 WHERE tenant_id = ?1 AND id = ?2",
-        )
-        .bind(tenant_id)
-        .bind(&command.event_id)
-        .bind(status)
-        .bind(&command.next_retry_at)
-        .bind(timestamp)
-        .execute(pool)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "engine event version has changed")?;
-    get_event_sqlite(pool, tenant_id, &command.event_id).await
-}
 
 async fn append_audit_postgres(
     pool: &sqlx::PgPool,
@@ -657,55 +487,7 @@ async fn append_audit_postgres(
     row.into_item()
 }
 
-async fn append_audit_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &AppendAuditRecordCommand,
-    timestamp: &str,
-) -> GameEventResult<AuditRecordItem> {
-    let id = uuid();
-    sqlx::query(
-        "INSERT INTO game_audit_record \
-         (id, uuid, tenant_id, organization_id, actor_type, actor_id, action, target_type, \
-          target_id, reason_code, before_snapshot, after_snapshot, trace_id, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?13)",
-    )
-    .bind(&id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.actor_type)
-    .bind(&command.actor_id)
-    .bind(&command.action)
-    .bind(&command.target_type)
-    .bind(&command.target_id)
-    .bind(&command.reason_code)
-    .bind(command.before_snapshot.to_string())
-    .bind(command.after_snapshot.to_string())
-    .bind(&command.trace_id)
-    .bind(timestamp)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    get_audit_sqlite(pool, tenant_id, &id).await
-}
 
-async fn get_audit_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    audit_id: &str,
-) -> GameEventResult<AuditRecordItem> {
-    let row = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {AUDIT_COLUMNS_SQLITE} FROM game_audit_record \
-         WHERE tenant_id = ?1 AND id = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(audit_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameEventError::not_found("audit record not found"))?;
-    row.into_item()
-}
 
 async fn search_audit_postgres(
     pool: &sqlx::PgPool,
@@ -747,45 +529,6 @@ async fn search_audit_postgres(
     audit_page_from_rows(rows, total, params.limit, params.offset)
 }
 
-async fn search_audit_sqlite(
-    pool: &sqlx::SqlitePool,
-    params: AuditSearchParams<'_>,
-) -> GameEventResult<AuditRecordPage> {
-    let filter = "tenant_id = ?1 \
-        AND (?2 IS NULL OR target_type = ?2) \
-        AND (?3 IS NULL OR target_id = ?3) \
-        AND (?4 IS NULL OR actor_type = ?4) \
-        AND (?5 IS NULL OR actor_id = ?5) \
-        AND (?6 IS NULL OR action = ?6)";
-    let rows = sqlx::query_as::<_, AuditRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {AUDIT_COLUMNS_SQLITE} FROM game_audit_record \
-         WHERE {filter} ORDER BY created_at DESC LIMIT ?7 OFFSET ?8",
-    )))
-    .bind(params.tenant_id)
-    .bind(params.target_type)
-    .bind(params.target_id)
-    .bind(params.actor_type)
-    .bind(params.actor_id)
-    .bind(params.action)
-    .bind(params.limit)
-    .bind(params.offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(sqlx::AssertSqlSafe(format!(
-        "SELECT COUNT(*) FROM game_audit_record WHERE {filter}",
-    )))
-    .bind(params.tenant_id)
-    .bind(params.target_type)
-    .bind(params.target_id)
-    .bind(params.actor_type)
-    .bind(params.actor_id)
-    .bind(params.action)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    audit_page_from_rows(rows, total, params.limit, params.offset)
-}
 
 fn event_page_from_rows(
     rows: Vec<EventRow>,
@@ -872,16 +615,27 @@ fn map_sqlx_error(error: sqlx::Error) -> GameEventError {
 
 #[cfg(test)]
 mod tests {
+
+fn optional_postgres_database_url() -> Option<String> {
+    std::env::var("SDKWORK_DATABASE_URL")
+        .or_else(|_| std::env::var("DATABASE_URL"))
+        .ok()
+        .filter(|url| url.starts_with("postgres://") || url.starts_with("postgresql://"))
+}
     use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
     use sdkwork_database_sqlx::create_pool_from_config;
     use serde_json::json;
 
     use super::*;
 
-    async fn sqlite_repo() -> SqlxGameEventsRepository {
-        let pool = create_pool_from_config(DatabaseConfig {
-            engine: DatabaseEngine::Sqlite,
-            url: "sqlite::memory:".into(),
+    async fn postgres_repo() -> Option<SqlxGameEventsRepository> {
+    let Some(database_url) = optional_postgres_database_url() else {
+        eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+        return None;
+    };
+                let pool = create_pool_from_config(DatabaseConfig {
+            engine: DatabaseEngine::Postgres,
+            url: database_url,
             max_connections: 1,
             ..Default::default()
         })
@@ -928,7 +682,7 @@ mod tests {
         )
         .await
         .unwrap();
-        SqlxGameEventsRepository::new(pool)
+        Some(SqlxGameEventsRepository::new(pool))
     }
 
     fn event_command(idempotency_key: &str) -> AppendGameEngineEventCommand {
@@ -958,7 +712,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_append_event_is_idempotent_and_conflict_checked() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let command = event_command("idem-event-sqlite");
 
         let first = repository.append_event("100001", &command).await.unwrap();
@@ -976,7 +733,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_event_outbox_lists_pending_and_publishes() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let event = repository
             .append_event("100001", &event_command("idem-event-pending"))
             .await
@@ -1012,7 +772,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_audit_append_and_search_filters_by_target() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         repository
             .append_audit_record("100001", &audit_command("session-1"))
             .await

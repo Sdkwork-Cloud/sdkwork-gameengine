@@ -52,17 +52,8 @@ impl GameModeRepository for SqlxGameModeRepository {
                 )
                 .await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_sqlite(
-                    pool,
-                    tenant_id,
-                    game_id,
-                    status,
-                    q.as_deref(),
-                    limit,
-                    offset,
-                )
-                .await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -77,7 +68,8 @@ impl GameModeRepository for SqlxGameModeRepository {
 
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_postgres(pool, tenant_id, mode_id).await,
-            DatabasePool::Sqlite(pool, _) => get_sqlite(pool, tenant_id, mode_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -92,8 +84,8 @@ impl GameModeRepository for SqlxGameModeRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_postgres(pool, tenant_id, &id, &now, command).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_sqlite(pool, tenant_id, &id, &now, command).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -111,7 +103,8 @@ impl GameModeRepository for SqlxGameModeRepository {
             DatabasePool::Postgres(pool, _) => {
                 update_postgres(pool, tenant_id, &updated, &now).await
             }
-            DatabasePool::Sqlite(pool, _) => update_sqlite(pool, tenant_id, &updated, &now).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 }
@@ -199,50 +192,6 @@ async fn list_postgres(
     Ok(page_from_rows(rows, total, limit, offset))
 }
 
-async fn list_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    game_id: Option<&str>,
-    status: Option<&str>,
-    q: Option<&str>,
-    limit: i64,
-    offset: i64,
-) -> GameModeResult<GameModePage> {
-    let rows = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {MODE_COLUMNS} FROM game_mode \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR status = ?3) \
-         AND (?4 IS NULL OR LOWER(title) LIKE LOWER(?4) OR LOWER(mode_code) LIKE LOWER(?4)) \
-         ORDER BY sort_order ASC, mode_code ASC LIMIT ?5 OFFSET ?6",
-    )))
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(status)
-    .bind(q)
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    let total: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM game_mode \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR status = ?3) \
-         AND (?4 IS NULL OR LOWER(title) LIKE LOWER(?4) OR LOWER(mode_code) LIKE LOWER(?4))",
-    )
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(status)
-    .bind(q)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    Ok(page_from_rows(rows, total, limit, offset))
-}
 
 fn page_from_rows(rows: Vec<ModeRow>, total: i64, limit: i64, offset: i64) -> GameModePage {
     GameModePage {
@@ -272,24 +221,6 @@ async fn get_postgres(
     Ok(row.into_item())
 }
 
-async fn get_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    mode_id: &str,
-) -> GameModeResult<GameModeItem> {
-    let row = sqlx::query_as::<_, ModeRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {MODE_COLUMNS} FROM game_mode \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR mode_code = ?2) LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(mode_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameModeError::not_found("mode not found"))?;
-
-    Ok(row.into_item())
-}
 
 async fn create_postgres(
     pool: &sqlx::PgPool,
@@ -327,40 +258,6 @@ async fn create_postgres(
     Ok(row.into_item())
 }
 
-async fn create_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    id: &str,
-    now: &str,
-    command: &CreateGameModeCommand,
-) -> GameModeResult<GameModeItem> {
-    sqlx::query(
-        "INSERT INTO game_mode \
-         (id, uuid, tenant_id, organization_id, game_id, mode_code, title, status, min_players, max_players, \
-          team_size, ruleset_id, matchmaking_enabled, room_enabled, leaderboard_enabled, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?15)",
-    )
-    .bind(id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.game_id)
-    .bind(&command.mode_code)
-    .bind(&command.title)
-    .bind(&command.status)
-    .bind(command.min_players)
-    .bind(command.max_players)
-    .bind(command.team_size)
-    .bind(&command.ruleset_id)
-    .bind(command.matchmaking_enabled)
-    .bind(command.room_enabled)
-    .bind(command.leaderboard_enabled)
-    .bind(now)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    get_sqlite(pool, tenant_id, id).await
-}
 
 async fn update_postgres(
     pool: &sqlx::PgPool,
@@ -394,38 +291,6 @@ async fn update_postgres(
     Ok(row.into_item())
 }
 
-async fn update_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    item: &GameModeItem,
-    now: &str,
-) -> GameModeResult<GameModeItem> {
-    let result = sqlx::query(
-        "UPDATE game_mode SET title = ?3, status = ?4, min_players = ?5, max_players = ?6, \
-         team_size = ?7, ruleset_id = ?8, matchmaking_enabled = ?9, room_enabled = ?10, \
-         leaderboard_enabled = ?11, updated_at = ?12, version = version + 1 \
-         WHERE tenant_id = ?1 AND id = ?2 AND deleted_at IS NULL",
-    )
-    .bind(tenant_id)
-    .bind(&item.id)
-    .bind(&item.title)
-    .bind(&item.status)
-    .bind(item.min_players)
-    .bind(item.max_players)
-    .bind(item.team_size)
-    .bind(&item.ruleset_id)
-    .bind(item.matchmaking_enabled)
-    .bind(item.room_enabled)
-    .bind(item.leaderboard_enabled)
-    .bind(now)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        return Err(GameModeError::not_found("mode not found"));
-    }
-    get_sqlite(pool, tenant_id, &item.id).await
-}
 
 fn merge_update(mut item: GameModeItem, command: &UpdateGameModeCommand) -> GameModeItem {
     if let Some(title) = &command.title {

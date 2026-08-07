@@ -35,8 +35,8 @@ impl GameMatchmakingRepository for SqlxGameMatchmakingRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -54,7 +54,8 @@ impl GameMatchmakingRepository for SqlxGameMatchmakingRepository {
         }
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_postgres(pool, tenant_id, ticket_id).await,
-            DatabasePool::Sqlite(pool, _) => get_sqlite(pool, tenant_id, ticket_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -68,8 +69,8 @@ impl GameMatchmakingRepository for SqlxGameMatchmakingRepository {
             DatabasePool::Postgres(pool, _) => {
                 cancel_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                cancel_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -82,7 +83,8 @@ impl GameMatchmakingRepository for SqlxGameMatchmakingRepository {
         let params = TicketListParams::from_query(tenant_id, query);
         match &self.pool {
             DatabasePool::Postgres(pool, _) => list_tickets_postgres(pool, params).await,
-            DatabasePool::Sqlite(pool, _) => list_tickets_sqlite(pool, params).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -98,8 +100,8 @@ impl GameMatchmakingRepository for SqlxGameMatchmakingRepository {
             DatabasePool::Postgres(pool, _) => {
                 list_queue_postgres(pool, tenant_id, &query.game_id, mode_id, limit, offset).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_queue_sqlite(pool, tenant_id, &query.game_id, mode_id, limit, offset).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -229,51 +231,6 @@ async fn create_postgres(
         .ok_or_else(|| GameMatchmakingError::conflict("match ticket idempotency conflict"))
 }
 
-async fn create_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateMatchTicketCommand,
-    timestamp: &str,
-) -> GameMatchmakingResult<MatchTicketItem> {
-    if let Some(existing) = get_existing_sqlite(pool, tenant_id, command).await? {
-        return Ok(existing);
-    }
-    let id = uuid();
-    let ticket_code = format!("MT-{id}");
-    let attributes = command.match_attributes.to_string();
-    let result = sqlx::query(
-        "INSERT INTO game_match_ticket \
-         (id, uuid, tenant_id, organization_id, ticket_code, game_id, mode_id, ruleset_id, \
-          user_id, party_id, status, priority, match_attributes, idempotency_key, queued_at, \
-          expires_at, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, 'queued', ?10, ?11, \
-          ?12, ?13, ?14, ?13, ?13) \
-         ON CONFLICT (tenant_id, idempotency_key) DO NOTHING",
-    )
-    .bind(&id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&ticket_code)
-    .bind(&command.game_id)
-    .bind(&command.mode_id)
-    .bind(&command.ruleset_id)
-    .bind(&command.user_id)
-    .bind(&command.party_id)
-    .bind(command.priority)
-    .bind(attributes)
-    .bind(&command.idempotency_key)
-    .bind(timestamp)
-    .bind(&command.expires_at)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        return get_existing_sqlite(pool, tenant_id, command)
-            .await?
-            .ok_or_else(|| GameMatchmakingError::conflict("match ticket idempotency conflict"));
-    }
-    get_sqlite(pool, tenant_id, &id).await
-}
 
 async fn get_existing_postgres(
     pool: &sqlx::PgPool,
@@ -292,22 +249,6 @@ async fn get_existing_postgres(
     map_existing(row, command)
 }
 
-async fn get_existing_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CreateMatchTicketCommand,
-) -> GameMatchmakingResult<Option<MatchTicketItem>> {
-    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
-         WHERE tenant_id = ?1 AND idempotency_key = ?2 LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(&command.idempotency_key)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    map_existing(row, command)
-}
 
 fn map_existing(
     row: Option<TicketRow>,
@@ -339,23 +280,6 @@ async fn get_postgres(
     row.into_item()
 }
 
-async fn get_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    ticket_id: &str,
-) -> GameMatchmakingResult<MatchTicketItem> {
-    let row = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
-         WHERE tenant_id = ?1 AND (id = ?2 OR ticket_code = ?2) LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(ticket_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameMatchmakingError::not_found("match ticket not found"))?;
-    row.into_item()
-}
 
 async fn cancel_postgres(
     pool: &sqlx::PgPool,
@@ -382,35 +306,6 @@ async fn cancel_postgres(
     }
 }
 
-async fn cancel_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CancelMatchTicketCommand,
-    timestamp: &str,
-) -> GameMatchmakingResult<MatchTicketItem> {
-    let result = sqlx::query(
-        "UPDATE game_match_ticket SET status = 'cancelled', cancelled_at = ?4, updated_at = ?4, \
-         version = version + 1 \
-         WHERE tenant_id = ?1 AND (id = ?2 OR ticket_code = ?2) AND user_id = ?3 AND status = 'queued'",
-    )
-    .bind(tenant_id)
-    .bind(&command.ticket_id)
-    .bind(&command.user_id)
-    .bind(timestamp)
-    .execute(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    if result.rows_affected() == 0 {
-        let existing = get_sqlite(pool, tenant_id, &command.ticket_id).await?;
-        if existing.status != "queued" {
-            return Err(GameMatchmakingError::conflict(
-                "only queued match tickets can be cancelled",
-            ));
-        }
-        return Err(GameMatchmakingError::not_found("match ticket not found"));
-    }
-    get_sqlite(pool, tenant_id, &command.ticket_id).await
-}
 
 async fn cancel_failure(
     pool: &sqlx::PgPool,
@@ -468,47 +363,6 @@ async fn list_tickets_postgres(
     page_from_rows(rows, total, params.limit, params.offset)
 }
 
-async fn list_tickets_sqlite(
-    pool: &sqlx::SqlitePool,
-    params: TicketListParams<'_>,
-) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
-         WHERE tenant_id = ?1 \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR mode_id = ?3) \
-         AND (?4 IS NULL OR status = ?4) \
-         AND (?5 IS NULL OR user_id = ?5) \
-         ORDER BY queued_at DESC LIMIT ?6 OFFSET ?7",
-    )))
-    .bind(params.tenant_id)
-    .bind(params.game_id)
-    .bind(params.mode_id)
-    .bind(params.status)
-    .bind(params.user_id)
-    .bind(params.limit)
-    .bind(params.offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM game_match_ticket \
-         WHERE tenant_id = ?1 \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR mode_id = ?3) \
-         AND (?4 IS NULL OR status = ?4) \
-         AND (?5 IS NULL OR user_id = ?5)",
-    )
-    .bind(params.tenant_id)
-    .bind(params.game_id)
-    .bind(params.mode_id)
-    .bind(params.status)
-    .bind(params.user_id)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    page_from_rows(rows, total, params.limit, params.offset)
-}
 
 async fn list_queue_postgres(
     pool: &sqlx::PgPool,
@@ -546,41 +400,6 @@ async fn list_queue_postgres(
     page_from_rows(rows, total, limit, offset)
 }
 
-async fn list_queue_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    game_id: &str,
-    mode_id: Option<&str>,
-    limit: i64,
-    offset: i64,
-) -> GameMatchmakingResult<MatchTicketPage> {
-    let rows = sqlx::query_as::<_, TicketRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {TICKET_COLUMNS_SQLITE} FROM game_match_ticket \
-         WHERE tenant_id = ?1 AND game_id = ?2 AND status = 'queued' \
-         AND (?3 IS NULL OR mode_id = ?3) \
-         ORDER BY priority DESC, queued_at ASC LIMIT ?4 OFFSET ?5",
-    )))
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(mode_id)
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    let total: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM game_match_ticket \
-         WHERE tenant_id = ?1 AND game_id = ?2 AND status = 'queued' \
-         AND (?3 IS NULL OR mode_id = ?3)",
-    )
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(mode_id)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    page_from_rows(rows, total, limit, offset)
-}
 
 fn page_from_rows(
     rows: Vec<TicketRow>,
@@ -626,16 +445,27 @@ fn map_sqlx_error(error: sqlx::Error) -> GameMatchmakingError {
 
 #[cfg(test)]
 mod tests {
+
+fn optional_postgres_database_url() -> Option<String> {
+    std::env::var("SDKWORK_DATABASE_URL")
+        .or_else(|_| std::env::var("DATABASE_URL"))
+        .ok()
+        .filter(|url| url.starts_with("postgres://") || url.starts_with("postgresql://"))
+}
     use sdkwork_database_config::{DatabaseConfig, DatabaseEngine};
     use sdkwork_database_sqlx::create_pool_from_config;
     use serde_json::json;
 
     use super::*;
 
-    async fn sqlite_repo() -> SqlxGameMatchmakingRepository {
-        let pool = create_pool_from_config(DatabaseConfig {
-            engine: DatabaseEngine::Sqlite,
-            url: "sqlite::memory:".into(),
+    async fn postgres_repo() -> Option<SqlxGameMatchmakingRepository> {
+    let Some(database_url) = optional_postgres_database_url() else {
+        eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+        return None;
+    };
+                let pool = create_pool_from_config(DatabaseConfig {
+            engine: DatabaseEngine::Postgres,
+            url: database_url,
             max_connections: 1,
             ..Default::default()
         })
@@ -670,7 +500,7 @@ mod tests {
         )
         .await
         .unwrap();
-        SqlxGameMatchmakingRepository::new(pool)
+        Some(SqlxGameMatchmakingRepository::new(pool))
     }
 
     fn command(idempotency_key: &str, user_id: &str, priority: i32) -> CreateMatchTicketCommand {
@@ -689,7 +519,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_create_ticket_is_idempotent_and_conflicting_payload_fails() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let command = command("idem-sqlite-1", "user-1", 10);
 
         let first = repository.create_ticket("100001", &command).await.unwrap();
@@ -707,7 +540,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_cancel_ticket_updates_status_and_version() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         let ticket = repository
             .create_ticket("100001", &command("idem-cancel", "user-1", 10))
             .await
@@ -732,7 +568,10 @@ mod tests {
 
     #[tokio::test]
     async fn sqlite_queue_list_is_paginated_and_sorted_by_priority() {
-        let repository = sqlite_repo().await;
+let Some(repository) = postgres_repo().await else {
+    eprintln!("skipping game repository test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+    return;
+};
         repository
             .create_ticket("100001", &command("idem-low", "user-low", 10))
             .await

@@ -43,8 +43,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 list_postgres(pool, tenant_id, game_id, status, limit, offset).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                list_sqlite(pool, tenant_id, game_id, status, limit, offset).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -58,7 +58,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
         }
         match &self.pool {
             DatabasePool::Postgres(pool, _) => get_postgres(pool, tenant_id, room_id).await,
-            DatabasePool::Sqlite(pool, _) => get_sqlite(pool, tenant_id, room_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -75,7 +76,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
         }
         match &self.pool {
             DatabasePool::Postgres(pool, _) => list_seats_postgres(pool, tenant_id, room_id).await,
-            DatabasePool::Sqlite(pool, _) => list_seats_sqlite(pool, tenant_id, room_id).await,
+            DatabasePool::Sqlite(_, _) =>
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"),
         }
     }
 
@@ -90,8 +92,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 create_postgres(pool, tenant_id, &id, &timestamp, command).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                create_sqlite(pool, tenant_id, &id, &timestamp, command).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -125,17 +127,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
                 )
                 .await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                join_sqlite(
-                    pool,
-                    tenant_id,
-                    command,
-                    seat_no,
-                    reusable,
-                    active_count,
-                    &timestamp,
-                )
-                .await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -155,8 +148,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 leave_postgres(pool, tenant_id, command, active_count, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                leave_sqlite(pool, tenant_id, command, active_count, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -173,8 +166,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 ready_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                ready_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -191,8 +184,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 start_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                start_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -209,8 +202,8 @@ impl GameRoomRepository for SqlxGameRoomRepository {
             DatabasePool::Postgres(pool, _) => {
                 close_postgres(pool, tenant_id, command, &timestamp).await
             }
-            DatabasePool::Sqlite(pool, _) => {
-                close_sqlite(pool, tenant_id, command, &timestamp).await
+            DatabasePool::Sqlite(_, _) => {
+                unreachable!("game repository requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)")
             }
         }
     }
@@ -323,45 +316,6 @@ async fn list_postgres(
     Ok(page_from_rows(rows, total, limit, offset))
 }
 
-async fn list_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    game_id: Option<&str>,
-    status: Option<&str>,
-    limit: i64,
-    offset: i64,
-) -> GameRoomResult<GameRoomPage> {
-    let rows = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {ROOM_COLUMNS} FROM game_room \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR status = ?3) \
-         ORDER BY updated_at DESC LIMIT ?4 OFFSET ?5",
-    )))
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(status)
-    .bind(limit)
-    .bind(offset)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    let total: i64 = sqlx::query_scalar(
-        "SELECT COUNT(*) FROM game_room \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL \
-         AND (?2 IS NULL OR game_id = ?2) \
-         AND (?3 IS NULL OR status = ?3)",
-    )
-    .bind(tenant_id)
-    .bind(game_id)
-    .bind(status)
-    .fetch_one(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    Ok(page_from_rows(rows, total, limit, offset))
-}
 
 fn page_from_rows(rows: Vec<RoomRow>, total: i64, limit: i64, offset: i64) -> GameRoomPage {
     GameRoomPage {
@@ -391,24 +345,6 @@ async fn get_postgres(
     Ok(row.into_item())
 }
 
-async fn get_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    room_id: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let row = sqlx::query_as::<_, RoomRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {ROOM_COLUMNS} FROM game_room \
-         WHERE tenant_id = ?1 AND deleted_at IS NULL AND (id = ?2 OR room_code = ?2) LIMIT 1",
-    )))
-    .bind(tenant_id)
-    .bind(room_id)
-    .fetch_optional(pool)
-    .await
-    .map_err(map_sqlx_error)?
-    .ok_or_else(|| GameRoomError::not_found("room not found"))?;
-
-    Ok(row.into_item())
-}
 
 async fn list_seats_postgres(
     pool: &sqlx::PgPool,
@@ -427,22 +363,6 @@ async fn list_seats_postgres(
     Ok(rows.into_iter().map(SeatRow::into_item).collect())
 }
 
-async fn list_seats_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    room_id: &str,
-) -> GameRoomResult<Vec<GameRoomSeatItem>> {
-    let rows = sqlx::query_as::<_, SeatRow>(sqlx::AssertSqlSafe(format!(
-        "SELECT {SEAT_COLUMNS} FROM game_room_seat \
-         WHERE tenant_id = ?1 AND room_id = ?2 ORDER BY seat_no ASC",
-    )))
-    .bind(tenant_id)
-    .bind(room_id)
-    .fetch_all(pool)
-    .await
-    .map_err(map_sqlx_error)?;
-    Ok(rows.into_iter().map(SeatRow::into_item).collect())
-}
 
 async fn create_postgres(
     pool: &sqlx::PgPool,
@@ -481,42 +401,6 @@ async fn create_postgres(
     Ok(row.into_item())
 }
 
-async fn create_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    id: &str,
-    timestamp: &str,
-    command: &CreateGameRoomCommand,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    sqlx::query(
-        "INSERT INTO game_room \
-         (id, uuid, tenant_id, organization_id, game_id, mode_id, ruleset_id, room_code, \
-          host_user_id, visibility, join_policy, max_players, current_players, status, \
-          opened_at, created_at, created_by, updated_at, updated_by) \
-         VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, 1, 'open', \
-          ?12, ?12, ?8, ?12, ?8)",
-    )
-    .bind(id)
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(&command.game_id)
-    .bind(&command.mode_id)
-    .bind(&command.ruleset_id)
-    .bind(&command.room_code)
-    .bind(&command.host_user_id)
-    .bind(&command.visibility)
-    .bind(&command.join_policy)
-    .bind(command.max_players)
-    .bind(timestamp)
-    .execute(&mut *tx)
-    .await
-    .map_err(map_sqlx_error)?;
-
-    insert_host_seat_sqlite(&mut tx, tenant_id, id, &command.host_user_id, timestamp).await?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, id).await
-}
 
 async fn insert_host_seat_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -542,29 +426,6 @@ async fn insert_host_seat_postgres(
     Ok(())
 }
 
-async fn insert_host_seat_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    room_id: &str,
-    host_user_id: &str,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    sqlx::query(
-        "INSERT INTO game_room_seat \
-         (id, uuid, tenant_id, organization_id, room_id, seat_no, user_id, status, joined_at, created_at, updated_at) \
-         VALUES (?1, ?2, ?3, '0', ?4, 1, ?5, 'joined', ?6, ?6, ?6)",
-    )
-    .bind(uuid())
-    .bind(uuid())
-    .bind(tenant_id)
-    .bind(room_id)
-    .bind(host_user_id)
-    .bind(timestamp)
-    .execute(&mut **tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    Ok(())
-}
 
 async fn join_postgres(
     pool: &sqlx::PgPool,
@@ -590,29 +451,6 @@ async fn join_postgres(
     get_postgres(pool, tenant_id, &command.room_id).await
 }
 
-async fn join_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &JoinGameRoomCommand,
-    seat_no: i32,
-    reusable: bool,
-    current_players: i32,
-    timestamp: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    update_room_players_sqlite(
-        &mut tx,
-        tenant_id,
-        &command.room_id,
-        command.expected_version,
-        current_players,
-        timestamp,
-    )
-    .await?;
-    upsert_join_seat_sqlite(&mut tx, tenant_id, command, seat_no, reusable, timestamp).await?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, &command.room_id).await
-}
 
 async fn upsert_join_seat_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -659,50 +497,6 @@ async fn upsert_join_seat_postgres(
     Ok(())
 }
 
-async fn upsert_join_seat_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    command: &JoinGameRoomCommand,
-    seat_no: i32,
-    reusable: bool,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    if reusable {
-        sqlx::query(
-            "UPDATE game_room_seat SET user_id = ?4, display_name_snapshot = ?5, status = 'joined', \
-             joined_at = ?6, ready_at = NULL, left_at = NULL, updated_at = ?6, version = version + 1 \
-             WHERE tenant_id = ?1 AND room_id = ?2 AND seat_no = ?3",
-        )
-        .bind(tenant_id)
-        .bind(&command.room_id)
-        .bind(seat_no)
-        .bind(&command.user_id)
-        .bind(&command.display_name_snapshot)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-        .map_err(map_sqlx_error)?;
-    } else {
-        sqlx::query(
-            "INSERT INTO game_room_seat \
-             (id, uuid, tenant_id, organization_id, room_id, seat_no, user_id, display_name_snapshot, \
-              status, joined_at, created_at, updated_at) \
-             VALUES (?1, ?2, ?3, '0', ?4, ?5, ?6, ?7, 'joined', ?8, ?8, ?8)",
-        )
-        .bind(uuid())
-        .bind(uuid())
-        .bind(tenant_id)
-        .bind(&command.room_id)
-        .bind(seat_no)
-        .bind(&command.user_id)
-        .bind(&command.display_name_snapshot)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-        .map_err(map_sqlx_error)?;
-    }
-    Ok(())
-}
 
 async fn leave_postgres(
     pool: &sqlx::PgPool,
@@ -738,39 +532,6 @@ async fn leave_postgres(
     get_postgres(pool, tenant_id, &command.room_id).await
 }
 
-async fn leave_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &LeaveGameRoomCommand,
-    current_players: i32,
-    timestamp: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    update_room_players_sqlite(
-        &mut tx,
-        tenant_id,
-        &command.room_id,
-        command.expected_version,
-        current_players,
-        timestamp,
-    )
-    .await?;
-    let result = sqlx::query(
-        "UPDATE game_room_seat SET status = 'left', left_at = ?4, updated_at = ?4, version = version + 1 \
-         WHERE tenant_id = ?1 AND room_id = ?2 AND user_id = ?3 \
-         AND status IN ('reserved', 'joined', 'ready', 'playing')",
-    )
-    .bind(tenant_id)
-    .bind(&command.room_id)
-    .bind(&command.user_id)
-    .bind(timestamp)
-    .execute(&mut *tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "active room seat not found")?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, &command.room_id).await
-}
 
 async fn ready_postgres(
     pool: &sqlx::PgPool,
@@ -808,41 +569,6 @@ async fn ready_postgres(
     get_postgres(pool, tenant_id, &command.room_id).await
 }
 
-async fn ready_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &ReadyGameRoomCommand,
-    timestamp: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    touch_room_sqlite(
-        &mut tx,
-        tenant_id,
-        &command.room_id,
-        command.expected_version,
-        timestamp,
-    )
-    .await?;
-    let status = if command.ready { "ready" } else { "joined" };
-    let ready_at = if command.ready { Some(timestamp) } else { None };
-    let result = sqlx::query(
-        "UPDATE game_room_seat SET status = ?4, ready_at = ?5, updated_at = ?6, version = version + 1 \
-         WHERE tenant_id = ?1 AND room_id = ?2 AND user_id = ?3 \
-         AND status IN ('reserved', 'joined', 'ready')",
-    )
-    .bind(tenant_id)
-    .bind(&command.room_id)
-    .bind(&command.user_id)
-    .bind(status)
-    .bind(ready_at)
-    .bind(timestamp)
-    .execute(&mut *tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    ensure_rows_affected(result.rows_affected(), "active room seat not found")?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, &command.room_id).await
-}
 
 async fn start_postgres(
     pool: &sqlx::PgPool,
@@ -875,36 +601,6 @@ async fn start_postgres(
     get_postgres(pool, tenant_id, &command.room_id).await
 }
 
-async fn start_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &StartGameRoomCommand,
-    timestamp: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    update_room_status_sqlite(
-        &mut tx,
-        tenant_id,
-        &command.room_id,
-        command.expected_version,
-        "in_progress",
-        Some("started_at"),
-        timestamp,
-    )
-    .await?;
-    sqlx::query(
-        "UPDATE game_room_seat SET status = 'playing', updated_at = ?3, version = version + 1 \
-         WHERE tenant_id = ?1 AND room_id = ?2 AND status IN ('reserved', 'joined', 'ready')",
-    )
-    .bind(tenant_id)
-    .bind(&command.room_id)
-    .bind(timestamp)
-    .execute(&mut *tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, &command.room_id).await
-}
 
 async fn close_postgres(
     pool: &sqlx::PgPool,
@@ -937,36 +633,6 @@ async fn close_postgres(
     get_postgres(pool, tenant_id, &command.room_id).await
 }
 
-async fn close_sqlite(
-    pool: &sqlx::SqlitePool,
-    tenant_id: &str,
-    command: &CloseGameRoomCommand,
-    timestamp: &str,
-) -> GameRoomResult<GameRoomItem> {
-    let mut tx = pool.begin().await.map_err(map_sqlx_error)?;
-    update_room_status_sqlite(
-        &mut tx,
-        tenant_id,
-        &command.room_id,
-        command.expected_version,
-        "closed",
-        Some("closed_at"),
-        timestamp,
-    )
-    .await?;
-    sqlx::query(
-        "UPDATE game_room SET current_players = 0, updated_by = ?3 WHERE tenant_id = ?1 AND id = ?2",
-    )
-    .bind(tenant_id)
-    .bind(&command.room_id)
-    .bind(&command.operator_user_id)
-    .execute(&mut *tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    close_active_seats_sqlite(&mut tx, tenant_id, &command.room_id, timestamp).await?;
-    tx.commit().await.map_err(map_sqlx_error)?;
-    get_sqlite(pool, tenant_id, &command.room_id).await
-}
 
 async fn update_room_players_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -1004,41 +670,6 @@ async fn update_room_players_postgres(
     ensure_version_update(result.rows_affected())
 }
 
-async fn update_room_players_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    room_id: &str,
-    expected_version: Option<i64>,
-    current_players: i32,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    let result = if let Some(expected_version) = expected_version {
-        sqlx::query(
-            "UPDATE game_room SET current_players = ?4, updated_at = ?5, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(expected_version)
-        .bind(current_players)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_room SET current_players = ?3, updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(current_players)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_version_update(result.rows_affected())
-}
 
 async fn touch_room_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -1073,38 +704,6 @@ async fn touch_room_postgres(
     ensure_version_update(result.rows_affected())
 }
 
-async fn touch_room_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    room_id: &str,
-    expected_version: Option<i64>,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    let result = if let Some(expected_version) = expected_version {
-        sqlx::query(
-            "UPDATE game_room SET updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(expected_version)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    } else {
-        sqlx::query(
-            "UPDATE game_room SET updated_at = ?3, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND deleted_at IS NULL",
-        )
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_version_update(result.rows_affected())
-}
 
 async fn update_room_status_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -1149,48 +748,6 @@ async fn update_room_status_postgres(
     ensure_version_update(result.rows_affected())
 }
 
-async fn update_room_status_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    room_id: &str,
-    expected_version: Option<i64>,
-    status: &str,
-    timestamp_column: Option<&str>,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    let result = if let Some(expected_version) = expected_version {
-        let timestamp_assignment = timestamp_column
-            .map(|column| format!(", {column} = ?5"))
-            .unwrap_or_default();
-        sqlx::query(sqlx::AssertSqlSafe(format!(
-            "UPDATE game_room SET status = ?4{timestamp_assignment}, updated_at = ?5, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND version = ?3 AND deleted_at IS NULL",
-        )))
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(expected_version)
-        .bind(status)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    } else {
-        let timestamp_assignment = timestamp_column
-            .map(|column| format!(", {column} = ?4"))
-            .unwrap_or_default();
-        sqlx::query(sqlx::AssertSqlSafe(format!(
-            "UPDATE game_room SET status = ?3{timestamp_assignment}, updated_at = ?4, version = version + 1 \
-             WHERE tenant_id = ?1 AND id = ?2 AND deleted_at IS NULL",
-        )))
-        .bind(tenant_id)
-        .bind(room_id)
-        .bind(status)
-        .bind(timestamp)
-        .execute(&mut **tx)
-        .await
-    }
-    .map_err(map_sqlx_error)?;
-    ensure_version_update(result.rows_affected())
-}
 
 async fn close_active_seats_postgres(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -1211,24 +768,6 @@ async fn close_active_seats_postgres(
     Ok(())
 }
 
-async fn close_active_seats_sqlite(
-    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
-    tenant_id: &str,
-    room_id: &str,
-    timestamp: &str,
-) -> GameRoomResult<()> {
-    sqlx::query(
-        "UPDATE game_room_seat SET status = 'left', left_at = ?3, updated_at = ?3, version = version + 1 \
-         WHERE tenant_id = ?1 AND room_id = ?2 AND status IN ('reserved', 'joined', 'ready', 'playing')",
-    )
-    .bind(tenant_id)
-    .bind(room_id)
-    .bind(timestamp)
-    .execute(&mut **tx)
-    .await
-    .map_err(map_sqlx_error)?;
-    Ok(())
-}
 
 fn ensure_expected_version(room: &GameRoomItem, expected: Option<i64>) -> GameRoomResult<()> {
     if let Some(expected) = expected {
