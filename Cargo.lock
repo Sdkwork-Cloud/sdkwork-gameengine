@@ -1702,6 +1702,7 @@ name = "sdkwork-api-gameengine-assembly"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "sdkwork-database-sqlx",
  "sdkwork-gameengine-service-host",
  "sdkwork-iam-web-adapter",
  "sdkwork-routes-gameengine-catalog-app-api",
@@ -2188,6 +2189,7 @@ dependencies = [
  "sdkwork-game-catalog-service",
  "sdkwork-routes-games-support",
  "sdkwork-web-axum",
+ "sdkwork-web-core",
  "serde",
  "serde_json",
  "tokio",
@@ -2202,6 +2204,7 @@ dependencies = [
  "sdkwork-routes-gameengine-catalog-app-api",
  "sdkwork-routes-games-support",
  "sdkwork-web-axum",
+ "sdkwork-web-core",
  "serde",
  "serde_json",
 ]
@@ -2231,6 +2234,7 @@ dependencies = [
  "sdkwork-game-leaderboard-service",
  "sdkwork-routes-games-support",
  "sdkwork-web-axum",
+ "sdkwork-web-core",
  "serde",
 ]
 
@@ -2243,6 +2247,7 @@ dependencies = [
  "sdkwork-routes-games-support",
  "sdkwork-utils-rust",
  "sdkwork-web-axum",
+ "sdkwork-web-core",
  "serde",
 ]
 
@@ -2255,6 +2260,7 @@ dependencies = [
  "sdkwork-routes-games-support",
  "sdkwork-utils-rust",
  "sdkwork-web-axum",
+ "sdkwork-web-core",
  "serde",
 ]
 

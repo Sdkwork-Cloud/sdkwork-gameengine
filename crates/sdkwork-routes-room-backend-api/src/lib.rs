@@ -1,7 +1,9 @@
+mod http_route_manifest;
 mod manifest;
 mod paths;
 mod routes;
 
+pub use http_route_manifest::gateway_route_manifest;
 pub use manifest::{
     API_AUTHORITY, OWNER, PACKAGE_NAME, PREFIX, ROUTE_MANIFEST_PATH, SDK_FAMILY, SURFACE,
 };

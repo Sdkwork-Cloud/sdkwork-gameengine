@@ -10,6 +10,7 @@ name = "sdkwork_routes_room_app_api"
 path = "src/lib.rs"
 
 [dependencies]
+sdkwork-web-core.workspace = true
 axum.workspace = true
 serde.workspace = true
 sdkwork_game_room_service.workspace = true
