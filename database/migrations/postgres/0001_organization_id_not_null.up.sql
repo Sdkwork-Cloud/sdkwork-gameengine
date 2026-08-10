@@ -18,78 +18,97 @@
 
 BEGIN;
 
+ALTER TABLE game_catalog ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_catalog SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_catalog ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_catalog ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_mode ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_mode SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_mode ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_mode ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_ruleset ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_ruleset SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_ruleset ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_ruleset ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_room ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_room SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_room ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_room ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_room_seat ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_room_seat SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_room_seat ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_room_seat ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_match_ticket ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_match_ticket SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_match_ticket ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_match_ticket ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_match_result ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_match_result SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_match_result ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_match_result ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_session ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_session SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_session ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_session ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_session_participant ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_session_participant SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_session_participant ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_session_participant ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_session_result ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_session_result SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_session_result ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_session_result ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_score_event ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_score_event SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_score_event ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_score_event ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_point_ledger ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_point_ledger SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_point_ledger ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_point_ledger ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_point_balance ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_point_balance SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_point_balance ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_point_balance ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_leaderboard_config ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_leaderboard_config SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_leaderboard_config ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_leaderboard_config ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_leaderboard_entry ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_leaderboard_entry SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_leaderboard_entry ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_leaderboard_entry ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_settlement_job ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_settlement_job SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_settlement_job ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_settlement_job ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_reward_intent ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_reward_intent SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_reward_intent ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_reward_intent ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_engine_event ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_engine_event SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_engine_event ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_engine_event ALTER COLUMN organization_id SET NOT NULL;
 
+ALTER TABLE game_audit_record ADD COLUMN IF NOT EXISTS organization_id TEXT NOT NULL DEFAULT '0';
 UPDATE game_audit_record SET organization_id = '0' WHERE organization_id IS NULL;
 ALTER TABLE game_audit_record ALTER COLUMN organization_id SET DEFAULT '0';
 ALTER TABLE game_audit_record ALTER COLUMN organization_id SET NOT NULL;
