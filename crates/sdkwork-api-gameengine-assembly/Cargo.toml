@@ -19,11 +19,11 @@ sdkwork_routes_games_support.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-web-contract.workspace = true
 sdkwork-iam-web-adapter.workspace = true
-sdkwork-routes-gameengine-catalog-app-api = { path = "../sdkwork-routes-gameengine-catalog-app-api" }
-sdkwork-routes-gameengine-catalog-backend-api = { path = "../sdkwork-routes-gameengine-catalog-backend-api" }
-sdkwork-routes-leaderboard-app-api = { path = "../sdkwork-routes-leaderboard-app-api" }
-sdkwork-routes-room-app-api = { path = "../sdkwork-routes-room-app-api" }
-sdkwork-routes-room-backend-api = { path = "../sdkwork-routes-room-backend-api" }
+sdkwork_routes_gameengine_catalog_app_api.workspace = true
+sdkwork_routes_gameengine_catalog_backend_api.workspace = true
+sdkwork_routes_leaderboard_app_api.workspace = true
+sdkwork_routes_room_app_api.workspace = true
+sdkwork_routes_room_backend_api.workspace = true
 
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
