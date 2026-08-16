@@ -1,11 +1,18 @@
 use axum::body::{to_bytes, Body};
 use axum::http::{header, Request, StatusCode};
-use sdkwork_api_gameengine_standalone_gateway::{build_router, with_games_app_request_context};
+use sdkwork_api_gameengine_assembly::assemble_api_router_with_service_parts;
+use sdkwork_api_gameengine_standalone_gateway::build_router_with_resolver;
 use sdkwork_game_catalog_repository_sqlx::{
     GameCatalogRepositoryKind, InMemoryGameCatalogRepository,
 };
 use sdkwork_game_catalog_service::GameCatalogService;
-use sdkwork_routes_gameengine_catalog_app_api::build_catalog_app_router;
+use sdkwork_game_leaderboard_repository_sqlx::{
+    InMemoryLeaderboardRepository, LeaderboardRepositoryKind,
+};
+use sdkwork_game_leaderboard_service::LeaderboardService;
+use sdkwork_game_room_repository_sqlx::{GameRoomRepositoryKind, InMemoryGameRoomRepository};
+use sdkwork_game_room_service::GameRoomService;
+use sdkwork_iam_web_adapter::IamWebRequestContextResolver;
 use sdkwork_web_core::{access_token_jwt, auth_token_jwt, TRACEPARENT_HEADER};
 use std::sync::Arc;
 use tower::ServiceExt;
@@ -23,9 +30,23 @@ fn memory_catalog_service() -> SharedCatalogService {
     )))
 }
 
+fn test_app() -> axum::Router {
+    std::env::set_var("SDKWORK_ENVIRONMENT", "test");
+    let leaderboard = Arc::new(LeaderboardService::new(LeaderboardRepositoryKind::Memory(
+        InMemoryLeaderboardRepository::with_seed(vec![]),
+    )));
+    let room = Arc::new(GameRoomService::new(GameRoomRepositoryKind::Memory(
+        InMemoryGameRoomRepository::with_seed(vec![]),
+    )));
+    let assembly =
+        assemble_api_router_with_service_parts(memory_catalog_service(), leaderboard, room);
+    build_router_with_resolver(assembly, IamWebRequestContextResolver::new(None))
+        .expect("host GameEngine test contribution")
+}
+
 #[tokio::test]
 async fn catalog_router_rejects_unauthenticated_requests() {
-    let router = with_games_app_request_context(build_catalog_app_router(memory_catalog_service()));
+    let router = test_app();
 
     let response = router
         .oneshot(
@@ -48,7 +69,7 @@ async fn catalog_router_accepts_dev_inline_dual_tokens() {
         auth_token_jwt(DEMO_TENANT, DEMO_USER, DEMO_SESSION, DEMO_APP)
     );
     let access_token = access_token_jwt(DEMO_TENANT, DEMO_USER, DEMO_SESSION, DEMO_APP);
-    let router = with_games_app_request_context(build_catalog_app_router(memory_catalog_service()));
+    let router = test_app();
 
     let response = router
         .oneshot(
@@ -73,7 +94,7 @@ async fn catalog_router_rejects_forbidden_pagination_alias_with_problem_json() {
         auth_token_jwt(DEMO_TENANT, DEMO_USER, DEMO_SESSION, DEMO_APP)
     );
     let access_token = access_token_jwt(DEMO_TENANT, DEMO_USER, DEMO_SESSION, DEMO_APP);
-    let router = with_games_app_request_context(build_catalog_app_router(memory_catalog_service()));
+    let router = test_app();
 
     let response = router
         .oneshot(
@@ -119,20 +140,7 @@ async fn catalog_router_rejects_forbidden_pagination_alias_with_problem_json() {
 
 #[tokio::test]
 async fn build_router_mounts_infrastructure_and_catalog_routes() {
-    use sdkwork_game_leaderboard_repository_sqlx::{
-        InMemoryLeaderboardRepository, LeaderboardRepositoryKind,
-    };
-    use sdkwork_game_leaderboard_service::LeaderboardService;
-    use sdkwork_game_room_repository_sqlx::{GameRoomRepositoryKind, InMemoryGameRoomRepository};
-    use sdkwork_game_room_service::GameRoomService;
-
-    let leaderboard = Arc::new(LeaderboardService::new(LeaderboardRepositoryKind::Memory(
-        InMemoryLeaderboardRepository::with_seed(vec![]),
-    )));
-    let room_service = Arc::new(GameRoomService::new(GameRoomRepositoryKind::Memory(
-        InMemoryGameRoomRepository::with_seed(vec![]),
-    )));
-    let app = build_router(memory_catalog_service(), leaderboard, room_service).await;
+    let app = test_app();
     let response = app
         .oneshot(
             Request::builder()
@@ -150,7 +158,7 @@ fn standalone_gateway_main_uses_single_database_bootstrap() {
     let main_source = include_str!("../src/main.rs");
 
     assert!(
-        main_source.contains("assemble_api_router"),
+        main_source.contains("assemble_api_router_runtime"),
         "standalone gateway main must bootstrap all business routes through gateway assembly"
     );
     assert!(

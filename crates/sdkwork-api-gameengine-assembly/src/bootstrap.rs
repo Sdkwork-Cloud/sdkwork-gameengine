@@ -7,24 +7,25 @@
 use axum::Router;
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_gameengine_service_host::{
-    build_gateway_services, GatewayServices, SharedCatalogService, SharedLeaderboardService,
-    SharedRoomService,
+    build_gateway_runtime, build_gateway_runtime_with_pool, GatewayServices, SharedCatalogService,
+    SharedLeaderboardService, SharedRoomService,
 };
 use sdkwork_routes_gameengine_catalog_app_api::build_catalog_app_router;
 use sdkwork_routes_gameengine_catalog_backend_api::build_catalog_backend_router;
 use sdkwork_routes_leaderboard_app_api::build_leaderboard_app_router;
 use sdkwork_routes_room_app_api::build_room_app_router;
 use sdkwork_routes_room_backend_api::build_room_backend_router;
-use sdkwork_web_bootstrap::{
-    ApiAssemblyContribution, DatabasePoolReadinessCheck, ReadinessCheck,
-};
+use sdkwork_web_bootstrap::{ApiAssemblyContribution, DatabasePoolReadinessCheck, ReadinessCheck};
 use sdkwork_web_core::HttpRouteManifest;
 use std::sync::Arc;
 
-use crate::web_bootstrap::{with_games_app_request_context, with_games_backend_request_context};
-
 /// Indivisible host-neutral API assembly contribution (web-bootstrap contract).
 pub type ApiAssembly = ApiAssemblyContribution;
+
+pub struct ApiAssemblyRuntime {
+    pub contribution: ApiAssembly,
+    pub database_pool: DatabasePool,
+}
 
 fn combined_route_manifest() -> HttpRouteManifest {
     let manifests = [
@@ -44,19 +45,11 @@ fn combined_route_manifest() -> HttpRouteManifest {
 
 fn games_router(services: GatewayServices) -> Router {
     let app = Router::new()
-        .merge(with_games_app_request_context(build_catalog_app_router(
-            services.catalog.clone(),
-        )))
-        .merge(with_games_app_request_context(
-            build_leaderboard_app_router(services.leaderboard),
-        ))
-        .merge(with_games_app_request_context(build_room_app_router(
-            services.room.clone(),
-        )));
-    let backend = with_games_backend_request_context(
-        build_catalog_backend_router(services.catalog)
-            .merge(build_room_backend_router(services.room)),
-    );
+        .merge(build_catalog_app_router(services.catalog.clone()))
+        .merge(build_leaderboard_app_router(services.leaderboard))
+        .merge(build_room_app_router(services.room.clone()));
+    let backend = build_catalog_backend_router(services.catalog)
+        .merge(build_room_backend_router(services.room));
     Router::new().merge(app).merge(backend)
 }
 
@@ -75,8 +68,21 @@ fn contribution_from(
 }
 
 pub async fn assemble_api_router() -> Result<ApiAssembly, String> {
-    let services = build_gateway_services().await?;
-    Ok(assemble_api_router_with_services(services))
+    Ok(assemble_api_router_runtime().await?.contribution)
+}
+
+pub async fn assemble_api_router_runtime() -> Result<ApiAssemblyRuntime, String> {
+    let runtime = build_gateway_runtime().await?;
+    let contribution = contribution_from(
+        games_router(runtime.services),
+        Arc::new(DatabasePoolReadinessCheck::new(
+            runtime.database_pool.clone(),
+        )),
+    )?;
+    Ok(ApiAssemblyRuntime {
+        contribution,
+        database_pool: runtime.database_pool,
+    })
 }
 
 pub fn assemble_api_router_with_services(services: GatewayServices) -> ApiAssembly {
@@ -107,9 +113,9 @@ pub async fn assemble_business_routes() -> Result<ApiAssembly, String> {
 /// pool so the platform cloud gateway can share its process-wide PostgreSQL
 /// pool.
 pub async fn assemble_api_router_with_pool(pool: DatabasePool) -> Result<ApiAssembly, String> {
-    let services = build_gateway_services().await?;
+    let runtime = build_gateway_runtime_with_pool(pool.clone()).await?;
     contribution_from(
-        games_router(services),
+        games_router(runtime.services),
         Arc::new(DatabasePoolReadinessCheck::new(pool)),
     )
 }

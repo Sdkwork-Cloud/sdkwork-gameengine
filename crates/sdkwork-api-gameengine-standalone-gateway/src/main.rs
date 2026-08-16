@@ -1,5 +1,4 @@
-use sdkwork_api_gameengine_assembly::assemble_api_router;
-use sdkwork_api_gameengine_standalone_gateway::build_router_from_business;
+use sdkwork_api_gameengine_standalone_gateway::build_router;
 
 #[tokio::main]
 async fn main() {
@@ -14,10 +13,12 @@ async fn main() {
         .or_else(|_| std::env::var("SDKWORK_GAMES_APPLICATION_PUBLIC_INGRESS_BIND"))
         .unwrap_or_else(|_| "127.0.0.1:8095".to_owned());
 
-    let assembly = assemble_api_router()
+    let runtime = sdkwork_api_gameengine_assembly::assemble_api_router_runtime()
         .await
         .expect("gameengine gateway assembly failed");
-    let app = build_router_from_business(assembly.router);
+    let app = build_router(runtime)
+        .await
+        .expect("gameengine standalone gateway composition failed");
     let listener = tokio::net::TcpListener::bind(&bind_address)
         .await
         .expect("bind gameengine standalone-gateway listener failed");

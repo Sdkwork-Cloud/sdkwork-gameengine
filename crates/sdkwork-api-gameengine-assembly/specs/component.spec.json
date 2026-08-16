@@ -38,9 +38,25 @@
   ],
   "contracts": {
     "publicExports": [
-      "."
+      "sdkwork_api_gameengine_assembly::assemble_api_router",
+      "sdkwork_api_gameengine_assembly::assemble_api_router_runtime",
+      "sdkwork_api_gameengine_assembly::assemble_api_router_with_pool"
     ],
-    "runtimeEntrypoints": [],
+    "providedPorts": [
+      {
+        "name": "gameengineApiAssembly",
+        "export": "sdkwork_api_gameengine_assembly::assemble_api_router_runtime"
+      },
+      {
+        "name": "gameengineApiAssemblyWithPool",
+        "export": "sdkwork_api_gameengine_assembly::assemble_api_router_with_pool"
+      }
+    ],
+    "requiredPorts": [],
+    "runtimeEntrypoints": [
+      "sdkwork_api_gameengine_assembly::assemble_api_router_runtime",
+      "sdkwork_api_gameengine_assembly::assemble_api_router_with_pool"
+    ],
     "routeManifest": "assembly-manifest.json",
     "sdkClients": [],
     "sdkDependencies": [],
