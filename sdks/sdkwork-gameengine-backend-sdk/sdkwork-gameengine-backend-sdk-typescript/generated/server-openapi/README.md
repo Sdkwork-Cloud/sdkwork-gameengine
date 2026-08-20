@@ -5,17 +5,17 @@ Generated SDKWork v3 dual-token transport SDK.
 ## Installation
 
 ```bash
-npm install @sdkwork-internal/gameengine-backend-sdk-generated
+npm install sdkwork-gameengine-backend-sdk-generated-typescript
 # or
-yarn add @sdkwork-internal/gameengine-backend-sdk-generated
+yarn add sdkwork-gameengine-backend-sdk-generated-typescript
 # or
-pnpm add @sdkwork-internal/gameengine-backend-sdk-generated
+pnpm add sdkwork-gameengine-backend-sdk-generated-typescript
 ```
 
 ## Quick Start
 
 ```typescript
-import { SdkworkGameengineBackendClient } from '@sdkwork-internal/gameengine-backend-sdk-generated';
+import { SdkworkGameengineBackendClient } from 'sdkwork-gameengine-backend-sdk-generated-typescript';
 
 const client = new SdkworkGameengineBackendClient({
   baseUrl: '/backend/v3/api',
@@ -46,7 +46,7 @@ Access-Token: <accessToken>
 ## Configuration (Non-Auth)
 
 ```typescript
-import { SdkworkGameengineBackendClient } from '@sdkwork-internal/gameengine-backend-sdk-generated';
+import { SdkworkGameengineBackendClient } from 'sdkwork-gameengine-backend-sdk-generated-typescript';
 
 const client = new SdkworkGameengineBackendClient({
   baseUrl: '/backend/v3/api',
@@ -92,7 +92,7 @@ const result = await client.rooms.backend.games.rooms.list(params);
 ## Error Handling
 
 ```typescript
-import { SdkworkGameengineBackendClient, NetworkError, TimeoutError, AuthenticationError } from '@sdkwork-internal/gameengine-backend-sdk-generated';
+import { SdkworkGameengineBackendClient, NetworkError, TimeoutError, AuthenticationError } from 'sdkwork-gameengine-backend-sdk-generated-typescript';
 
 try {
   const params = {
@@ -120,6 +120,8 @@ This SDK includes cross-platform publish scripts in `bin/`:
 - `bin/publish-core.mjs`
 - `bin/publish.sh`
 - `bin/publish.ps1`
+
+TypeScript check and publish commands use pnpm to materialize workspace dependency versions in a temporary tarball. They reject local-only dependency protocols before npm publication and do not rewrite the source `package.json`.
 
 ### Check
 

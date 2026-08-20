@@ -1,5 +1,5 @@
 import { backendApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { SdkWorkPageData } from '../types';
 
@@ -18,44 +18,38 @@ export class GamesBackendGamesCatalogApi {
   }
 
 
-async list(params?: GamesBackendGamesCatalogListParams): Promise<SdkWorkPageData> {
+async list(params?: GamesBackendGamesCatalogListParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkPageData> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<SdkWorkPageData>(appendQueryString(backendApiPath(`/games`), query));
+    return this.client.request<SdkWorkPageData>(appendQueryString(backendApiPath(`/games`), query), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 }
 
 export class GamesBackendGamesApi {
-  private client: HttpClient;
   public readonly catalog: GamesBackendGamesCatalogApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.catalog = new GamesBackendGamesCatalogApi(client);
   }
 
 }
 
 export class GamesBackendApi {
-  private client: HttpClient;
   public readonly games: GamesBackendGamesApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.games = new GamesBackendGamesApi(client);
   }
 
 }
 
 export class GamesApi {
-  private client: HttpClient;
   public readonly backend: GamesBackendApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.backend = new GamesBackendApi(client);
   }
 

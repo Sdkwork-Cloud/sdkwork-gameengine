@@ -1,5 +1,5 @@
 import { appApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { SdkWorkPageData } from '../types';
 
@@ -21,7 +21,7 @@ export class GamesCatalogApi {
   }
 
 
-async list(params?: GamesCatalogListParams): Promise<SdkWorkPageData> {
+async list(params?: GamesCatalogListParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkPageData> {
     const query = buildQueryString([
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -30,20 +30,18 @@ async list(params?: GamesCatalogListParams): Promise<SdkWorkPageData> {
       { name: 'q', value: params?.q, style: 'form', explode: true, allowReserved: false },
       { name: 'sort', value: params?.sort, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<SdkWorkPageData>(appendQueryString(appApiPath(`/games`), query));
+    return this.client.request<SdkWorkPageData>(appendQueryString(appApiPath(`/games`), query), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
-async retrieve(gameId: string): Promise<Record<string, unknown>> {
-    return this.client.get<Record<string, unknown>>(appApiPath(`/games/${serializePathParameter(gameId, { name: 'gameId', style: 'simple', explode: false })}`));
+async retrieve(gameId: string, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/${serializePathParameter(gameId, { name: 'gameId', style: 'simple', explode: false })}`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
 export class GamesApi {
-  private client: HttpClient;
   public readonly catalog: GamesCatalogApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.catalog = new GamesCatalogApi(client);
   }
 

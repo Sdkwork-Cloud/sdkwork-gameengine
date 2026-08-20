@@ -1,5 +1,5 @@
 import { appApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { CreateRoomRequest, ExpectedVersionRequest, JoinRoomRequest, ReadyRoomRequest, SdkWorkPageData } from '../types';
 
@@ -12,8 +12,8 @@ export class RoomsGamesRoomsSeatsApi {
   }
 
 
-async list(roomId: string): Promise<SdkWorkPageData> {
-    return this.client.get<SdkWorkPageData>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/seats`));
+async list(roomId: string, requestOptions?: ApiRequestOptions): Promise<SdkWorkPageData> {
+    return this.client.request<SdkWorkPageData>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/seats`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 }
 
@@ -34,62 +34,58 @@ export class RoomsGamesRoomsApi {
   }
 
 
-async list(params?: RoomsGamesRoomsListParams): Promise<SdkWorkPageData> {
+async list(params?: RoomsGamesRoomsListParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkPageData> {
     const query = buildQueryString([
       { name: 'game_id', value: params?.gameId, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<SdkWorkPageData>(appendQueryString(appApiPath(`/games/rooms`), query));
+    return this.client.request<SdkWorkPageData>(appendQueryString(appApiPath(`/games/rooms`), query), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 
-async create(body: CreateRoomRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms`), body, undefined, undefined, 'application/json');
+async create(body: CreateRoomRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
-async retrieve(roomId: string): Promise<Record<string, unknown>> {
-    return this.client.get<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}`));
+async retrieve(roomId: string, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 
-async join(roomId: string, body: JoinRoomRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/join`), body, undefined, undefined, 'application/json');
+async join(roomId: string, body: JoinRoomRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/join`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
-async leave(roomId: string, body: ExpectedVersionRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/leave`), body, undefined, undefined, 'application/json');
+async leave(roomId: string, body: ExpectedVersionRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/leave`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
-async ready(roomId: string, body: ReadyRoomRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/ready`), body, undefined, undefined, 'application/json');
+async ready(roomId: string, body: ReadyRoomRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/ready`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
-async start(roomId: string, body: ExpectedVersionRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/start`), body, undefined, undefined, 'application/json');
+async start(roomId: string, body: ExpectedVersionRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/start`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 
-async close(roomId: string, body: ExpectedVersionRequest): Promise<Record<string, unknown>> {
-    return this.client.post<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/close`), body, undefined, undefined, 'application/json');
+async close(roomId: string, body: ExpectedVersionRequest, requestOptions?: ApiRequestOptions): Promise<Record<string, unknown>> {
+    return this.client.request<Record<string, unknown>>(appApiPath(`/games/rooms/${serializePathParameter(roomId, { name: 'roomId', style: 'simple', explode: false })}/close`), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'POST' as any, body, contentType: 'application/json', sdkworkUnwrapKind: 'item' });
   }
 }
 
 export class RoomsGamesApi {
-  private client: HttpClient;
   public readonly rooms: RoomsGamesRoomsApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.rooms = new RoomsGamesRoomsApi(client);
   }
 
 }
 
 export class RoomsApi {
-  private client: HttpClient;
   public readonly games: RoomsGamesApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.games = new RoomsGamesApi(client);
   }
 

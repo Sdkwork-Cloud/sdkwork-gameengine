@@ -1,5 +1,5 @@
 import { appApiPath } from './paths';
-import type { HttpClient } from '../http/client';
+import type { ApiRequestOptions, HttpClient } from '../http/client';
 
 import type { LeaderboardEntry, SdkWorkPageData } from '../types';
 
@@ -16,11 +16,11 @@ export class LeaderboardGamesLeaderboardMeApi {
   }
 
 
-async retrieve(params?: LeaderboardGamesLeaderboardMeRetrieveParams): Promise<LeaderboardEntry> {
+async retrieve(params?: LeaderboardGamesLeaderboardMeRetrieveParams, requestOptions?: ApiRequestOptions): Promise<LeaderboardEntry> {
     const query = buildQueryString([
       { name: 'game_id', value: params?.gameId, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<LeaderboardEntry>(appendQueryString(appApiPath(`/games/leaderboard/me`), query));
+    return this.client.request<LeaderboardEntry>(appendQueryString(appApiPath(`/games/leaderboard/me`), query), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'item' });
   }
 }
 
@@ -40,33 +40,29 @@ export class LeaderboardGamesLeaderboardApi {
   }
 
 
-async list(params?: LeaderboardGamesLeaderboardListParams): Promise<SdkWorkPageData> {
+async list(params?: LeaderboardGamesLeaderboardListParams, requestOptions?: ApiRequestOptions): Promise<SdkWorkPageData> {
     const query = buildQueryString([
       { name: 'game_id', value: params?.gameId, style: 'form', explode: true, allowReserved: false },
       { name: 'page', value: params?.page, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<SdkWorkPageData>(appendQueryString(appApiPath(`/games/leaderboard`), query));
+    return this.client.request<SdkWorkPageData>(appendQueryString(appApiPath(`/games/leaderboard`), query), { ...(requestOptions?.signal !== undefined ? { signal: requestOptions.signal } : {}), ...(requestOptions?.timeout !== undefined ? { timeout: requestOptions.timeout } : {}), method: 'GET' as any, sdkworkUnwrapKind: 'page' });
   }
 }
 
 export class LeaderboardGamesApi {
-  private client: HttpClient;
   public readonly leaderboard: LeaderboardGamesLeaderboardApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.leaderboard = new LeaderboardGamesLeaderboardApi(client);
   }
 
 }
 
 export class LeaderboardApi {
-  private client: HttpClient;
   public readonly games: LeaderboardGamesApi;
 
   constructor(client: HttpClient) {
-    this.client = client;
     this.games = new LeaderboardGamesApi(client);
   }
 

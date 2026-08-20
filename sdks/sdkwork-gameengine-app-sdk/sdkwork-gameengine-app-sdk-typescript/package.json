@@ -1,6 +1,6 @@
 {
   "name": "@sdkwork/gameengine-app-sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "SDKWork composed consumer facade for @sdkwork/gameengine-app-sdk.",
   "type": "module",
   "private": false,
