@@ -1,8 +1,89 @@
-version: 1
+version: 2
 defaultProfile: cloud.production
 
 profiles:
+  cloud.test:
+    deployment:
+      deploymentProfile: cloud
+      environment: test
+      deliveryKind: container-image
+      deploymentDriver: kubernetes
+      managementModel: sdkwork-managed
+      tenancyModel: single-tenant
+      isolationModel: dedicated
+      networkExposure: public
+      rolloutStrategy: rolling
+      availabilityMode: high-availability
+    install:
+      layout: binary-package
+    expose:
+      - domain: games-test.sdkwork.com
+        tls: sdkwork.com
+        mode: web
+        web: pc
+      - domain: gameengine-test.sdkwork.com
+        tls: sdkwork.com
+        mode: api
+    packages: []
+    overrides:
+      topology:
+        spec: specs/topology.spec.json
+        profile: cloud.test
+        env: etc/topology/cloud.test.env
+      proxy:
+        upstreams:
+          application.public-ingress: https://gameengine-test.sdkwork.com
+          platform.api-gateway: https://api-test.sdkwork.com
+      kubernetes:
+        reference: deployments/kubernetes/
+
+  cloud.staging:
+    deployment:
+      deploymentProfile: cloud
+      environment: staging
+      deliveryKind: container-image
+      deploymentDriver: kubernetes
+      managementModel: sdkwork-managed
+      tenancyModel: single-tenant
+      isolationModel: dedicated
+      networkExposure: public
+      rolloutStrategy: rolling
+      availabilityMode: high-availability
+    install:
+      layout: binary-package
+    expose:
+      - domain: games-staging.sdkwork.com
+        tls: sdkwork.com
+        mode: web
+        web: pc
+      - domain: gameengine-staging.sdkwork.com
+        tls: sdkwork.com
+        mode: api
+    packages: []
+    overrides:
+      topology:
+        spec: specs/topology.spec.json
+        profile: cloud.staging
+        env: etc/topology/cloud.staging.env
+      proxy:
+        upstreams:
+          application.public-ingress: https://gameengine-staging.sdkwork.com
+          platform.api-gateway: https://api-staging.sdkwork.com
+      kubernetes:
+        reference: deployments/kubernetes/
+
   cloud.production:
+    deployment:
+      deploymentProfile: cloud
+      environment: production
+      deliveryKind: container-image
+      deploymentDriver: kubernetes
+      managementModel: sdkwork-managed
+      tenancyModel: single-tenant
+      isolationModel: dedicated
+      networkExposure: public
+      rolloutStrategy: rolling
+      availabilityMode: high-availability
     install:
       layout: binary-package
     expose:
@@ -18,19 +99,36 @@ profiles:
         mode: api
     packages: []
     overrides:
+      topology:
+        spec: specs/topology.spec.json
+        profile: cloud.production
+        env: etc/topology/cloud.production.env
       proxy:
         upstreams:
           application.public-ingress: https://gameengine.sdkwork.com
           platform.api-gateway: https://api.sdkwork.com
+      kubernetes:
+        reference: deployments/kubernetes/
 
-  standalone.development:
+  standalone.production:
+    deployment:
+      deploymentProfile: standalone
+      environment: production
+      deliveryKind: host-package
+      deploymentDriver: nginx
+      managementModel: customer-managed
+      tenancyModel: single-tenant
+      isolationModel: dedicated
+      networkExposure: private
+      rolloutStrategy: recreate
+      availabilityMode: single-instance
     install:
-      layout: source-tree
-    expose:
-      - domain: localhost
-        tls: off
-        mode: web+api
-        web: pc
+      layout: binary-package
+    expose: []
     packages: []
     overrides:
+      topology:
+        spec: specs/topology.spec.json
+        profile: standalone.production
+        env: etc/topology/standalone.production.env
       allowInsecureTls: true

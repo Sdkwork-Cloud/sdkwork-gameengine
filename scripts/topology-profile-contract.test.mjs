@@ -48,10 +48,10 @@ test('topology env keys use the games application code', () => {
 test('topology profiles use SDKWork v4 two-segment profile ids', () => {
   const topology = readJson('specs/topology.spec.json');
   const expectedProfileFiles = {
-    'standalone.development': 'configs/topology/standalone.development.env',
-    'standalone.production': 'configs/topology/standalone.production.env',
-    'cloud.development': 'configs/topology/cloud.development.env',
-    'cloud.production': 'configs/topology/cloud.production.env',
+    'standalone.development': 'etc/topology/standalone.development.env',
+    'standalone.production': 'etc/topology/standalone.production.env',
+    'cloud.development': 'etc/topology/cloud.development.env',
+    'cloud.production': 'etc/topology/cloud.production.env',
   };
 
   assert.equal(topology.profilePattern, '{deploymentProfile}.{environment}.env');

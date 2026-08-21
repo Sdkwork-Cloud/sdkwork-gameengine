@@ -299,7 +299,7 @@ The root topology is `schemaVersion: 4` and supports SDKWork v4 two-segment prof
 
 Process layout is internal runtime orchestration and is not encoded in profile ids, public env
 keys, scripts, SDK bootstrap, or documentation. Runtime profile files live under
-`configs/topology/<deploymentProfile>.<environment>.env`.
+`etc/topology/<deploymentProfile>.<environment>.env`.
 
 The application public ingress is `application.public-ingress`, served by
 `sdkwork-api-gameengine-standalone-gateway` for the current executable baseline. Cloud profiles also
